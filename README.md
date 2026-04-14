@@ -2,7 +2,7 @@
 
 Reusable AI-agent skills for **MuleSoft Mule 4** development — best practices, troubleshooting, and operational runbooks.
 
-These skills are designed to be used with AI coding agents (Claude, Gemini, Cursor, etc.) and work alongside MCP servers like **anypoint-connect** and **mule-build** for full lifecycle coverage.
+These skills are designed to be used with AI coding agents (Claude, Gemini, Cursor, etc.) and work alongside MCP servers like **anypoint-connect**, **mule-build**, and **mule-lint** for full lifecycle coverage.
 
 ---
 
@@ -19,8 +19,9 @@ The agent will:
 1. Clone this repo
 2. Copy universal skills into your project's `.agents/skills/` directory
 3. Copy workflow templates into `.agents/workflows/`
-4. Generate project-specific `AGENTS.md`, `GEMINI.md`, and `CLAUDE.md` from templates
-5. Commit the setup
+4. Configure MCP servers (`.vscode/mcp.json` or root `mcp.json`)
+5. Generate project-specific `AGENTS.md`, `GEMINI.md`, and `CLAUDE.md` from templates
+6. Commit the setup
 
 ---
 
@@ -68,6 +69,10 @@ mule-skills/
 │       └── SKILL.md                       # Production log analysis (configurable)
 ├── workflows/
 │   └── build.md                           # Generic Mule build workflow
+├── mcp/
+│   ├── .vscode/
+│   │   └── mcp.json                       # VS Code / Gemini Code Assist config
+│   └── mcp.json                           # Claude Desktop / Cursor / Windsurf config
 └── templates/
     ├── AGENTS.md                          # Project-specific agent guide
     ├── GEMINI.md                          # Gemini directives template
@@ -80,10 +85,13 @@ mule-skills/
 
 These skills are designed to work with:
 
-| MCP Server | Purpose | Used By |
-|------------|---------|---------|
-| **anypoint-connect** | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange | `mule-ops`, `mule-troubleshooting` |
-| **mule-build** | Local build, run, and release — Maven packaging, version bumps, security scanning | `workflows/build.md` |
+| MCP Server | npm Package | Purpose | Used By |
+|------------|-------------|---------|--------|
+| **anypoint-connect** | `@sfdxy/anypoint-connect` | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange | `mule-ops`, `mule-troubleshooting` |
+| **mule-build** | `@sfdxy/mule-build` | Local build, run, and release — Maven packaging, version bumps, security scanning | `workflows/build.md` |
+| **mule-lint** | `@sfdxy/mule-lint` | Static analysis — 56 rules for error handling, security, naming, logging, performance | Post-development checklist |
+
+Pre-built MCP config files are provided in the `mcp/` directory for VS Code and Claude Desktop. See [SETUP.md](SETUP.md#step-5-configure-mcp-servers) for IDE-specific instructions.
 
 Skills will reference MCP tool names (e.g., `mcp_anypoint-connect_get_logs`) but work independently if MCP servers are not available — the methodology is still valid for manual execution.
 
@@ -112,9 +120,12 @@ your-mule-project/
 │   │       └── SKILL.md
 │   └── workflows/
 │       └── build.md
+├── .vscode/
+│   └── mcp.json                 # MCP server config (VS Code)
 ├── AGENTS.md                    # Project-specific (from template)
 ├── GEMINI.md                    # Optional
 ├── CLAUDE.md                    # Optional
+├── .anypoint-connect.json       # Anypoint profile binding
 ├── pom.xml
 └── src/
 ```
