@@ -113,7 +113,9 @@ your-mule-project/
 ├── .agents/
 │   ├── skills/
 │   │   ├── mule-development/
-│   │   │   └── SKILL.md
+│   │   │   ├── SKILL.md
+│   │   │   └── resources/
+│   │   │       └── post-development-checklist.md
 │   │   ├── mule-troubleshooting/
 │   │   │   └── SKILL.md
 │   │   └── mule-ops/
