@@ -58,15 +58,15 @@ cp -r /tmp/mule-skills/workflows/build.md .agents/workflows/
 
 ---
 
-## Step 5: Copy and Customize Templates
+## Step 5: Verify Resources
 
-Copy templates into the project root:
+The `mule-development` skill includes `resources/post-development-checklist.md` which was copied in Step 3. Verify it exists:
 
 ```bash
-cp /tmp/mule-skills/templates/post-development-checklist.md .agents/skills/mule-development/resources/post-development-checklist.md
+ls .agents/skills/mule-development/resources/post-development-checklist.md
 ```
 
-> The post-development checklist goes into the mule-development skill's resources folder so it's referenced by the skill.
+> This checklist is a starting point. Add your own project-specific gotchas to the "Project-Specific Gotchas" section at the bottom as you discover them.
 
 ---
 

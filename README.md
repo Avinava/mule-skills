@@ -30,7 +30,7 @@ The agent will:
 
 | Skill | Path | Description |
 |-------|------|-------------|
-| **Mule Development** | `skills/mule-development/` | DataWeave patterns, flow design, error handling, naming conventions, concurrency, SOQL safety, ObjectStore patterns, and common pitfalls. Use every time you modify or create a flow. |
+| **Mule Development** | `skills/mule-development/` | DataWeave patterns, flow design, error handling, naming conventions, concurrency, SOQL safety, ObjectStore patterns, and common pitfalls. Includes `resources/post-development-checklist.md`. Use every time you modify or create a flow. |
 | **Mule Troubleshooting** | `skills/mule-troubleshooting/` | Structured RCA methodology for timeout, concurrency, and connection issues in multi-tier Mule architectures (PAPI → SAPI → External Systems). |
 | **Mule Ops** | `skills/mule-ops/` | Production log analysis workflow using Anypoint Monitoring. Covers logs, errors, metrics, memory, performance, and deployment activity. Uses configurable app name placeholders. |
 
@@ -47,7 +47,7 @@ The agent will:
 | **AGENTS.md** | `templates/AGENTS.md` | Project guide for AI agents — architecture, flows, configuration, patterns |
 | **GEMINI.md** | `templates/GEMINI.md` | Gemini-specific directives |
 | **CLAUDE.md** | `templates/CLAUDE.md` | Claude-specific directives |
-| **Post-Dev Checklist** | `templates/post-development-checklist.md` | Gotcha checklist to run after every flow modification |
+
 
 ---
 
@@ -59,7 +59,9 @@ mule-skills/
 ├── SETUP.md                               # Bootstrap instruction for AI agents
 ├── skills/
 │   ├── mule-development/
-│   │   └── SKILL.md                       # Best practices & patterns (universal)
+│   │   ├── SKILL.md                       # Best practices & patterns (universal)
+│   │   └── resources/
+│   │       └── post-development-checklist.md  # Gotcha checklist (referenced by skill)
 │   ├── mule-troubleshooting/
 │   │   └── SKILL.md                       # RCA methodology (universal)
 │   └── mule-ops/
@@ -69,8 +71,7 @@ mule-skills/
 └── templates/
     ├── AGENTS.md                          # Project-specific agent guide
     ├── GEMINI.md                          # Gemini directives template
-    ├── CLAUDE.md                          # Claude directives template
-    └── post-development-checklist.md      # Customizable post-dev checklist
+    └── CLAUDE.md                          # Claude directives template
 ```
 
 ---
