@@ -1,0 +1,19 @@
+{
+  "servers": {
+    "anypoint-connect": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@sfdxy/anypoint-connect", "mcp"]
+    },
+    "mule-build": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@sfdxy/mule-build", "mcp"]
+    },
+    "mule-lint": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@sfdxy/mule-lint", "mcp"]
+    }
+  }
+}
