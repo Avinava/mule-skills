@@ -73,8 +73,9 @@ cp -R "$MULE_SKILLS_TMP/skills/mule-ops" .agents/skills/
 cp "$MULE_SKILLS_TMP/workflows/build.md" .agents/workflows/build.md
 ```
 
-If any destination already exists, compare it with the source before copying. Preserve local
-customizations, especially `.agents/skills/mule-ops/SKILL.md`.
+If any destination already exists, compare it with the source before copying. Preserve intentional
+local changes, but keep deployed application names, organization identity, and project topology in
+project context rather than modifying the reusable skill files.
 
 Codex discovers repository skills from `.agents/skills/` between the current directory and the Git
 root. Other agents can read the same files directly even if they also use a tool-specific directory.
@@ -180,7 +181,10 @@ test -f .agents/skills/document-mulesoft-project/SKILL.md
 test -f .agents/skills/document-mulesoft-project/agents/openai.yaml
 test -f .agents/skills/document-mulesoft-project/references/privacy-and-evidence.md
 test -f .agents/skills/document-mulesoft-project/scripts/audit_documentation.py
+test -f .agents/skills/mule-development/agents/openai.yaml
 test -f .agents/skills/mule-development/resources/post-development-checklist.md
+test -f .agents/skills/mule-troubleshooting/agents/openai.yaml
+test -f .agents/skills/mule-ops/agents/openai.yaml
 test -f .agents/workflows/build.md
 python3 .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.py . --pretty
 ```
@@ -189,18 +193,22 @@ The inventory command is read-only and returns a repository-relative JSON index.
 the current directory as a Mule project. Do not commit its output unless the project intentionally
 maintains that artifact.
 
-## 7. Configure the project copy of `mule-ops`
+## 7. Establish the operational application map
 
 Inspect the project's flows, deployment files, and Anypoint application metadata before asking for
-names. Then edit `.agents/skills/mule-ops/SKILL.md`:
+names. Record project-specific operational context in `AGENTS.md` or an existing project-owned
+runbook, not in `.agents/skills/mule-ops/SKILL.md`.
 
-1. Replace `<YOUR_PAPI_APP>` with the deployed Process API application name, if present.
-2. Replace `<YOUR_SAPI_APP>` with the deployed System API application name, if present.
-3. Set the configuration table's default environment to the project's normal analysis environment.
-4. If the project does not use a PAPI/SAPI pair, adapt the application list and correlation workflow to
-   the architecture actually found. Do not invent companion applications.
+Capture only when evidenced and useful:
 
-Ask the user only for values that cannot be established from repository or authorized Anypoint evidence.
+1. entry application and participating Mule applications;
+2. role of each application without assuming a Process/System pair;
+3. dependency edges and correlation propagation;
+4. normal analysis environment and reporting timezone;
+5. scheduler, batch, queue, retry, and deployment constraints relevant to operations.
+
+Ask the user only for values that cannot be established from repository or authorized Anypoint
+evidence. Keep customer or organization identity out of reusable skills and examples.
 
 ## 8. Generate project agent context
 
@@ -226,8 +234,8 @@ Always create `AGENTS.md`. Generate the following only for agents the project ac
 - `GEMINI.md` from `templates/GEMINI.md`
 - `CLAUDE.md` from `templates/CLAUDE.md`
 
-Fill only evidence-backed sections. Remove the content-hash, Salesforce, or other optional sections when
-they do not apply. Do not ask for a Salesforce alias unless the project actually connects to Salesforce.
+Fill only evidence-backed sections. Remove optional sections that do not apply, and do not ask for
+connector, organization, or environment details unless current project evidence makes them relevant.
 
 ## 10. Update `.gitignore`
 
@@ -313,9 +321,9 @@ Report:
 1. Review `git status` and preserve local edits.
 2. Clone the latest repository into a new `mktemp` directory as in Step 2.
 3. Compare the installed skills, workflow, and MCP templates with the new versions.
-4. Update `document-mulesoft-project`, `mule-development`, `mule-troubleshooting`, and
-   `workflows/build.md` after reviewing their diffs.
-5. Merge changes to `mule-ops` manually so deployed application names and architecture remain intact.
+4. Update all four skills and `workflows/build.md` after reviewing their diffs.
+5. If an installed skill contains project identity or topology, move that context into `AGENTS.md`
+   or a project-owned runbook before replacing the reusable skill.
 6. Review MCP package version changes and upstream release notes before changing pinned versions.
 7. Never overwrite generated `AGENTS.md`, `GEMINI.md`, or `CLAUDE.md` with templates. Refresh their
    content from current project evidence instead.

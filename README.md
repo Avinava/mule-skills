@@ -37,15 +37,15 @@ The agent will:
 | Skill                         | Path                                | Description                                                                                                                                                                                                                                                                                                                           |
 | ----------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Document MuleSoft Project** | `skills/document-mulesoft-project/` | Analyzes Mule 4 source and creates or refreshes evidence-backed Markdown documentation. Selects an adaptive document set, explains APIs, flows, integrations, DataWeave, configuration, deployment, testing, and operations, and adds Mermaid diagrams where useful. Includes read-only inventory and privacy/evidence audit scripts. |
-| **Mule Development**          | `skills/mule-development/`          | DataWeave patterns, flow design, error handling, naming conventions, concurrency, SOQL safety, ObjectStore patterns, and common pitfalls. Includes `resources/post-development-checklist.md`. Use every time you modify or create a flow.                                                                                             |
-| **Mule Troubleshooting**      | `skills/mule-troubleshooting/`      | Structured RCA methodology for timeout, concurrency, and connection issues in multi-tier Mule architectures (PAPI → SAPI → External Systems).                                                                                                                                                                                         |
-| **Mule Ops**                  | `skills/mule-ops/`                  | Production log analysis workflow using Anypoint Monitoring. Covers logs, errors, metrics, memory, performance, and deployment activity. Uses configurable app name placeholders.                                                                                                                                                      |
+| **Mule Development**          | `skills/mule-development/`          | Evidence-based Mule 4 implementation guidance for DataWeave, error handling, serialization, flow design, concurrency, queues, timeouts, state, logging, testing, and documentation. Includes a post-development checklist.                                                                                                                |
+| **Mule Troubleshooting**      | `skills/mule-troubleshooting/`      | Structured RCA methodology that traces timeouts, connection failures, rate limits, concurrency, batch, queues, deployment transitions, and memory pressure across the complete execution path.                                                                                                                                        |
+| **Mule Ops**                  | `skills/mule-ops/`                  | Role-based runtime health analysis using logs, metrics, deployments, coverage ledgers, cross-application correlation, confidence states, and privacy-safe reporting. Supports one application or any discovered multi-application topology.                                                                                            |
 
 ### Generic Workflows
 
 | Workflow  | Path                 | Description                                                                                                                   |
 | --------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Build** | `workflows/build.md` | Build a Mule application JAR — version bump decisions, CHANGELOG maintenance, git tagging, documentation sync, and packaging. |
+| **Build** | `workflows/build.md` | Validate and package a Mule application; performs versioning, changelog, commit, tag, publish, or deploy actions only when explicitly requested. |
 
 ### Templates (customize per project)
 
@@ -68,6 +68,7 @@ mule-skills/
 ├── skills/
 │   ├── mule-development/
 │   │   ├── SKILL.md                       # Best practices & patterns (universal)
+│   │   ├── agents/openai.yaml             # Codex UI metadata
 │   │   └── resources/
 │   │       └── post-development-checklist.md  # Gotcha checklist (referenced by skill)
 │   ├── document-mulesoft-project/
@@ -76,9 +77,11 @@ mule-skills/
 │   │   ├── references/                    # Analysis, blueprint, Mermaid, and privacy guidance
 │   │   └── scripts/                       # Read-only inventory and documentation audit
 │   ├── mule-troubleshooting/
-│   │   └── SKILL.md                       # RCA methodology (universal)
+│   │   ├── SKILL.md                       # RCA methodology (universal)
+│   │   └── agents/openai.yaml             # Codex UI metadata
 │   └── mule-ops/
-│       └── SKILL.md                       # Production log analysis (configurable)
+│       ├── SKILL.md                       # Runtime health analysis (universal)
+│       └── agents/openai.yaml             # Codex UI metadata
 ├── workflows/
 │   └── build.md                           # Generic Mule build workflow
 ├── mcp/
@@ -139,12 +142,15 @@ your-mule-project/
 │   │   │   └── scripts/
 │   │   ├── mule-development/
 │   │   │   ├── SKILL.md
+│   │   │   ├── agents/openai.yaml
 │   │   │   └── resources/
 │   │   │       └── post-development-checklist.md
 │   │   ├── mule-troubleshooting/
-│   │   │   └── SKILL.md
+│   │   │   ├── SKILL.md
+│   │   │   └── agents/openai.yaml
 │   │   └── mule-ops/
-│   │       └── SKILL.md
+│   │       ├── SKILL.md
+│   │       └── agents/openai.yaml
 │   └── workflows/
 │       └── build.md
 ├── .vscode/

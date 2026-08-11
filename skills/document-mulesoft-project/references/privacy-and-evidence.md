@@ -93,6 +93,10 @@ Never transplant a name, endpoint, field mapping, architecture image, sample pay
 detail from a different customer project. Learn the documentation pattern, then re-derive facts from
 the current project.
 
+Do not promote exact schedules, traffic volumes, retention windows, error counts, incident
+timestamps, log messages, or tuning values from one project into reusable guidance. State the
+general mechanism and require the current project's evidence to supply values.
+
 When source examples look production-like, prefer schema-derived synthetic examples. If a copied
 fragment is necessary, replace personal, customer, host, tenant, and record identifiers while
 preserving only the structural behavior being explained.

@@ -1,273 +1,171 @@
 # Post-Development Checklist
 
-Common gotchas discovered from production incidents and fix sessions. **Run through this checklist after any flow modification before building.**
+Run this checklist after every Mule source change. Apply only the checks relevant to the changed
+path, but always complete privacy, contract, error, test, and diff review.
 
----
+## Contents
 
-## 1. Error Handler Safety
+1. [Scope and privacy](#1-scope-and-privacy)
+2. [Contracts and flow behavior](#2-contracts-and-flow-behavior)
+3. [Error handling](#3-error-handling)
+4. [DataWeave and serialization](#4-dataweave-and-serialization)
+5. [Queries and connector inputs](#5-queries-and-connector-inputs)
+6. [Concurrency, queues, and batch](#6-concurrency-queues-and-batch)
+7. [Timeouts, retries, and connections](#7-timeouts-retries-and-connections)
+8. [State and Object Store](#8-state-and-object-store)
+9. [HTTP and correlation](#9-http-and-correlation)
+10. [Build, tests, and documentation](#10-build-tests-and-documentation)
+11. [Quick scan](#11-quick-scan)
 
-### ❌ Unsafe `error.errorMessage.payload` Access
-Directly accessing `error.errorMessage.payload` crashes when the error payload is `Binary` (e.g., from HTTP responses). This causes a **double-fault** — the error handler itself throws `MULE:EXPRESSION`.
+## 1. Scope and privacy
 
-```dataweave
-// ❌ CRASHES on Binary payloads
-var sapiPayload = error.errorMessage.payload
+- Confirm only intended files and behaviors changed.
+- Confirm no prior-client name, topology, endpoint, payload, identifier, schedule, volume, or
+  incident detail entered source, comments, fixtures, logs, tests, or documentation.
+- Confirm no secret, token, private hostname, tenant identifier, personal data, or production
+  payload was added.
+- Use synthetic, structurally minimal test data.
+- Preserve unrelated user-authored changes and existing conventions.
 
-// ✅ Safe — use try() + read() + write()
-import try from dw::Runtime
-var rawPayload = try(() -> write(error.errorMessage.payload, "application/json"))
-var sapiPayload = if (rawPayload.success)
-    read(rawPayload.result, "application/json") default {}
-  else {}
-```
+## 2. Contracts and flow behavior
 
-### ❌ Wrong `flowName` in Error Logger Content
-Error handler `json-logger:content` blocks sometimes hardcode the wrong flow name (copy-paste from another flow). This makes production error triage much harder.
+- Cross-check RAML/OAS or event schema against listeners, APIKit routes, request/response mapping,
+  status codes, and error envelopes.
+- Verify every changed `flow-ref` resolves and every renamed flow is updated in tests, logs, alerts,
+  and documentation.
+- Verify all paths: success, alternate branch, empty input, dependency failure, retry exhaustion,
+  and local/global error handling.
+- Confirm `on-error-continue` produces a deliberate successful continuation or asynchronous
+  disposition. Use `on-error-propagate` when the caller or source must observe failure.
+- Confirm queue acknowledgement, redelivery, dead-letter, idempotency, and message-loss behavior
+  before swallowing any error.
 
-**Check:** Every `json-logger:content` inside an error handler references the correct enclosing flow name.
+## 3. Error handling
 
-### ❌ Missing Error Handler on Flows
-Every flow that does meaningful work should have an `<error-handler>`. Unhandled errors silently propagate and get swallowed in queue-driven architectures.
+### Parse error payloads defensively
 
----
-
-## 2. DataWeave
-
-### ❌ Missing `import try from dw::Runtime`
-Using `try()` without the explicit import causes a **compile error** at deploy time, not at design time.
-
-```dataweave
-// ❌ Compiles in Studio, fails at runtime
-var result = try(() -> payload.value)
-
-// ✅ Always import
-import try from dw::Runtime
-var result = try(() -> payload.value)
-```
-
-### ❌ Unused DW Imports
-Leaving `import * from dw::core::Strings` when nothing from that module is used adds noise. However, **be careful not to remove imports that ARE used** (e.g., `substring()` requires `dw::core::Strings`).
-
-Common functions that do NOT need `dw::core::Strings`:
-- `isEmpty()`, `isBlank()` — these are core DataWeave functions
-
-Functions that DO need `dw::core::Strings`:
-- `substring()`, `capitalize()`, `camelize()`
-
-### ❌ `output application/json` for Batch Variables
-Variables entering a batch scope must use `output application/java`. Using `application/json` creates streaming values that cause Kryo serialization warnings and potential data loss.
+`error.errorMessage` or its payload can be absent, binary, text, or already structured. Keep risky
+access inside `try()` and log only sanitized fields:
 
 ```dataweave
-// ❌ Creates streaming values in batch
 %dw 2.0
-output application/json
----
-payload.items map { id: $.id }
-
-// ✅ Materializes to plain Java objects
-%dw 2.0
+import try from dw::Runtime
 output application/java
+var parsed = try(() -> read(error.errorMessage.payload, "application/json"))
 ---
-payload.items map { id: $.id }
+if (parsed.success) parsed.result else {}
 ```
 
-### ❌ `output application/java` for HTTP Payloads Inside Batch Steps
-**NEVER** change outbound HTTP request payloads inside `<batch:step>` from `application/json` to `application/java`. While `application/java` works fine for variables and for HTTP payloads in **normal flows**, inside batch steps the Mule BatchEngine uses **Kryo** to serialize the current `payload` between steps. DataWeave's internal Java collection types (e.g., `LinkedHashMap$LinkedValues`, `LinkedHashMap$LinkedEntrySet`) are **not Kryo-serializable**, causing:
+- Import `try` from `dw::Runtime` whenever the script calls `try()`.
+- Do not serialize and log the whole error payload as a fallback.
+- Verify error type access uses supported fields such as `error.errorType.identifier`.
+- Verify structured logger content names the correct enclosing flow and operation.
+- Deduplicate or clearly distinguish the originating failure, retry summary, error logger, and
+  default exception-listener entry.
+- Confirm the path has an effective local or global error strategy; do not add handlers solely to
+  satisfy a count-based rule.
 
-1. `ExternalizableKryo` WARN — "Reflective operation exception found when creating an implicit reflection serializer"
-2. `com.mulesoft.mule.runtime.module.batch.exception.BatchException` on every record
-3. **100% batch failure** — all records route to `on-complete` with error status
+## 4. DataWeave and serialization
 
-```xml
-<!-- ❌ CRASHES inside <batch:step> — Kryo can't serialize Java LinkedHashMaps -->
-<ee:transform doc:name="Prepare Update">
-    <ee:set-payload><![CDATA[%dw 2.0
-output application/java
----
-[{ "Id": vars.record.Id, "Status__c": "Cleared" }]]]></ee:set-payload>
-</ee:transform>
-<http:request method="POST" config-ref="http-request-config" .../>
+- Confirm unquoted identifiers start with a letter; later characters can include underscores.
+  Quote output keys that require special characters or a leading underscore.
+- Remove only imports proven unused. Keep module imports required by functions in the script.
+- Null-guard optional selectors and avoid defaults that hide required-data errors.
+- Save the original message before scatter-gather when later processors need it; address route
+  results by their verified route index.
+- Choose output media type from the next component's contract.
+- Materialize only when needed; avoid retaining lazy iterators, streams, map views, or
+  connector-specific objects across batch steps or persistent queues.
+- When changing a batch record, variable, or HTTP body between `application/java`, JSON, or another
+  type, run a representative serialization test on the target runtime.
 
-<!-- ✅ CORRECT — JSON byte arrays serialize cleanly through Kryo -->
-<ee:transform doc:name="Prepare Update">
-    <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[{ "Id": vars.record.Id, "Status__c": "Cleared" }]]]></ee:set-payload>
-</ee:transform>
-<http:request method="POST" config-ref="http-request-config" .../>
-```
+## 5. Queries and connector inputs
 
-> **Why:** JSON payloads serialize into simple byte arrays that Kryo handles natively. Java collections from DataWeave contain internal iterator references and view types that Kryo's reflective serializer cannot reconstruct.
+- Validate required identifiers before building a dynamic query.
+- Escape or bind user-derived values using the connector's supported mechanism.
+- Confirm selected fields include every field consumed by downstream transforms and conditions.
+- Confirm empty results, null results, pagination, and connector-specific result shapes are handled.
+- Keep query examples and fixtures entity-neutral; do not copy real object names or identifiers from
+  another project.
 
-**The rule:**
-| Location | Use `application/java`? | Use `application/json`? |
-|----------|:-:|:-:|
-| Variables entering batch scope | ✅ Yes | ❌ No |
-| HTTP payloads in normal flows | ✅ OK | ✅ OK |
-| HTTP payloads inside `<batch:step>` | ❌ **NEVER** | ✅ Yes |
+## 6. Concurrency, queues, and batch
 
-### ❌ Field Names Starting with `_`
-DataWeave field identifiers must start with a letter. Leading underscores cause runtime errors.
+- Calculate effective concurrency from source consumers, flow `maxConcurrency`, parallel scopes,
+  batch-job concurrency, replicas, connection pools, and dependency limits.
+- Treat `maxConcurrency < numberOfConsumers` as a deliberate back-pressure choice or review signal.
+- Treat batch block size as a memory and scheduling control, not a direct count of simultaneous
+  dependency calls.
+- Select numeric limits from measured workload and documented dependency capacity; do not reuse
+  values from another project.
+- Keep queue messages minimal and serializable. Pass only fields required by the consumer.
+- Verify whether transient or persistent VM queues are supported on the deployment target and match
+  the required recovery semantics.
+- For lifecycle errors during deployment, verify acknowledgement and redelivery before adding
+  `on-error-continue`. Never claim automatic reprocessing without evidence.
 
-```dataweave
-// ❌ Runtime error
-{ _resolvedProject: vars.project }
+## 7. Timeouts, retries, and connections
 
-// ✅ Correct
-{ resolvedProject: vars.project }
-```
+- Inventory connect, response, read, connection-idle, proxy, retry, and total upstream deadlines.
+- Ensure synchronous inner calls, retries, and error mapping fit within the caller's deadline with
+  margin.
+- Do not compare connection idle lifetime with request response timeout as if they are the same
+  timer.
+- Bound retries, define retryable errors, and include backoff or jitter where appropriate.
+- Confirm retries are safe for the operation's idempotency and do not multiply load beyond the
+  dependency's capacity.
+- Choose connection-pool behavior deliberately and verify special values against the installed
+  connector version.
 
-### ❌ Accessing Payload After Scatter-Gather
-Scatter-gather **replaces** the payload. If you need the original payload downstream, save it to a variable first.
+## 8. State and Object Store
 
-```xml
-<!-- ✅ Save before scatter-gather -->
-<set-variable value="#[payload]" variableName="originalPayload" />
-<scatter-gather>
-    <route> ... </route>
-    <route> ... </route>
-</scatter-gather>
-<!-- Access results: payload.'0'.payload, payload.'1'.payload -->
-```
+- Decide whether a missing key is expected or exceptional.
+- Remember that `os:retrieve` throws `OS:KEY_NOT_FOUND` when no key exists and no non-null default is
+  returned. `#[null]` is not a valid miss-suppressing default.
+- For cache-aside behavior, use a collision-safe non-null sentinel or handle only
+  `OS:KEY_NOT_FOUND` in a Try scope; keep store-unavailable and invalid-key failures visible.
+- Verify TTL, persistence, multi-replica access, atomicity, and stale-data behavior.
+- Confirm keys and values contain no secret or unnecessary personal data.
 
----
+## 9. HTTP and correlation
 
-## 3. SOQL and Salesforce
+- Confirm request method, path, query parameters, headers, body, and expected media type match the
+  contract.
+- For GET, HEAD, or OPTIONS, rely on verified connector behavior or set `sendBodyMode="NEVER"` when
+  the project needs an explicit guarantee. Do not add it mechanically when `AUTO` already meets the
+  installed connector's behavior.
+- Verify outbound correlation propagation configuration and inbound adoption before promising
+  end-to-end traceability.
+- Confirm error mapping preserves a safe correlation reference without returning internal details.
+- Avoid raw request/response logging; prefer safe route, outcome, duration, and redacted identifiers.
 
-### ❌ Null Variables in SOQL
-A null variable produces `WHERE Id = 'null'` which returns 400 errors, not empty results.
+## 10. Build, tests, and documentation
 
-```xml
-<!-- ✅ Always guard -->
-<choice>
-  <when expression="#[!isEmpty(vars.recordId)]">
-    <!-- proceed with SOQL -->
-  </when>
-  <otherwise>
-    <logger level="WARN" message="Skipping — recordId is null"/>
-  </otherwise>
-</choice>
-```
+- Run the project's formatter or linter and focused MUnit tests first, then the required full build.
+- Confirm tests cover the changed success path and meaningful failure path rather than only flow
+  execution.
+- Cross-check API specification routes against implementation and report intentional gaps.
+- Match operational version metadata to the packaged artifact when the project logs a version.
+- Update owning documentation, diagrams, runbooks, configuration tables, and changelog when behavior
+  changed.
+- Review the final diff for unsupported assumptions and unrelated edits.
 
-### ❌ Missing Fields in SOQL SELECT
-If downstream DWL references `vars.contact.AccountId`, the SOQL query **must** include `AccountId` in the SELECT. Missing fields cause **silent nulls**, not errors.
+## 11. Quick scan
 
-```sql
--- ❌ DWL downstream uses AccountId but it's not selected
-SELECT Id FROM Contact WHERE ...
+| Priority | Check |
+| --- | --- |
+| High | No secrets, client-derived identity, payloads, or private endpoints introduced |
+| High | Contract, caller outcome, and queue delivery semantics remain correct |
+| High | Error handlers cannot double-fault or silently discard required work |
+| High | Batch and queue boundaries contain supported serializable values |
+| High | Retry and concurrency cannot exceed the proven dependency budget |
+| Medium | Timeout budget covers inner work, retries, and error mapping |
+| Medium | Query inputs are validated and all consumed fields are selected |
+| Medium | Correlation propagation and log attribution are verified |
+| Medium | Object Store miss, TTL, persistence, and failure behavior are intentional |
+| Medium | Queue payloads are minimal and recovery behavior is tested |
+| Low | Imports, names, versions, docs, and diagrams remain aligned |
 
--- ✅ Include all downstream fields
-SELECT Id, AccountId FROM Contact WHERE ...
-```
+## Project-local additions
 
----
-
-## 4. Concurrency and Connections
-
-### ❌ `maxConcurrency` < `numberOfConsumers`
-If `maxConcurrency="1"` but `numberOfConsumers="2"`, the second consumer thread is permanently blocked — wasted resources and misleading config.
-
-**Rule:** `maxConcurrency` ≥ `numberOfConsumers` on VM listener flows.
-
-### ❌ `maxConnections="-1"` (Unlimited)
-Never use unlimited connections. This leads to `Max connections exceeded` errors when the downstream system's internal pool exhausts.
-
-**Rule:** Always set an explicit `maxConnections` value matched to the downstream system's capacity.
-
-### ❌ `idleTimeout` < `responseTimeout`
-If `idleTimeout` fires before `responseTimeout`, Grizzly kills the TCP connection mid-request, causing **silent HTTP failures** — no error, no response, no log.
-
-**Rule:** `idleTimeout` ≥ `responseTimeout` on all HTTP request configs.
-
----
-
-## 5. VM Queues
-
-### ❌ Full Records in VM Queue Payload
-Passing entire raw records (e.g., `record: item.record`) through VM queues bloats message size and wastes memory. Only pass the fields needed by the consuming flow.
-
-```dataweave
-// ❌ Passes entire record
-{ record: item.record, id: item.id }
-
-// ✅ Extract only needed fields
-{ id: item.id, name: item.name, amount: item.amount }
-```
-
----
-
-## 6. ObjectStore
-
-### ❌ ObjectStore Retrieve Without Default Value
-An `os:retrieve` without `<os:default-value>` throws `OS:KEY_NOT_FOUND` on cache misses. In cache-aside patterns, misses are normal — they should return null, not throw errors.
-
-```xml
-<!-- ❌ Cache miss throws OS:KEY_NOT_FOUND -->
-<os:retrieve key="#[vars.cacheKey]" objectStore="my-cache" target="result"/>
-
-<!-- ✅ Cache miss returns null -->
-<os:retrieve key="#[vars.cacheKey]" objectStore="my-cache" target="result">
-    <os:default-value><![CDATA[#[null]]]></os:default-value>
-</os:retrieve>
-```
-
----
-
-## 7. HTTP Requests
-
-### ❌ Body on GET Requests
-HTTP GET requests that include a body produce `Body is ignored` warnings. While this is cosmetic (a one-time-per-thread Mule runtime message), prevent it with:
-
-```xml
-<http:request method="GET" sendBodyMode="NEVER" ... />
-```
-
-> **Note:** This warning self-suppresses after the first occurrence per thread. If you already have `sendBodyMode="NEVER"` and still see it once per startup, that's expected Mule runtime behavior — not a bug.
-
----
-
-## 8. Build and Deploy
-
-### ❌ Version Mismatch
-`json.logger.application.version` in property files (`prod.yaml`, `dev.yaml`, `local.yaml`) must match `pom.xml <version>`. A mismatch means production logs report the wrong version, making incident triage unreliable.
-
-### ❌ Unimplemented APIkit Routes
-If the RAML spec defines an endpoint but no implementation flow exists, Mule logs a WARN on every startup:
-```
-FlowFinder - Action-Resource-ContentType triplet has no implementation -> post:/entity:application/json
-```
-
-Either remove unused endpoints from the RAML, or stub them with a 501 response.
-
----
-
-## Quick-Scan Summary
-
-| # | Check | Severity |
-|---|-------|----------|
-| 1 | Error handlers use `try()/read()/write()` for error payloads | 🔴 High |
-| 2 | `import try from dw::Runtime` present when `try()` is used | 🔴 High |
-| 3 | SOQL variables null-guarded before query construction | 🔴 High |
-| 4 | `maxConnections` is explicit (not `-1`) | 🔴 High |
-| 5 | `idleTimeout` ≥ `responseTimeout` | 🔴 High |
-| 6 | **HTTP payloads inside `<batch:step>` stay `application/json`** (not java) | 🔴 High |
-| 7 | Batch **variables** use `output application/java` | 🟡 Medium |
-| 8 | `maxConcurrency` ≥ `numberOfConsumers` | 🟡 Medium |
-| 9 | SOQL SELECT includes all downstream fields | 🟡 Medium |
-| 10 | Error logger `flowName` matches enclosing flow | 🟡 Medium |
-| 11 | No full records passed through VM queues | 🟡 Medium |
-| 12 | Payload saved before scatter-gather if needed after | 🟡 Medium |
-| 13 | DWL field names start with a letter (no `_` prefix) | 🟢 Low |
-| 14 | No unused DWL imports | 🟢 Low |
-| 15 | GET requests use `sendBodyMode="NEVER"` | 🟢 Low |
-| 16 | Version in property files matches `pom.xml` | 🟢 Low |
-| 17 | No unimplemented APIkit routes in RAML | 🟢 Low |
-| 18 | `os:retrieve` has `<os:default-value>` (cache miss → null, not error) | 🟡 Medium |
-
----
-
-## Project-Specific Gotchas
-
-<!-- Add your own project-specific gotchas below as you discover them.
-Use the same format: ❌ Problem → ✅ Solution, with optional > **Incident:** note -->
+Keep project-specific checks in the consuming repository, not in this reusable skill. Use neutral
+mechanism-based wording if a local lesson is later promoted upstream.
