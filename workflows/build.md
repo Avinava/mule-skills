@@ -87,8 +87,11 @@ When the user explicitly requests a release:
 3. Update an existing changelog using its established format; do not create one unless requested or
    required by repository instructions.
 4. Re-run validation, tests, and packaging after version changes.
-5. Commit or tag only when authorized. Make an annotated tag only after the final release commit.
-6. Push, publish, or deploy only when explicitly requested.
+5. Use `review-mulesoft-project` in release-readiness mode on the resulting candidate when the skill
+   is installed. Do not continue on `Not ready` or `Unresolved`; complete or explicitly accept every
+   condition before continuing from `Ready with conditions`.
+6. Commit or tag only when authorized. Make an annotated tag only after the final release commit.
+7. Push, publish, or deploy only when explicitly requested.
 
 Use semantic-version guidance as a starting point, not a replacement for the project's release
 policy:
