@@ -1,6 +1,10 @@
-# mule-skills
+<p align="center">
+  <img src="assets/banner.svg" alt="Mule Skills — evidence-backed Mule 4 agent workflows" width="960" />
+</p>
 
-Reusable AI-agent skills for **MuleSoft Mule 4** development — project documentation, best practices, troubleshooting, and operational runbooks.
+<p align="center">
+  <strong>Reusable AI-agent skills for MuleSoft Mule 4 documentation, development, troubleshooting, and operations.</strong>
+</p>
 
 These skills are designed to be used with AI coding agents (Codex, Claude, Gemini, Cursor, etc.) and work alongside MCP servers like **anypoint-connect**, **mule-build**, and **mule-lint** for full lifecycle coverage.
 
@@ -58,6 +62,8 @@ The agent will:
 
 ```
 mule-skills/
+├── assets/
+│   └── banner.svg                         # README illustration and project banner
 ├── README.md                              # This file
 ├── SETUP.md                               # Bootstrap instruction for AI agents
 ├── skills/
