@@ -24,9 +24,9 @@ The agent will:
 1. Clone this repo
 2. Copy universal skills into your project's `.agents/skills/` directory
 3. Copy workflow templates into `.agents/workflows/`
-4. Configure MCP servers (`.vscode/mcp.json` or root `mcp.json`)
-5. Generate project-specific `AGENTS.md`, `GEMINI.md`, and `CLAUDE.md` from templates
-6. Commit the setup
+4. Configure pinned MCP servers for the agent or IDE you actually use
+5. Generate evidence-backed `AGENTS.md` plus optional host-specific context files
+6. Validate the installation and commit it when authorized
 
 ---
 
@@ -34,27 +34,26 @@ The agent will:
 
 ### Universal Skills (ready to use as-is)
 
-| Skill | Path | Description |
-|-------|------|-------------|
+| Skill                         | Path                                | Description                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Document MuleSoft Project** | `skills/document-mulesoft-project/` | Analyzes Mule 4 source and creates or refreshes evidence-backed Markdown documentation. Selects an adaptive document set, explains APIs, flows, integrations, DataWeave, configuration, deployment, testing, and operations, and adds Mermaid diagrams where useful. Includes read-only inventory and privacy/evidence audit scripts. |
-| **Mule Development** | `skills/mule-development/` | DataWeave patterns, flow design, error handling, naming conventions, concurrency, SOQL safety, ObjectStore patterns, and common pitfalls. Includes `resources/post-development-checklist.md`. Use every time you modify or create a flow. |
-| **Mule Troubleshooting** | `skills/mule-troubleshooting/` | Structured RCA methodology for timeout, concurrency, and connection issues in multi-tier Mule architectures (PAPI → SAPI → External Systems). |
-| **Mule Ops** | `skills/mule-ops/` | Production log analysis workflow using Anypoint Monitoring. Covers logs, errors, metrics, memory, performance, and deployment activity. Uses configurable app name placeholders. |
+| **Mule Development**          | `skills/mule-development/`          | DataWeave patterns, flow design, error handling, naming conventions, concurrency, SOQL safety, ObjectStore patterns, and common pitfalls. Includes `resources/post-development-checklist.md`. Use every time you modify or create a flow.                                                                                             |
+| **Mule Troubleshooting**      | `skills/mule-troubleshooting/`      | Structured RCA methodology for timeout, concurrency, and connection issues in multi-tier Mule architectures (PAPI → SAPI → External Systems).                                                                                                                                                                                         |
+| **Mule Ops**                  | `skills/mule-ops/`                  | Production log analysis workflow using Anypoint Monitoring. Covers logs, errors, metrics, memory, performance, and deployment activity. Uses configurable app name placeholders.                                                                                                                                                      |
 
 ### Generic Workflows
 
-| Workflow | Path | Description |
-|----------|------|-------------|
+| Workflow  | Path                 | Description                                                                                                                   |
+| --------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **Build** | `workflows/build.md` | Build a Mule application JAR — version bump decisions, CHANGELOG maintenance, git tagging, documentation sync, and packaging. |
 
 ### Templates (customize per project)
 
-| Template | Path | Description |
-|----------|------|-------------|
+| Template      | Path                  | Description                                                                |
+| ------------- | --------------------- | -------------------------------------------------------------------------- |
 | **AGENTS.md** | `templates/AGENTS.md` | Project guide for AI agents — architecture, flows, configuration, patterns |
-| **GEMINI.md** | `templates/GEMINI.md` | Gemini-specific directives |
-| **CLAUDE.md** | `templates/CLAUDE.md` | Claude-specific directives |
-
+| **GEMINI.md** | `templates/GEMINI.md` | Gemini-specific directives                                                 |
+| **CLAUDE.md** | `templates/CLAUDE.md` | Claude-specific directives                                                 |
 
 ---
 
@@ -83,9 +82,11 @@ mule-skills/
 ├── workflows/
 │   └── build.md                           # Generic Mule build workflow
 ├── mcp/
+│   ├── .codex/
+│   │   └── config.toml                   # Codex project-scoped MCP config
 │   ├── .vscode/
-│   │   └── mcp.json                       # VS Code / Gemini Code Assist config
-│   └── mcp.json                           # Claude Desktop / Cursor / Windsurf config
+│   │   └── mcp.json                       # VS Code / GitHub Copilot config
+│   └── mcp.json                           # Shared mcpServers payload for JSON-based clients
 └── templates/
     ├── AGENTS.md                          # Project-specific agent guide
     ├── GEMINI.md                          # Gemini directives template
@@ -98,13 +99,15 @@ mule-skills/
 
 These skills are designed to work with:
 
-| MCP Server | npm Package | Purpose | Used By |
-|------------|-------------|---------|--------|
-| **anypoint-connect** | `@sfdxy/anypoint-connect` | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange | `mule-ops`, `mule-troubleshooting` |
-| **mule-build** | `@sfdxy/mule-build` | Local build, run, and release — Maven packaging, version bumps, security scanning | `workflows/build.md` |
-| **mule-lint** | `@sfdxy/mule-lint` | Static analysis — 56 rules for error handling, security, naming, logging, performance | Post-development checklist |
+| MCP Server           | npm Package                     | Purpose                                                                                         | Used By                            |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **anypoint-connect** | `@sfdxy/anypoint-connect@0.9.0` | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange             | `mule-ops`, `mule-troubleshooting` |
+| **mule-build**       | `@sfdxy/mule-build@2.0.0`       | Local build, run, release, validation, and security checks                                      | `workflows/build.md`               |
+| **mule-lint**        | `@sfdxy/mule-lint@1.24.1`       | Static analysis — 82 rules for error handling, security, naming, logging, performance, and more | Post-development checklist         |
 
-Pre-built MCP config files are provided in the `mcp/` directory for VS Code and Claude Desktop. See [SETUP.md](SETUP.md#step-5-configure-mcp-servers) for IDE-specific instructions.
+The MCP package versions are pinned for reproducibility. Pre-built configs are provided for Codex,
+VS Code, and JSON-based MCP clients. See [SETUP.md](SETUP.md#4-configure-mcp-servers-for-the-active-agent)
+for current, host-specific instructions.
 
 Skills will reference MCP tool names (e.g., `mcp_anypoint-connect_get_logs`) but work independently if MCP servers are not available — the methodology is still valid for manual execution.
 
@@ -119,7 +122,9 @@ Skills are folders of instructions that extend AI agent capabilities. Each skill
 - **`references/` or `resources/`** (optional): Guidance, checklists, reference data, or examples loaded only when needed
 - **`scripts/`** (optional): Deterministic helpers for repeatable analysis and validation
 
-When an AI agent encounters a task matching a skill's description, it reads the `SKILL.md` and follows the instructions. The agent directories can be named `.agents/` or `.agent/` depending on your tooling.
+When an AI agent encounters a task matching a skill's description, it reads the `SKILL.md` and follows
+the instructions. This repository installs shared project skills in `.agents/skills/`, the
+repository-scoped location discovered by Codex. Existing tool-specific agent directories can coexist.
 
 ### Directory Placement
 
@@ -144,6 +149,8 @@ your-mule-project/
 │       └── build.md
 ├── .vscode/
 │   └── mcp.json                 # MCP server config (VS Code)
+├── .codex/
+│   └── config.toml              # MCP server config (Codex)
 ├── AGENTS.md                    # Project-specific (from template)
 ├── GEMINI.md                    # Optional
 ├── CLAUDE.md                    # Optional
