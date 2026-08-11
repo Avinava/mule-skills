@@ -3,198 +3,161 @@
 </p>
 
 <p align="center">
-  <strong>Reusable AI-agent skills for MuleSoft Mule 4 documentation, development, troubleshooting, and operations.</strong>
+  <strong>Reusable AI-agent workflows for the Mule 4 engineering lifecycle.</strong>
 </p>
 
-These skills are designed to be used with AI coding agents (Codex, Claude, Gemini, Cursor, etc.) and work alongside MCP servers like **anypoint-connect**, **mule-build**, and **mule-lint** for full lifecycle coverage.
+Mule Skills gives coding agents a shared way to document, build, troubleshoot, operate, and review
+MuleSoft projects. The workflows start from current-project evidence, keep business context separate
+from implemented behavior, and avoid carrying identity or tuning assumptions between projects.
 
----
+The skills work as instruction-only workflows and can use the included MCP configurations when
+local build, lint, or authorized Anypoint evidence is available.
 
-## Quick Setup
+## Quick start
 
-Paste this instruction into your AI coding agent (Codex, Claude, Gemini, etc.) when working on a Mule 4 project:
+From the Mule project you want to configure, give your coding agent this instruction:
 
+```text
+Follow https://github.com/Avinava/mule-skills/blob/main/SETUP.md to install or reconcile the
+MuleSoft skills for this repository. Preserve existing changes, configure only the agent host I use,
+and show me the validation results before committing.
 ```
-Follow the setup instructions at https://github.com/Avinava/mule-skills/blob/main/SETUP.md
-to configure this MuleSoft project with AI agent skills.
-```
 
-The agent will:
+The setup runbook installs the skills under `.agents/skills/`, adds the build workflow, configures
+only the selected MCP host, creates evidence-backed project guidance, and validates the result.
 
-1. Clone this repo
-2. Copy universal skills into your project's `.agents/skills/` directory
-3. Copy workflow templates into `.agents/workflows/`
-4. Configure pinned MCP servers for the agent or IDE you actually use
-5. Generate evidence-backed `AGENTS.md` plus optional host-specific context files
-6. Validate the installation and commit it when authorized
+## Included workflows
 
----
+| Workflow | Use it for | Default result |
+| --- | --- | --- |
+| [`document-mulesoft-project`](skills/document-mulesoft-project/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
+| [`mule-development`](skills/mule-development/) | Mule XML, DataWeave, connectors, error handling, queues, batch, configuration, and MUnit changes | Implemented source change with proportionate validation |
+| [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
+| [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Evidence-backed operational assessment |
+| [`review-mulesoft-project`](skills/review-mulesoft-project/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
+| [`build`](workflows/build.md) | Validation, tests, packaging, and explicitly requested release actions | Deployable artifact and validation summary |
 
-## Skill Index
+### Choosing the right workflow
 
-### Universal Skills (ready to use as-is)
+| Request | Start with | Add when needed |
+| --- | --- | --- |
+| Explain or refresh the project | Documentation | Optional business-context questions when source cannot establish purpose or ownership |
+| Implement a change | Development | Documentation refresh, then change review |
+| Diagnose a symptom | Troubleshooting | Ops for authorized runtime evidence; development only when a fix is requested |
+| Assess current runtime health | Ops | Troubleshooting when a specific causal question emerges |
+| Review a change or repository | Project review | Ops only for authorized, material runtime verification |
+| Prepare a release | Build | Release-readiness review before commit, tag, publish, or deploy |
 
-| Skill                         | Path                                | Description                                                                                                                                                                                                                                                                                                                           |
-| ----------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Document MuleSoft Project** | `skills/document-mulesoft-project/` | Analyzes Mule 4 source and creates or refreshes evidence-backed Markdown documentation. Selects an adaptive document set, explains APIs, flows, integrations, DataWeave, configuration, deployment, testing, and operations, and adds Mermaid diagrams where useful. Includes read-only inventory and privacy/evidence audit scripts. |
-| **Mule Development**          | `skills/mule-development/`          | Evidence-based Mule 4 implementation guidance for DataWeave, error handling, serialization, flow design, concurrency, queues, timeouts, state, logging, testing, and documentation. Includes a post-development checklist.                                                                                                                |
-| **Mule Troubleshooting**      | `skills/mule-troubleshooting/`      | Structured RCA methodology that traces timeouts, connection failures, rate limits, concurrency, batch, queues, deployment transitions, and memory pressure across the complete execution path.                                                                                                                                        |
-| **Mule Ops**                  | `skills/mule-ops/`                  | Role-based runtime health analysis using logs, metrics, deployments, coverage ledgers, cross-application correlation, confidence states, and privacy-safe reporting. Supports one application or any discovered multi-application topology.                                                                                            |
-| **Review MuleSoft Project**   | `skills/review-mulesoft-project/`   | Evidence-backed change, PR, whole-project, and release-readiness review. Covers contracts, Mule behavior, delivery semantics, security, tests, operations, and documentation, with prioritized findings and remediation options.                                                                                                        |
+Documentation and review questions are optional and non-blocking. When business information would
+materially improve the result, the skill offers concise choices plus `Other` and `Not sure / Skip`,
+then continues with verified technical evidence if the user skips.
 
-### Generic Workflows
+## Operating principles
 
-| Workflow  | Path                 | Description                                                                                                                   |
-| --------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Build** | `workflows/build.md` | Validate and package a Mule application; performs versioning, changelog, commit, tag, publish, or deploy actions only when explicitly requested. |
+- **Evidence before assumption:** distinguish verified source or telemetry, user-provided context,
+  inference, recommendations, and unresolved gaps.
+- **Current project only:** never transplant application identity, topology, endpoints, payloads,
+  schedules, volumes, incident fingerprints, or numeric tuning from another project.
+- **Privacy by default:** never expose credentials, secret values, private keys, tenant identifiers,
+  private hosts, personal data, or raw production payloads.
+- **Proportionate validation:** use focused checks for local changes and the complete required gate
+  for release readiness.
+- **Explicit mutations:** reviews and diagnosis are read-only by default; commits, comments, tags,
+  deployments, and releases require user authorization.
+- **Honest uncertainty:** missing access or evidence remains visible instead of being converted into
+  a confident claim.
 
-### Templates (customize per project)
+## MCP support
 
-| Template      | Path                  | Description                                                                |
-| ------------- | --------------------- | -------------------------------------------------------------------------- |
-| **AGENTS.md** | `templates/AGENTS.md` | Project guide for AI agents — architecture, flows, configuration, patterns |
-| **GEMINI.md** | `templates/GEMINI.md` | Gemini-specific directives                                                 |
-| **CLAUDE.md** | `templates/CLAUDE.md` | Claude-specific directives                                                 |
+The repository includes credential-free launch configurations for three pinned MCP servers:
 
----
+| Server | Pinned package | Role |
+| --- | --- | --- |
+| `anypoint-connect` | `@sfdxy/anypoint-connect@0.9.0` | Authorized Anypoint logs, metrics, deployments, API management, Exchange, MQ, and Object Store evidence |
+| `mule-build` | `@sfdxy/mule-build@2.0.0` | Mule validation, testing, packaging, local runtime, versioning, and security checks |
+| `mule-lint` | `@sfdxy/mule-lint@1.24.1` | Static Mule analysis and machine-readable reports |
 
-## Repository Structure
+Templates are provided for Codex (`mcp/.codex/config.toml`), VS Code
+(`mcp/.vscode/mcp.json`), and clients that accept an `mcpServers` object (`mcp/mcp.json`). Configure
+only the host in use and merge with existing settings rather than replacing them. The detailed
+procedure is in [SETUP.md](SETUP.md#4-configure-the-selected-mcp-host).
 
-```
+Codex discovers repository-scoped skills from `.agents/skills/` between the working directory and
+the repository root. See the official [Codex skills documentation](https://developers.openai.com/codex/skills/)
+and [Codex MCP documentation](https://developers.openai.com/codex/mcp/) for current host behavior.
+
+## Repository layout
+
+```text
 mule-skills/
-├── assets/
-│   └── banner.svg                         # README illustration and project banner
-├── README.md                              # This file
-├── SETUP.md                               # Bootstrap instruction for AI agents
+├── assets/                         # Project artwork
 ├── skills/
-│   ├── mule-development/
-│   │   ├── SKILL.md                       # Best practices & patterns (universal)
-│   │   ├── agents/openai.yaml             # Codex UI metadata
-│   │   └── resources/
-│   │       └── post-development-checklist.md  # Gotcha checklist (referenced by skill)
-│   ├── document-mulesoft-project/
-│   │   ├── SKILL.md                       # Evidence-backed documentation workflow
-│   │   ├── agents/openai.yaml             # Codex UI metadata
-│   │   ├── references/                    # Analysis, blueprint, Mermaid, and privacy guidance
-│   │   └── scripts/                       # Read-only inventory and documentation audit
-│   ├── mule-troubleshooting/
-│   │   ├── SKILL.md                       # RCA methodology (universal)
-│   │   └── agents/openai.yaml             # Codex UI metadata
-│   ├── mule-ops/
-│   │   ├── SKILL.md                       # Runtime health analysis (universal)
-│   │   └── agents/openai.yaml             # Codex UI metadata
-│   └── review-mulesoft-project/
-│       ├── SKILL.md                       # Change, project, and readiness review
-│       ├── agents/openai.yaml             # Codex UI metadata
-│       └── references/                    # Review domains and finding policy
-├── workflows/
-│   └── build.md                           # Generic Mule build workflow
-├── mcp/
-│   ├── .codex/
-│   │   └── config.toml                   # Codex project-scoped MCP config
-│   ├── .vscode/
-│   │   └── mcp.json                       # VS Code / GitHub Copilot config
-│   └── mcp.json                           # Shared mcpServers payload for JSON-based clients
-└── templates/
-    ├── AGENTS.md                          # Project-specific agent guide
-    ├── GEMINI.md                          # Gemini directives template
-    └── CLAUDE.md                          # Claude directives template
+│   ├── document-mulesoft-project/  # Documentation workflow, references, and audit tools
+│   ├── mule-development/           # Implementation workflow and post-change checklist
+│   ├── mule-troubleshooting/       # Root-cause analysis workflow
+│   ├── mule-ops/                   # Runtime health workflow
+│   └── review-mulesoft-project/    # Change, project, and release-readiness review
+├── workflows/build.md              # Validate, package, and explicit release workflow
+├── templates/                      # Project-owned AGENTS, Claude, and Gemini guidance
+├── mcp/                            # Codex, VS Code, and generic JSON MCP templates
+├── README.md                       # Toolkit overview
+└── SETUP.md                        # Installation and reconciliation runbook
 ```
 
----
+Each skill has a required `SKILL.md` and may include:
 
-## MCP Server Compatibility
+- `agents/openai.yaml` for interface metadata;
+- `references/` or `resources/` for guidance loaded by the workflow;
+- `scripts/` for deterministic, repeatable inspection and validation.
 
-These skills are designed to work with:
+After installation, the shared project layout is:
 
-| MCP Server           | npm Package                     | Purpose                                                                                         | Used By                            |
-| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------- |
-| **anypoint-connect** | `@sfdxy/anypoint-connect@0.9.0` | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange             | `mule-ops`, `mule-troubleshooting`, optional review verification |
-| **mule-build**       | `@sfdxy/mule-build@2.0.0`       | Local build, run, release, validation, and security checks                                      | `workflows/build.md`, review validation                           |
-| **mule-lint**        | `@sfdxy/mule-lint@1.24.1`       | Static analysis — 82 rules for error handling, security, naming, logging, performance, and more | Post-development checklist, project review                        |
-
-The MCP package versions are pinned for reproducibility. Pre-built configs are provided for Codex,
-VS Code, and JSON-based MCP clients. See [SETUP.md](SETUP.md#4-configure-mcp-servers-for-the-active-agent)
-for current, host-specific instructions.
-
-Skills will reference MCP tool names (e.g., `mcp_anypoint-connect_get_logs`) but work independently if MCP servers are not available — the methodology is still valid for manual execution.
-
----
-
-## How Skills Work
-
-Skills are folders of instructions that extend AI agent capabilities. Each skill contains:
-
-- **`SKILL.md`** (required): Main instruction file with YAML frontmatter (`name`, `description`) and detailed markdown instructions
-- **`agents/`** (optional): Agent-specific discovery and interface metadata
-- **`references/` or `resources/`** (optional): Guidance, checklists, reference data, or examples loaded only when needed
-- **`scripts/`** (optional): Deterministic helpers for repeatable analysis and validation
-
-When an AI agent encounters a task matching a skill's description, it reads the `SKILL.md` and follows
-the instructions. This repository installs shared project skills in `.agents/skills/`, the
-repository-scoped location discovered by Codex. Existing tool-specific agent directories can coexist.
-
-### Directory Placement
-
-```
+```text
 your-mule-project/
 ├── .agents/
-│   ├── skills/
-│   │   ├── document-mulesoft-project/
-│   │   │   ├── SKILL.md
-│   │   │   ├── agents/openai.yaml
-│   │   │   ├── references/
-│   │   │   └── scripts/
-│   │   ├── mule-development/
-│   │   │   ├── SKILL.md
-│   │   │   ├── agents/openai.yaml
-│   │   │   └── resources/
-│   │   │       └── post-development-checklist.md
-│   │   ├── mule-troubleshooting/
-│   │   │   ├── SKILL.md
-│   │   │   └── agents/openai.yaml
-│   │   ├── mule-ops/
-│   │   │   ├── SKILL.md
-│   │   │   └── agents/openai.yaml
-│   │   └── review-mulesoft-project/
-│   │       ├── SKILL.md
-│   │       ├── agents/openai.yaml
-│   │       └── references/
-│   └── workflows/
-│       └── build.md
-├── .vscode/
-│   └── mcp.json                 # MCP server config (VS Code)
-├── .codex/
-│   └── config.toml              # MCP server config (Codex)
-├── AGENTS.md                    # Project-specific (from template)
-├── GEMINI.md                    # Optional
-├── CLAUDE.md                    # Optional
-├── .anypoint-connect.json       # Anypoint profile binding
+│   ├── skills/                     # The five reusable Mule skills
+│   └── workflows/build.md
+├── .codex/config.toml              # Optional Codex MCP configuration
+├── .vscode/mcp.json                # Optional VS Code MCP configuration
+├── AGENTS.md                       # Evidence-backed project context
+├── CLAUDE.md                       # Optional host-specific guidance
+├── GEMINI.md                       # Optional host-specific guidance
 ├── pom.xml
 └── src/
 ```
 
----
+## Example prompts
+
+```text
+Use $document-mulesoft-project to refresh architecture and operations documentation. Ask optional
+business questions with choices where the repository cannot establish important context.
+
+Use $mule-development to implement this Mule change and complete the post-development checklist.
+
+Use $mule-troubleshooting to diagnose this timeout. Separate observations, hypotheses, confirmed
+causes, and unresolved gaps.
+
+Use $mule-ops to assess runtime health for the requested environment and time window.
+
+Use $review-mulesoft-project in change-review mode for this branch. Report findings and fix options;
+do not modify source or post PR comments.
+
+Use the build workflow to package the application. Do not release, tag, deploy, or push.
+```
 
 ## Contributing
 
-To add a new skill:
+When adding or changing a reusable skill:
 
-1. Create a folder under `skills/` with a descriptive kebab-case name
-2. Add a `SKILL.md` with YAML frontmatter:
-   ```yaml
-   ---
-   name: my-new-skill
-   description: One-line description of when to use this skill.
-   ---
-   ```
-3. Ensure **zero client-specific references** — no project names, org names, or version numbers
-4. Use `<PLACEHOLDER>` syntax for anything that varies per project
-5. Validate the skill and run every bundled script against representative inputs
-6. Update `README.md` and `SETUP.md` so installation and discovery remain complete
-7. Open a PR
-
----
+1. Keep the workflow focused and give its `SKILL.md` a precise trigger description.
+2. Put project-specific identity, topology, and operating facts in the consuming repository, never
+   in this reusable repository.
+3. Use neutral examples and mechanism-based guidance; do not retain prior-project fingerprints or
+   numeric tuning values.
+4. Add `agents/openai.yaml` and only the references, resources, scripts, or assets the skill needs.
+5. Validate the skill, test it with neutral representative tasks, and inspect outputs for unsupported
+   claims or sensitive data.
+6. Update README and SETUP when discovery, installation, routing, or required resources change.
 
 ## License
 
