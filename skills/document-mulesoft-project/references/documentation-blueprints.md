@@ -3,14 +3,15 @@
 ## Contents
 
 1. [Adaptive output rules](#adaptive-output-rules)
-2. [README](#readme)
-3. [Architecture](#architecture)
-4. [API contract](#api-contract)
-5. [Onboarding](#onboarding)
-6. [Operations](#operations)
-7. [Flow catalog](#flow-catalog)
-8. [Targeted updates](#targeted-updates)
-9. [Writing standards](#writing-standards)
+2. [Business context](#business-context)
+3. [README](#readme)
+4. [Architecture](#architecture)
+5. [API contract](#api-contract)
+6. [Onboarding](#onboarding)
+7. [Operations](#operations)
+8. [Flow catalog](#flow-catalog)
+9. [Targeted updates](#targeted-updates)
+10. [Writing standards](#writing-standards)
 
 ## Adaptive output rules
 
@@ -30,11 +31,26 @@ section in the closest applicable document.
 Before editing, map existing documents to these roles. Reuse an existing `DESIGN.md`, runbook, or
 API guide when it already owns the topic. Preserve document topology and manual narrative.
 
+## Business context
+
+Inspect source and existing prose before asking for context. When business purpose, audience,
+ownership, terminology, criticality, compliance, or operational expectations remain material and
+unknown, offer the user a short optional checkpoint before drafting.
+
+Derive multiple-choice options from the repository when possible. Keep them neutral, add an
+open-ended option, and always make `Not sure / Skip` explicit. Do not ask more than five questions
+at once or block progress on unanswered business questions.
+
+Treat answers as stakeholder-provided context. Attribute them when included, and cross-check any
+claim about implemented behavior against source. When the user skips a material item, either omit
+the unsupported claim or retain a concise, actionable question in the closest owning document.
+
 ## README
 
 Keep the README useful in the first two minutes. Include:
 
-1. Project purpose and directly evidenced API-led role.
+1. Project purpose and directly evidenced API-led role; attribute stakeholder-provided purpose
+   when source does not establish it.
 2. A compact capability or trigger summary.
 3. A small system-context or request-flow diagram when useful.
 4. Runtime/build prerequisites.
@@ -150,7 +166,9 @@ affected files, and recommended owning document.
 - Lead with behavior and outcome, then implementation detail.
 - Use present tense for current behavior.
 - Use repository-relative paths and exact flow/property names in code formatting.
-- Distinguish `Verified`, `Inferred`, and `Unresolved` when confidence matters.
+- Distinguish `Verified`, `Provided`, `Inferred`, and `Unresolved` when confidence matters.
+- Attribute stakeholder-provided business context and do not present it as verified runtime
+  behavior.
 - Keep one fact in one owning document and link rather than duplicate.
 - Prefer neutral prose over sales language.
 - Avoid decorative icons and excessive callouts.

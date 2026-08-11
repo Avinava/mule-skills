@@ -12,12 +12,13 @@
 
 Use these states when confidence affects interpretation:
 
-| State       | Meaning                                                 | Treatment                                        |
-| ----------- | ------------------------------------------------------- | ------------------------------------------------ |
-| Verified    | Directly established by current source or configuration | State as current behavior and cite the source    |
-| Inferred    | Strongly suggested by several facts but not explicit    | Label the inference and list supporting evidence |
-| Unresolved  | Conflicting or missing evidence                         | Put in `Open questions`; do not choose an answer |
-| Recommended | A proposed improvement, not current behavior            | Keep separate from current-state documentation   |
+| State       | Meaning                                                  | Treatment                                         |
+| ----------- | -------------------------------------------------------- | ------------------------------------------------- |
+| Verified    | Directly established by current source or configuration  | State as current behavior and cite the source     |
+| Provided    | Business context supplied by the user or a stakeholder    | Attribute it; do not use it to prove runtime      |
+| Inferred    | Strongly suggested by several facts but not explicit     | Label the inference and list supporting evidence  |
+| Unresolved  | Conflicting or missing evidence                          | Put in `Open questions`; do not choose an answer  |
+| Recommended | A proposed improvement, not current behavior             | Keep separate from current-state documentation    |
 
 Prefer repository-relative evidence such as a flow name plus file path. Do not cite local absolute
 paths. For diagrams, cite the principal source flows in the paragraph following the diagram.
@@ -30,6 +31,10 @@ Before publishing a design decision, distinguish:
 
 Only the first is an established rationale. Label the second as inferred and keep the third in a
 recommendation section if it is relevant.
+
+User answers can establish intended purpose, audience, ownership, terminology, or expectations as
+`Provided` context. They cannot establish that a flow, connector, retry, policy, or deployment
+behavior exists. Cross-check those claims against implementation evidence and surface conflicts.
 
 ## Sensitive-data boundary
 
@@ -105,6 +110,8 @@ Perform these checks over every changed document:
 7. Confirm sample payloads are synthetic and minimal.
 8. Run `scripts/audit_documentation.py`; use `--denylist-file` when the project supplies terms that
    must not appear.
+9. Confirm stakeholder-provided context is attributed and skipped questions did not become
+   unsupported claims.
 
 Treat an audit finding as a blocker until it is removed or explicitly reviewed as a safe false
 positive.
