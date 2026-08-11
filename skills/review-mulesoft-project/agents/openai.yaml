@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review MuleSoft Project"
+  short_description: "Review Mule changes, projects, and releases"
+  default_prompt: "Use $review-mulesoft-project to review this MuleSoft project and report prioritized findings with fix options."

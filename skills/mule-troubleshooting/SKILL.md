@@ -1,135 +1,242 @@
 ---
 name: mule-troubleshooting
-description: How to analyze MuleSoft logs, perform Root Cause Analysis (RCA), and create a fix plan for concurrency and timeout issues.
+description: Diagnose MuleSoft incidents and produce evidence-backed root-cause assessments or fix plans for timeouts, connection failures, rate limits, concurrency, batch processing, queues, deployment transitions, memory pressure, and cross-application error propagation. Use when a Mule runtime symptom must be traced through code, configuration, logs, metrics, and dependencies. Diagnose by default; modify source or configuration only when the user explicitly requests implementation.
 ---
 
-# MuleSoft Troubleshooting & RCA Guide
+# MuleSoft Troubleshooting and RCA
 
-This skill provides a structured approach to diagnosing and resolving complex timeout, concurrency, and connection issues in a multi-tier MuleSoft architecture (e.g., PAPI calling SAPI calling external systems like NetSuite or Salesforce).
+Trace symptoms across the complete execution path, distinguish the reporting component from the
+originating component, and require a discriminating check before calling a hypothesis the root
+cause.
 
-## Phase 1: Log Collection & Analysis
+## Privacy and reuse boundary
 
-When a system is experiencing instability, errors, or timeouts, follow these log analysis steps first.
+- Treat repositories, logs, payloads, application names, endpoints, organization metadata,
+  correlation identifiers, and audit users as sensitive.
+- Use role labels such as `Entry API`, `Orchestrator`, `System-facing API`, `Queue`, and `Target
+  System` in reusable examples.
+- Never transfer names, identifiers, sample payloads, exact schedules, traffic volumes, error
+  counts, or topology from a prior project into this skill or another project.
+- Use actual project identity only when necessary inside the authorized investigation, and keep it
+  out of reusable findings.
 
-### 1. Collect Comprehensive Logs
-Do not rely on a small sample of logs. Pull a large enough dataset to identify patterns (e.g., 24 hours of logs).
-*   Use the `mcp_anypoint-connect_get_logs` or `download_logs` tools to pull logs from **all participating applications** in the flow (e.g., both PAPI and SAPI).
-*   Ensure you are pulling logs for the specific environment where the issue occurs (e.g., Production).
+## Investigation contract
 
-### 2. Identify the Primary Error Signature
-Scan the logs to find the most frequent and critical errors. Look for:
-*   **Timeout Errors:**
-    *   `java.util.concurrent.TimeoutException`
-    *   `org.glassfish.grizzly.filterchain.IdleTimeoutFilter` (Indicates a connection was closed because it was idle longer than the configured timeout).
-    *   `HTTP GET/POST/PATCH on resource '...' failed: Timeout exceeded.`
-*   **Concurrency/Rate Limit Errors:**
-    *   `too many requests (429)` (Indicates an API is being hit too fast).
-    *   `concurrent request limit exceeded` (e.g., SuiteTalk SOAP limits).
-*   **Connection Refused/Bad Gateway (502/503/504):** Can indicate the downstream system is down or overwhelmed.
+Before analysis, establish:
 
-### 3. Trace the Error Chain (Correlation)
-*   Use the `correlationId` to trace a failing request across multiple applications (e.g., from PAPI to SAPI to an external system).
-*   Determine *which system* is generating the error and *which system* is logging it. For example, if PAPI logs a Grizzly timeout when calling SAPI, the issue might be SAPI closing the connection prematurely, or SAPI taking too long to process.
+- symptom, user impact, first-known time, environment, and timezone
+- affected request, event, scheduler, batch job, or queue path
+- participating applications and external dependencies
+- recent deployments or configuration changes
+- whether the user wants diagnosis only, a fix plan, or implementation
 
-### 4. Group Errors by Time and Frequency (Burst Analysis)
-*   Are the errors continuous, or do they happen in bursts?
-*   **Burst Example:** If 100 `429 Too Many Requests` errors occur within 15 seconds every 6 hours, immediately look for a scheduled batch job running at that interval.
+If the user cannot provide a fact, continue with available evidence and label the gap. Do not ask
+for information that repository or authorized runtime evidence can answer.
 
-## Phase 2: Root Cause Analysis (RCA)
+Use these confidence states:
 
-Once the error patterns are clear, investigate the configuration and code to find the root cause.
+| State | Meaning |
+| --- | --- |
+| Observed | Directly present in code, configuration, logs, or metrics |
+| Correlated | Aligned by correlation ID or time with adequate coverage |
+| Hypothesis | Plausible cause awaiting a discriminating check |
+| Confirmed | Supported across the components needed to rule out alternatives |
+| Unresolved | Evidence is missing or contradictory |
 
-### 1. Timeout Mismatches (The "Grizzly" Problem)
-If you see `IdleTimeoutFilter` errors, compare the timeout settings across the request chain.
-*   **Rule of Thumb:** The upstream system (e.g., PAPI) should have an `idleTimeout` that is **less than or equal to** the downstream system's (e.g., SAPI) `idleTimeout`.
-*   **Check:** Look at HTTP Requester configs in the calling app, and HTTP Listener configs in the receiving app.
-*   **Example Failure:** PAPI requester `idleTimeout` = 300s, SAPI listener `idleTimeout` = 60s. PAPI waits 300s, but SAPI drops the connection after 60s of inactivity, causing a Grizzly error in PAPI when it tries to use the dead connection.
+## Phase 1: Build the evidence set
 
-### 2. Concurrency Overload & Throttling
-If you see 429 errors or "concurrent request limit exceeded":
-*   **Batch Jobs:** Check `batch:job` configurations. A high `blockSize` (e.g., 100) will fire all records in the block concurrently. If downstream APIs have strict rate limits, this will cause 429s.
-*   **Queue Listeners:** Check VM or Anypoint MQ listeners. If `numberOfConsumers` is set but `maxConcurrency` is NOT set on the flow, it can lead to unbounded concurrency.
-*   **Flow Concurrency:** Check if `maxConcurrency` is explicitly set on flows handling heavy loads.
-*   **External Limits:** Understand the connection limits of the external system (e.g., NetSuite SOAP `maxConnection=3`). Ensure the upstream Mule apps are throttled to never send more concurrent requests than the downstream system can handle.
+### 1. Map the real execution path
 
-### 3. Resource Contention
-*   Check Anypoint Monitoring for CPU and Memory usage spikes correlating with error bursts. High CPU can cause thread starvation and cascading timeouts.
+Read the relevant Mule XML, referenced flows, DataWeave, connector configurations, property keys,
+error handlers, API contract, MUnit tests, deployment files, and current documentation. Follow:
 
-### 4. Deploy-Induced Error Bursts
-If errors cluster in a **1-5 second window** immediately after a deploy timestamp in the audit log, it's deploy noise — not a real issue.
+- synchronous calls and their response path
+- asynchronous publishes, acknowledgements, and consumers
+- retry, reconnection, and fallback scopes
+- scatter-gather, parallel-for-each, batch, and queue boundaries
+- local and global error handlers
 
-**Signature:**
-- `LifecycleException: "X" is stopped` or `MULE:UNKNOWN` errors
-- 50-200 errors in a 2-3 second burst
-- All errors in the same thread group, typically from VM queue listener flows
-- No errors before or after the burst window
+Do not infer API-led layers or dependency ownership from application names alone.
 
-**Root cause:** During a rolling deploy, old replicas begin shutting down while VM queue listeners still have messages in-flight. Components that have already stopped throw `LifecycleException` when the listener tries to route the message.
+### 2. Collect aligned telemetry
 
-**How to confirm:**
-1. Pull the audit log: `get_audit_log(hoursBack: 48, objectTypes: ["Application"])`
-2. Convert deploy timestamps from epoch ms to UTC
-3. Compare with the error spike windows from `get_log_stats`
-4. If the deploy timestamp falls within 1 minute before the error burst → deploy noise
+Use the `mule-ops` collection workflow when available. Otherwise obtain logs and metrics for every
+participating Mule application and the narrowest useful time window. Record actual coverage before
+comparing sources.
 
-**Prevention:** See the "VM Listener Shutdown Error Handler" pattern in the `mule-development` skill — add an error handler that catches `"is stopped"` / `LifecycleException` at WARN level.
+Prefer enough history to include baseline behavior and multiple occurrences, but do not silently
+default to a fixed duration when retention or incident timing suggests another window.
 
-> **Real-world example:** A deploy produced 118 `LifecycleException` errors (92% of all errors in a 12h window) in a 2-second burst. Error rate appeared to be 2.28%, but actual application error rate was ~0.2%.
+### 3. Identify primary signatures
 
-## Phase 3: Creating the Fix Plan
+Group by unique transaction and distinguish:
 
-Based on the RCA, design targeted fixes. Document these in an `implementation_plan.md` artifact.
+- originating connector or business error
+- timeout or connection exception observed by a caller
+- retry or reconnection summary
+- error-handler and default exception-listener duplicates
+- final response, acknowledgement, retry, dead-letter, or continuation outcome
 
-### 1. Fix Configuration Mismatches
-*   **Action:** Align timeouts. Increase the downstream listener's `idleTimeout` and `readTimeout` to comfortably exceed the expected processing time and align with the upstream requester's expectations.
+Use correlation IDs where propagation is verified. If they are absent, use narrow time, route, and
+operation matching and reduce confidence.
 
-### 2. Implement Strategic Throttling
-*   **Batch Jobs:** Reduce `blockSize` to a level the downstream API can handle (e.g., from 100 to 10). This trades speed for reliability.
-*   **Queue Listeners:** Add explicit `maxConcurrency="[X]"` attributes to listener flows to cap parallel processing and protect downstream bottlenecks (like 3-connection SOAP limits).
+### 4. Build a timeline
 
-### 3. Document the Architecture Before and After
-*   In your implementation plan, use Mermaid diagrams to clearly illustrate the flawed architecture and how the proposed fixes will resolve the bottlenecks.
+For each affected path, order:
 
-### Example Mermaid Diagram (Concurrency Fix):
-```mermaid
-graph TB
-    subgraph Before["❌ Before: No maxConcurrency"]
-        Q1["VM Queue"] --> L1["Listener<br/>maxConcurrency=∞"]
-        L1 -->|"Unbounded calls"| S1["SAPI"]
-        S1 -->|"overwhelmed"| NS1["External API<br/>limit=3"]
-    end
-    
-    subgraph After["✅ After: maxConcurrency=2"]
-        Q2["VM Queue"] --> L2["Listener<br/>maxConcurrency=2"]
-        L2 -->|"Throttled calls"| S2["SAPI"]
-        S2 -->|"within limits"| NS2["External API<br/>limit=3"]
-    end
-```
+1. trigger received
+2. key processing stages
+3. dependency request started
+4. dependency response or failure
+5. retry or fallback
+6. error mapping
+7. caller response or asynchronous disposition
+8. deployment or infrastructure events nearby
 
-## Phase 4: Verification
+This timeline prevents a later summary log or upstream timeout from being mistaken for the first
+failure.
 
-After deploying fixes, rigorous verification is essential.
+## Phase 2: Test hypotheses
 
-1.  **Wait for the Cycle:** Wait long enough for scheduled jobs (that previously failed) to run at least once.
-2.  **Pull Fresh Logs:** Pull logs covering the post-deployment period.
-3.  **Verify Error Absence:** Confirm that the specific errors targeted (e.g., 429s, Grizzly timeouts) are entirely gone from the new log set.
-4.  **Confirm Overall Stability:** Scan for any *new* errors introduced by the changes or unrelated external system failures.
+### Timeout and connection failures
 
-## Phase 5: Memory Profile Analysis
+Inventory each distinct timer instead of comparing similarly named properties blindly:
 
-When analyzing application performance in Anypoint Platform, pay close attention to the **Heap Used** graph:
+| Timer | What it governs |
+| --- | --- |
+| Connect timeout | Time allowed to establish a connection |
+| Requester response timeout | Time the caller waits for a response |
+| Read timeout | Connector-specific wait for inbound data |
+| Connection idle timeout | Lifetime of an unused persistent connection |
+| Proxy or gateway timeout | Deadline imposed outside the Mule app |
+| Retry duration | Attempts, delay, and per-attempt timeout combined |
+| Upstream request deadline | Total time available to return a useful result |
 
-### 1. The Normal "Sawtooth" Pattern
-A healthy Mule application will display a "sawtooth" pattern:
-- The heap usage steadily climbs as the application processes payloads.
-- It sharply drops when Garbage Collection (GC) runs and cleans up short-lived objects.
-- **Good:** Usage peaks at 60% (e.g., 600MB of a 1GB limit) and drops to 40% (400MB) consistently.
-- **Bad:** Usage climbs, GC runs, but the baseline keeps creeping higher until it hits the limit. This indicates a **Memory Leak**.
+For a synchronous chain, verify that inner work, retries, and error mapping can finish with margin
+before the upstream deadline. A connection idle timeout is not automatically the request-processing
+deadline, so do not apply a universal `idleTimeout >= responseTimeout` rule across unrelated
+components.
 
-### 2. Optimizing Memory Use in DataWeave & Flows
-Even with a healthy heap graph, you can optimize memory usage to prevent OutOfMemory (OOM) errors during traffic spikes:
-*   **Enable Streaming:** For large database queries, file reads, or HTTP responses, use repeatable streams. This prevents Mule from loading the entire payload into memory at once.
-    *   Example: `<ee:message><ee:set-payload><![CDATA[%dw 2.0 output application/json deferred=true ...]]></ee:set-payload></ee:message>`
-*   **Limit Batch `blockSize`:** A smaller block size means fewer concurrent records held in memory per batch JVM thread.
-*   **Use Persistent Queues:** When distributing work (like schedulers feeding VM queues), use **Persistent** storage. This writes queued messages to disk rather than holding them all in RAM.
-*   **Targeted Logging:** Avoid logging entire multi-megabyte JSON payloads using `<json-logger:logger>` or `<logger>`. Extract specific identifiers (e.g., `payload.id`) instead. Converting massive JSON objects to strings for the console consumes significant heap space instantaneously.
+Discriminate among:
+
+- dependency slowness
+- stale pooled connection or remote close
+- exhausted connection pool
+- caller deadline shorter than valid processing time
+- proxy or load-balancer timeout
+- CPU, thread, or event-loop starvation
+- retry duration exceeding the caller's budget
+
+### Concurrency and rate limits
+
+Estimate effective concurrency across the whole path:
+
+- source consumer count
+- flow `maxConcurrency` and connector-specific back pressure
+- batch-job `maxConcurrency` and block size
+- parallel scopes and asynchronous handoffs
+- replica count and queue distribution
+- connection-pool limits
+- dependency quotas and rate limits
+
+Treat batch block size as a memory and scheduling parameter, not a direct statement that every
+record in a block is sent concurrently. Mule processes record blocks in parallel according to batch
+concurrency and runtime capacity. Confirm behavior with metrics or a controlled load test before
+choosing a limit.
+
+Evaluate multiple remedies where appropriate:
+
+| Option | Benefit | Tradeoff |
+| --- | --- | --- |
+| Lower flow or batch concurrency | Protects a constrained dependency | Reduces throughput |
+| Add bounded retry with jitter | Absorbs transient failures | Extends latency and can amplify load |
+| Queue or bulkhead the work | Isolates callers from bursts | Changes delivery and recovery semantics |
+| Increase capacity | Preserves throughput | Adds cost and may move the bottleneck |
+| Reduce payload or batch size | Lowers memory and call pressure | Increases call or coordination overhead |
+
+Do not recommend a numeric value without observed workload, replica count, and dependency capacity.
+
+### Error propagation and proxy behavior
+
+A caller-side 5xx or timeout does not identify the origin. Inspect the intermediate application's
+operation result and error handler. No ERROR-level entry in an intermediate app can mean:
+
+- insufficient log coverage
+- failure logged at another level or only in a structured response
+- handled or continued error
+- transparent proxy behavior
+- missing correlation propagation
+- failure before or after that application
+
+Keep the cause unresolved until evidence distinguishes these cases.
+
+### Deploy-related bursts
+
+Compare error windows with deployment and replica events. Lifecycle or event-after-stop signatures
+close to a rolling transition can support a deployment-related hypothesis, but timestamps alone do
+not prove it.
+
+Before proposing suppression or `on-error-continue`, verify acknowledgement, persistence,
+redelivery, idempotency, and message-loss behavior. Never claim that a message will be reprocessed
+after swallowing an error unless the queue and source semantics prove it.
+
+### Memory pressure
+
+Compare heap baseline after GC, allocation slope, full-GC activity, payload size, concurrent work,
+batch settings, queue depth, and replica divergence. A repeated sawtooth is normally collection
+activity; a rising post-GC baseline is only a leak hypothesis until retention evidence supports it.
+
+Check for:
+
+- full-payload logging or repeated serialization
+- large repeatable in-memory streams
+- oversized variables or queue messages
+- high batch or parallel concurrency
+- unbounded caches or object-store usage
+- connector or custom-code resource retention
+
+## Phase 3: Produce the RCA or plan
+
+Lead with the impact and highest-confidence conclusion. Include:
+
+1. symptom and affected path
+2. evidence coverage and gaps
+3. timeline of the failure chain
+4. hypotheses considered and discriminating evidence
+5. confirmed or best-supported cause with confidence
+6. contributing conditions
+7. immediate containment options
+8. durable fix options with tradeoffs
+9. rollback and verification plan
+
+For a fix plan, cite exact repository-relative flows, configuration keys, and tests to change. Keep
+recommendations separate from current behavior. Do not implement the plan unless requested.
+
+Use Mermaid only when the multi-component sequence or before/after concurrency design is materially
+clearer than prose. Keep node labels role-based and free of project identity.
+
+## Phase 4: Verify a fix
+
+Verify against the failure mechanism, not only deployment success:
+
+1. Confirm the intended version and configuration are running.
+2. Exercise the affected path under a representative workload.
+3. Observe at least one relevant scheduler, batch, queue, or retry cycle when applicable.
+4. Compare equivalent pre-change and post-change windows.
+5. Confirm the primary signature is absent or reduced at the unique-transaction level.
+6. Confirm latency, throughput, memory, and dependency pressure did not regress.
+7. Scan for new errors, back pressure, duplicates, loss, or retry amplification.
+
+If the event has not recurred or telemetry coverage is inadequate, report the result as provisional.
+
+## Completion checklist
+
+- Trace all participating components and error handlers.
+- Record actual telemetry coverage and timezone.
+- Deduplicate multiple entries from the same transaction.
+- Distinguish the first failure from downstream symptoms and retry summaries.
+- Calculate the full timeout and concurrency budget before recommending values.
+- Treat deploy overlap, missing logs, and sawtooth memory as signals rather than proof.
+- Preserve client confidentiality and keep prior-project identity out of reusable examples and
+  current-project output.
+- State unresolved alternatives and the next discriminating check.
