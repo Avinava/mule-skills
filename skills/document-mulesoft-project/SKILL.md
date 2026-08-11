@@ -78,11 +78,58 @@ flow, endpoint, or property key. Apply this precedence:
 5. Tests: MUnit source and CI configuration.
 6. Existing prose: contextual evidence only after verification.
 
+Keep user-provided business context separate from implementation evidence. Attribute it as
+`Provided by project stakeholders` when it is included in the documentation; do not use it as
+proof of runtime behavior. If it conflicts with the repository, document the discrepancy instead
+of silently choosing one account.
+
 Record contradictions as documentation gaps. Label a conclusion as inferred when the source does
 not establish it directly. Put unresolved questions in a compact `Open questions` section instead
 of inventing an answer.
 
-### 4. Choose the adaptive document set
+### 4. Offer an optional business-context checkpoint
+
+After inspecting the repository and existing documentation, identify business information that
+would materially improve the requested documentation but cannot be derived safely from source.
+Common examples include:
+
+- the business outcome and capability this application supports
+- intended readers and the decisions or tasks the documentation should help with
+- upstream and downstream system roles, business ownership, and support ownership
+- business meaning of important routes, statuses, errors, and data fields
+- criticality, service expectations, compliance constraints, and recovery priorities
+- known business limitations, planned changes, and terminology
+
+If material questions remain, present a compact set before drafting:
+
+- Ask only questions whose answers would change useful content; do not ask the user to restate
+  facts already available in the repository.
+- State that every question is optional and that the user may answer what they know, skip an item,
+  or skip the entire checkpoint.
+- Where practical, give two to four concise, evidence-informed options plus `Other (please
+  specify)` and `Not sure / Skip`. Accept free-form answers as well.
+- Briefly explain why each answer matters when that is not obvious.
+- Prefer one batch of no more than five questions. Ask a follow-up only when an answer introduces
+  a material ambiguity.
+- Do not make documentation work contingent on optional business answers. If the user skips or
+  does not know, continue with verified technical facts and label or omit unsupported business
+  claims.
+
+Example presentation:
+
+```text
+Optional business context — answer any items you know, or reply "skip":
+1. Who is the primary reader? A) API consumers B) Mule developers C) Support/operators
+   D) Mixed audience E) Other (please specify) F) Not sure / Skip
+2. How critical is this integration? A) Business-critical B) Important but recoverable
+   C) Best effort D) Other (please specify) E) Not sure / Skip
+```
+
+Record answered items in the evidence ledger as user-provided context. Keep unanswered items only
+when they are actionable and material; group them under `Open questions > Business context` in the
+closest owning document.
+
+### 5. Choose the adaptive document set
 
 Create or reconcile:
 
@@ -99,12 +146,12 @@ already owns a topic, update it rather than creating a duplicate.
 
 For a targeted request, update only the requested document and directly affected cross-references.
 
-### 5. Explain from multiple perspectives
+### 6. Explain from multiple perspectives
 
 Cover the applicable perspectives without repeating the same facts:
 
 - **Purpose and boundary:** the problem, actors, upstream/downstream systems, and API-led layer when
-  directly evidenced.
+  directly evidenced or explicitly attributed to user-provided business context.
 - **Runtime path:** triggers, routing, transformations, connector calls, state changes, and response.
 - **Contract:** endpoints/events, headers, payload shapes, correlation, and errors.
 - **Failure behavior:** local/global handlers, retry or continuation semantics, writeback, and
@@ -117,7 +164,7 @@ Cover the applicable perspectives without repeating the same facts:
 Use tables for inventories and comparisons, prose for rationale, code snippets only when they make
 an exact contract clearer, and Mermaid only when relationships or sequence benefit materially.
 
-### 6. Reconcile existing documentation
+### 7. Reconcile existing documentation
 
 - Preserve correct manually authored explanations and project-specific terminology.
 - Change a claim only when source evidence contradicts it or the user requests a rewrite.
@@ -126,7 +173,7 @@ an exact contract clearer, and Mermaid only when relationships or sequence benef
 - Do not delete a document or collapse a multi-document suite without explicit approval.
 - Use repository-relative links and paths; never publish local absolute paths.
 
-### 7. Validate before delivery
+### 8. Validate before delivery
 
 Run the documentation audit over the files changed:
 
