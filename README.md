@@ -1,14 +1,14 @@
 # mule-skills
 
-Reusable AI-agent skills for **MuleSoft Mule 4** development — best practices, troubleshooting, and operational runbooks.
+Reusable AI-agent skills for **MuleSoft Mule 4** development — project documentation, best practices, troubleshooting, and operational runbooks.
 
-These skills are designed to be used with AI coding agents (Claude, Gemini, Cursor, etc.) and work alongside MCP servers like **anypoint-connect**, **mule-build**, and **mule-lint** for full lifecycle coverage.
+These skills are designed to be used with AI coding agents (Codex, Claude, Gemini, Cursor, etc.) and work alongside MCP servers like **anypoint-connect**, **mule-build**, and **mule-lint** for full lifecycle coverage.
 
 ---
 
 ## Quick Setup
 
-Paste this instruction into your AI coding agent (Claude, Gemini, etc.) when working on a Mule 4 project:
+Paste this instruction into your AI coding agent (Codex, Claude, Gemini, etc.) when working on a Mule 4 project:
 
 ```
 Follow the setup instructions at https://github.com/Avinava/mule-skills/blob/main/SETUP.md
@@ -16,6 +16,7 @@ to configure this MuleSoft project with AI agent skills.
 ```
 
 The agent will:
+
 1. Clone this repo
 2. Copy universal skills into your project's `.agents/skills/` directory
 3. Copy workflow templates into `.agents/workflows/`
@@ -31,6 +32,7 @@ The agent will:
 
 | Skill | Path | Description |
 |-------|------|-------------|
+| **Document MuleSoft Project** | `skills/document-mulesoft-project/` | Analyzes Mule 4 source and creates or refreshes evidence-backed Markdown documentation. Selects an adaptive document set, explains APIs, flows, integrations, DataWeave, configuration, deployment, testing, and operations, and adds Mermaid diagrams where useful. Includes read-only inventory and privacy/evidence audit scripts. |
 | **Mule Development** | `skills/mule-development/` | DataWeave patterns, flow design, error handling, naming conventions, concurrency, SOQL safety, ObjectStore patterns, and common pitfalls. Includes `resources/post-development-checklist.md`. Use every time you modify or create a flow. |
 | **Mule Troubleshooting** | `skills/mule-troubleshooting/` | Structured RCA methodology for timeout, concurrency, and connection issues in multi-tier Mule architectures (PAPI → SAPI → External Systems). |
 | **Mule Ops** | `skills/mule-ops/` | Production log analysis workflow using Anypoint Monitoring. Covers logs, errors, metrics, memory, performance, and deployment activity. Uses configurable app name placeholders. |
@@ -63,6 +65,11 @@ mule-skills/
 │   │   ├── SKILL.md                       # Best practices & patterns (universal)
 │   │   └── resources/
 │   │       └── post-development-checklist.md  # Gotcha checklist (referenced by skill)
+│   ├── document-mulesoft-project/
+│   │   ├── SKILL.md                       # Evidence-backed documentation workflow
+│   │   ├── agents/openai.yaml             # Codex UI metadata
+│   │   ├── references/                    # Analysis, blueprint, Mermaid, and privacy guidance
+│   │   └── scripts/                       # Read-only inventory and documentation audit
 │   ├── mule-troubleshooting/
 │   │   └── SKILL.md                       # RCA methodology (universal)
 │   └── mule-ops/
@@ -102,7 +109,9 @@ Skills will reference MCP tool names (e.g., `mcp_anypoint-connect_get_logs`) but
 Skills are folders of instructions that extend AI agent capabilities. Each skill contains:
 
 - **`SKILL.md`** (required): Main instruction file with YAML frontmatter (`name`, `description`) and detailed markdown instructions
-- **`resources/`** (optional): Additional files like checklists, reference data, or examples
+- **`agents/`** (optional): Agent-specific discovery and interface metadata
+- **`references/` or `resources/`** (optional): Guidance, checklists, reference data, or examples loaded only when needed
+- **`scripts/`** (optional): Deterministic helpers for repeatable analysis and validation
 
 When an AI agent encounters a task matching a skill's description, it reads the `SKILL.md` and follows the instructions. The agent directories can be named `.agents/` or `.agent/` depending on your tooling.
 
@@ -112,6 +121,11 @@ When an AI agent encounters a task matching a skill's description, it reads the 
 your-mule-project/
 ├── .agents/
 │   ├── skills/
+│   │   ├── document-mulesoft-project/
+│   │   │   ├── SKILL.md
+│   │   │   ├── agents/openai.yaml
+│   │   │   ├── references/
+│   │   │   └── scripts/
 │   │   ├── mule-development/
 │   │   │   ├── SKILL.md
 │   │   │   └── resources/
@@ -148,7 +162,9 @@ To add a new skill:
    ```
 3. Ensure **zero client-specific references** — no project names, org names, or version numbers
 4. Use `<PLACEHOLDER>` syntax for anything that varies per project
-5. Open a PR
+5. Validate the skill and run every bundled script against representative inputs
+6. Update `README.md` and `SETUP.md` so installation and discovery remain complete
+7. Open a PR
 
 ---
 

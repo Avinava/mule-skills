@@ -43,6 +43,7 @@ mkdir -p .agents/workflows
 Copy these skill directories from the cloned repo into the project:
 
 ```bash
+cp -r /tmp/mule-skills/skills/document-mulesoft-project .agents/skills/
 cp -r /tmp/mule-skills/skills/mule-development .agents/skills/
 cp -r /tmp/mule-skills/skills/mule-troubleshooting .agents/skills/
 cp -r /tmp/mule-skills/skills/mule-ops .agents/skills/
@@ -172,15 +173,21 @@ The `anypoint-connect` MCP server requires a one-time OAuth2 setup with Anypoint
 
 ---
 
-## Step 6: Verify Resources
+## Step 6: Verify Bundled Resources
 
 The `mule-development` skill includes `resources/post-development-checklist.md` which was copied in Step 3. Verify it exists:
 
 ```bash
 ls .agents/skills/mule-development/resources/post-development-checklist.md
+ls .agents/skills/document-mulesoft-project/references/privacy-and-evidence.md
+python3 .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.py . --pretty
 ```
 
 > This checklist is a starting point. Add your own project-specific gotchas to the "Project-Specific Gotchas" section at the bottom as you discover them.
+
+The inventory command is read-only and returns a repository-relative JSON index. It must identify the
+current directory as a Mule project before the documentation skill is used. Do not commit inventory
+output unless the project explicitly wants it as a maintained artifact.
 
 ---
 
@@ -255,6 +262,7 @@ git commit -m "feat: add AI agent skills, MCP servers, and project configuration
 - Added mule-development skill (best practices, patterns, gotchas)
 - Added mule-troubleshooting skill (RCA methodology)
 - Added mule-ops skill (production log analysis)
+- Added document-mulesoft-project skill (evidence-backed documentation and Mermaid diagrams)
 - Added build workflow
 - Configured MCP servers (anypoint-connect, mule-build, mule-lint)
 - Generated project-specific AGENTS.md, GEMINI.md, CLAUDE.md
@@ -267,7 +275,7 @@ git commit -m "feat: add AI agent skills, MCP servers, and project configuration
 
 After setup is complete, report to the user:
 
-1. ✅ Skills installed: `mule-development`, `mule-troubleshooting`, `mule-ops`
+1. ✅ Skills installed: `document-mulesoft-project`, `mule-development`, `mule-troubleshooting`, `mule-ops`
 2. ✅ Workflow installed: `build`
 3. ✅ MCP servers configured: `anypoint-connect`, `mule-build`, `mule-lint`
 4. ✅ Project files generated: `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`
@@ -287,6 +295,7 @@ To update skills from the upstream repo:
 
 ```bash
 git clone https://github.com/Avinava/mule-skills.git /tmp/mule-skills
+cp -r /tmp/mule-skills/skills/document-mulesoft-project .agents/skills/
 cp -r /tmp/mule-skills/skills/mule-development .agents/skills/
 cp -r /tmp/mule-skills/skills/mule-troubleshooting .agents/skills/
 # Don't overwrite mule-ops — it has project-specific config
@@ -294,4 +303,4 @@ cp -r /tmp/mule-skills/skills/mule-troubleshooting .agents/skills/
 rm -rf /tmp/mule-skills
 ```
 
-> **`mule-development`** and **`mule-troubleshooting`** are safe to overwrite — they're universal. **`mule-ops`** has project-specific app names — merge manually.
+> **`document-mulesoft-project`**, **`mule-development`**, and **`mule-troubleshooting`** are safe to overwrite — they're universal. **`mule-ops`** has project-specific app names — merge manually.

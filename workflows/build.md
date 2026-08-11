@@ -103,6 +103,9 @@ Review the changes made in this session and check whether any project documentat
 
 > Only update docs that are **factually outdated** by the changes. Do not rewrite docs for style or add speculative content.
 
+When the `document-mulesoft-project` skill is installed, use its targeted-refresh workflow for the
+affected documents. Preserve unrelated prose and run its documentation audit before continuing.
+
 ## 5. Sync Application Version
 
 Read the `<version>` from `pom.xml` and update the `json.logger.application.version` value in all environment property files to match (e.g., `prod.yaml`, `dev.yaml`, `local.yaml`).
