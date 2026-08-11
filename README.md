@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Mule Skills — evidence-backed Mule 4 agent workflows" width="960" />
+  <img src="assets/banner.svg" alt="Mule Skills — evidence-backed MuleSoft agent workflows" width="960" />
 </p>
 
 <p align="center">
@@ -77,10 +77,11 @@ The repository includes credential-free launch configurations for three pinned M
 | `mule-build` | `@sfdxy/mule-build@2.0.0` | Mule validation, testing, packaging, local runtime, versioning, and security checks |
 | `mule-lint` | `@sfdxy/mule-lint@1.24.1` | Static Mule analysis and machine-readable reports |
 
-Templates are provided for Codex (`mcp/.codex/config.toml`), VS Code
-(`mcp/.vscode/mcp.json`), and clients that accept an `mcpServers` object (`mcp/mcp.json`). Configure
-only the host in use and merge with existing settings rather than replacing them. The detailed
-procedure is in [SETUP.md](SETUP.md#4-configure-the-selected-mcp-host).
+Templates are provided for Codex (`mcp/.codex/config.toml`), VS Code and GitHub Copilot
+(`mcp/.vscode/mcp.json`), and hosts such as Claude Code or Copilot CLI that accept a project
+`mcpServers` object (`mcp/mcp.json`). Configure only the host in use and merge with existing settings
+rather than replacing them. The detailed procedure is in
+[SETUP.md](SETUP.md#4-configure-the-selected-mcp-host).
 
 Codex discovers repository-scoped skills from `.agents/skills/` between the working directory and
 the repository root. See the official [Codex skills documentation](https://developers.openai.com/codex/skills/)
@@ -98,7 +99,7 @@ mule-skills/
 │   ├── mule-ops/                   # Runtime health workflow
 │   └── review-mulesoft-project/    # Change, project, and release-readiness review
 ├── workflows/build.md              # Validate, package, and explicit release workflow
-├── templates/                      # Project-owned AGENTS, Claude, and Gemini guidance
+├── templates/                      # Project-owned AGENTS, Claude, Copilot, and Gemini guidance
 ├── mcp/                            # Codex, VS Code, and generic JSON MCP templates
 ├── README.md                       # Toolkit overview
 └── SETUP.md                        # Installation and reconciliation runbook
@@ -110,6 +111,16 @@ Each skill has a required `SKILL.md` and may include:
 - `references/` or `resources/` for guidance loaded by the workflow;
 - `scripts/` for deterministic, repeatable inspection and validation.
 
+Host instruction templates keep shared project facts in `AGENTS.md` and add only host-specific
+routing:
+
+| Template | Installed path | Host |
+| --- | --- | --- |
+| `templates/AGENTS.md` | `AGENTS.md` | Shared project context for coding agents |
+| `templates/CLAUDE.md` | `CLAUDE.md` | Claude Code |
+| `templates/copilot-instructions.md` | `.github/copilot-instructions.md` | GitHub Copilot Chat, coding agent, CLI, and code review where supported |
+| `templates/GEMINI.md` | `GEMINI.md` | Gemini coding agents |
+
 After installation, the shared project layout is:
 
 ```text
@@ -119,8 +130,10 @@ your-mule-project/
 │   └── workflows/build.md
 ├── .codex/config.toml              # Optional Codex MCP configuration
 ├── .vscode/mcp.json                # Optional VS Code MCP configuration
+├── .mcp.json                       # Optional Claude Code or Copilot CLI MCP configuration
+├── .github/copilot-instructions.md # Optional GitHub Copilot repository instructions
 ├── AGENTS.md                       # Evidence-backed project context
-├── CLAUDE.md                       # Optional host-specific guidance
+├── CLAUDE.md                       # Optional Claude Code guidance
 ├── GEMINI.md                       # Optional host-specific guidance
 ├── pom.xml
 └── src/

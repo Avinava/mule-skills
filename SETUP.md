@@ -12,15 +12,16 @@ Install or reconcile:
 - the Mule build workflow under `.agents/workflows/`;
 - MCP configuration for only the selected agent host;
 - an evidence-backed project `AGENTS.md`;
-- optional `CLAUDE.md` or `GEMINI.md` files only when those hosts are used.
+- optional `CLAUDE.md`, `.github/copilot-instructions.md`, or `GEMINI.md` files only when those
+  hosts are used.
 
 Do not commit or push unless the user authorizes it.
 
 ## Safety rules
 
 - Treat every existing file and uncommitted change as user-owned. Preserve unrelated edits.
-- Never delete or rename existing `.agent/`, `.agents/`, `.codex/`, `.cursor/`, or `.vscode/`
-  directories to make installation easier.
+- Never delete or rename existing `.agent/`, `.agents/`, `.codex/`, `.cursor/`, `.github/`, or
+  `.vscode/` directories to make installation easier.
 - Compare existing skills, workflows, templates, and MCP configuration before replacing or merging
   them. Do not blindly overwrite customized files.
 - Keep reusable skills neutral. Project identity and topology belong in `AGENTS.md` or a
@@ -122,8 +123,8 @@ The MCP templates contain no credentials. They launch the three pinned packages 
 | Template | Use |
 | --- | --- |
 | `mcp/.codex/config.toml` | Project-scoped Codex configuration |
-| `mcp/.vscode/mcp.json` | VS Code or GitHub Copilot configuration |
-| `mcp/mcp.json` | `mcpServers` object for compatible JSON-based hosts |
+| `mcp/.vscode/mcp.json` | VS Code and GitHub Copilot Chat configuration |
+| `mcp/mcp.json` | Project `mcpServers` object for Claude Code, Copilot CLI, and compatible hosts |
 
 ### Codex
 
@@ -140,7 +141,7 @@ file. Project-scoped MCP configuration loads only for trusted projects. The Chat
 Codex CLI, and Codex IDE extension share Codex MCP configuration for the same host. See the official
 [Codex MCP documentation](https://developers.openai.com/codex/mcp/).
 
-### VS Code or GitHub Copilot
+### GitHub Copilot in VS Code
 
 For a new project configuration:
 
@@ -150,7 +151,35 @@ cp "$MULE_SKILLS_TMP/mcp/.vscode/mcp.json" .vscode/mcp.json
 ```
 
 If `.vscode/mcp.json` exists, merge the three entries into its `servers` object. Preserve unrelated
-servers and settings.
+servers and settings. Repository-wide Copilot instructions are installed separately in Step 8.
+
+For GitHub Copilot CLI, use the shared project `.mcp.json` instructions in the next section and
+verify with `copilot mcp list`. GitHub-hosted Copilot agents and code review use repository settings
+for hosted MCP access; do not copy local credentials or assume local MCP configuration applies to
+GitHub-hosted runs.
+
+### Claude Code and Copilot CLI
+
+Both hosts can use a project-level `.mcp.json` containing the provided `mcpServers` object:
+
+```bash
+cp "$MULE_SKILLS_TMP/mcp/mcp.json" .mcp.json
+```
+
+If `.mcp.json` exists, merge the three entries into its `mcpServers` object instead of replacing the
+file. Verify the active host:
+
+```bash
+# Claude Code
+claude mcp list
+
+# GitHub Copilot CLI
+copilot mcp list
+```
+
+Claude Code asks for approval before using project-scoped servers from `.mcp.json`. Keep credentials
+out of this shared file. See the official
+[Claude Code MCP documentation](https://docs.anthropic.com/en/docs/claude-code/mcp).
 
 ### Other JSON-based hosts
 
@@ -270,11 +299,29 @@ Optional business context — answer any item or reply "skip":
 
 Always maintain `AGENTS.md`. Create or reconcile these files only for active hosts:
 
-- `CLAUDE.md` from `templates/CLAUDE.md`;
-- `GEMINI.md` from `templates/GEMINI.md`.
+- Claude Code: create or reconcile `CLAUDE.md` from `templates/CLAUDE.md`.
+- GitHub Copilot: create or reconcile `.github/copilot-instructions.md` from
+  `templates/copilot-instructions.md`.
+- Gemini: create or reconcile `GEMINI.md` from `templates/GEMINI.md`.
 
 These files should point to `AGENTS.md` for project context and contain only host-specific
 directives. Do not duplicate the project inventory or overwrite existing correct guidance.
+
+Claude Code automatically reads project `CLAUDE.md` files. GitHub Copilot uses
+`.github/copilot-instructions.md` as repository-wide instructions and can also use `AGENTS.md` on
+supported surfaces. Keep both host files compact and let `AGENTS.md` own shared project facts.
+
+For a new GitHub Copilot setup, the neutral template can be copied directly:
+
+```bash
+mkdir -p .github
+cp "$MULE_SKILLS_TMP/templates/copilot-instructions.md" .github/copilot-instructions.md
+```
+
+Reconcile an existing file instead of overwriting it. For `CLAUDE.md` and `GEMINI.md`, adapt the
+matching template to current-project evidence and remove the project-name placeholder before saving.
+See the official [Claude Code project-instruction documentation](https://docs.anthropic.com/en/docs/claude-code/memory)
+and [GitHub Copilot repository-instruction documentation](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions-in-your-ide/add-repository-instructions-in-your-ide).
 
 ## 9. Reconcile `.gitignore`
 
@@ -288,6 +335,9 @@ otherwise exclude it. Add exceptions only for paths created by this setup:
 !.codex/**
 !.vscode/
 !.vscode/**
+!.github/
+!.github/copilot-instructions.md
+!.mcp.json
 ```
 
 When applicable, ignore the local Anypoint profile binding:
@@ -307,7 +357,7 @@ python3 .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.
 python3 .agents/skills/document-mulesoft-project/scripts/audit_documentation.py AGENTS.md
 git diff --check
 git status --short
-git diff -- .agents AGENTS.md CLAUDE.md GEMINI.md .codex .vscode .gitignore
+git diff -- .agents AGENTS.md CLAUDE.md GEMINI.md .codex .vscode .github .mcp.json .gitignore
 ```
 
 Also verify:
@@ -315,6 +365,7 @@ Also verify:
 - every installed skill has `name` and `description` frontmatter;
 - `agents/openai.yaml` and every referenced resource or script were copied;
 - the selected MCP host reports the configured servers or its configuration parses successfully;
+- each selected host instruction file exists at its supported repository path;
 - no unresolved template placeholders remain in generated files;
 - no secrets, unrelated project identity, private hosts, raw payloads, or prior-project fingerprints
   were introduced;
