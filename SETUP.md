@@ -36,14 +36,15 @@ Do not commit or push unless the user authorizes it.
 
 These pins were verified on **2026-08-12**:
 
-| Component | Pinned version | Node.js requirement |
-| --- | ---: | ---: |
-| `@sfdxy/anypoint-connect` | `0.9.0` | `>=18.0.0` |
-| `@sfdxy/mule-build` | `2.0.0` | `>=20.19.0` |
-| `@sfdxy/mule-lint` | `1.24.1` | `>=20.0.0` |
+| Component and exact package | Source | Node.js requirement |
+| --- | --- | ---: |
+| [`@sfdxy/anypoint-connect@0.9.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.9.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=18.0.0` |
+| [`@sfdxy/mule-build@2.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.0.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
+| [`@sfdxy/mule-lint@1.24.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.24.1) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 
 Use Node.js `>=20.19.0` to satisfy all three. The repository pins package versions so upgrades are
-deliberate; review upstream release notes before changing them.
+deliberate; review the linked source repository and release notes before changing them. The package
+links resolve to the exact registry metadata used by the MCP templates.
 
 ## 1. Inspect the target repository
 
