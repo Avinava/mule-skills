@@ -123,3 +123,9 @@ Use the `document-mulesoft-project` skill for evidence-backed documentation crea
 refreshes. Link the current documentation set here:
 
 - <!-- Documentation path — Description -->
+
+## Review
+
+Use the `review-mulesoft-project` skill for change, PR, whole-project, and release-readiness reviews.
+Reviews report evidence-backed findings and remediation options without modifying source or PR state
+unless explicitly requested.

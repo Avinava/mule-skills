@@ -40,6 +40,7 @@ The agent will:
 | **Mule Development**          | `skills/mule-development/`          | Evidence-based Mule 4 implementation guidance for DataWeave, error handling, serialization, flow design, concurrency, queues, timeouts, state, logging, testing, and documentation. Includes a post-development checklist.                                                                                                                |
 | **Mule Troubleshooting**      | `skills/mule-troubleshooting/`      | Structured RCA methodology that traces timeouts, connection failures, rate limits, concurrency, batch, queues, deployment transitions, and memory pressure across the complete execution path.                                                                                                                                        |
 | **Mule Ops**                  | `skills/mule-ops/`                  | Role-based runtime health analysis using logs, metrics, deployments, coverage ledgers, cross-application correlation, confidence states, and privacy-safe reporting. Supports one application or any discovered multi-application topology.                                                                                            |
+| **Review MuleSoft Project**   | `skills/review-mulesoft-project/`   | Evidence-backed change, PR, whole-project, and release-readiness review. Covers contracts, Mule behavior, delivery semantics, security, tests, operations, and documentation, with prioritized findings and remediation options.                                                                                                        |
 
 ### Generic Workflows
 
@@ -79,9 +80,13 @@ mule-skills/
 │   ├── mule-troubleshooting/
 │   │   ├── SKILL.md                       # RCA methodology (universal)
 │   │   └── agents/openai.yaml             # Codex UI metadata
-│   └── mule-ops/
-│       ├── SKILL.md                       # Runtime health analysis (universal)
-│       └── agents/openai.yaml             # Codex UI metadata
+│   ├── mule-ops/
+│   │   ├── SKILL.md                       # Runtime health analysis (universal)
+│   │   └── agents/openai.yaml             # Codex UI metadata
+│   └── review-mulesoft-project/
+│       ├── SKILL.md                       # Change, project, and readiness review
+│       ├── agents/openai.yaml             # Codex UI metadata
+│       └── references/                    # Review domains and finding policy
 ├── workflows/
 │   └── build.md                           # Generic Mule build workflow
 ├── mcp/
@@ -104,9 +109,9 @@ These skills are designed to work with:
 
 | MCP Server           | npm Package                     | Purpose                                                                                         | Used By                            |
 | -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------- |
-| **anypoint-connect** | `@sfdxy/anypoint-connect@0.9.0` | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange             | `mule-ops`, `mule-troubleshooting` |
-| **mule-build**       | `@sfdxy/mule-build@2.0.0`       | Local build, run, release, validation, and security checks                                      | `workflows/build.md`               |
-| **mule-lint**        | `@sfdxy/mule-lint@1.24.1`       | Static analysis — 82 rules for error handling, security, naming, logging, performance, and more | Post-development checklist         |
+| **anypoint-connect** | `@sfdxy/anypoint-connect@0.9.0` | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange             | `mule-ops`, `mule-troubleshooting`, optional review verification |
+| **mule-build**       | `@sfdxy/mule-build@2.0.0`       | Local build, run, release, validation, and security checks                                      | `workflows/build.md`, review validation                           |
+| **mule-lint**        | `@sfdxy/mule-lint@1.24.1`       | Static analysis — 82 rules for error handling, security, naming, logging, performance, and more | Post-development checklist, project review                        |
 
 The MCP package versions are pinned for reproducibility. Pre-built configs are provided for Codex,
 VS Code, and JSON-based MCP clients. See [SETUP.md](SETUP.md#4-configure-mcp-servers-for-the-active-agent)
@@ -148,9 +153,13 @@ your-mule-project/
 │   │   ├── mule-troubleshooting/
 │   │   │   ├── SKILL.md
 │   │   │   └── agents/openai.yaml
-│   │   └── mule-ops/
+│   │   ├── mule-ops/
+│   │   │   ├── SKILL.md
+│   │   │   └── agents/openai.yaml
+│   │   └── review-mulesoft-project/
 │   │       ├── SKILL.md
-│   │       └── agents/openai.yaml
+│   │       ├── agents/openai.yaml
+│   │       └── references/
 │   └── workflows/
 │       └── build.md
 ├── .vscode/

@@ -22,6 +22,11 @@ tags, deployment, and test skipping as explicit release choices rather than auto
 
 Use `document-mulesoft-project` for documentation creation and targeted refreshes.
 
+## Review
+
+Use `review-mulesoft-project` for change, PR, project, and release-readiness reviews. Report findings
+and remediation options without changing source or PR state unless explicitly requested.
+
 ## Privacy
 
 Do not introduce identity, topology, payloads, endpoints, schedules, volumes, or incident details

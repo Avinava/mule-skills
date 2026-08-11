@@ -63,13 +63,14 @@ Create the canonical repository-scoped skill directories:
 mkdir -p .agents/skills .agents/workflows
 ```
 
-Copy the four skills and build workflow:
+Copy the five skills and build workflow:
 
 ```bash
 cp -R "$MULE_SKILLS_TMP/skills/document-mulesoft-project" .agents/skills/
 cp -R "$MULE_SKILLS_TMP/skills/mule-development" .agents/skills/
 cp -R "$MULE_SKILLS_TMP/skills/mule-troubleshooting" .agents/skills/
 cp -R "$MULE_SKILLS_TMP/skills/mule-ops" .agents/skills/
+cp -R "$MULE_SKILLS_TMP/skills/review-mulesoft-project" .agents/skills/
 cp "$MULE_SKILLS_TMP/workflows/build.md" .agents/workflows/build.md
 ```
 
@@ -185,6 +186,10 @@ test -f .agents/skills/mule-development/agents/openai.yaml
 test -f .agents/skills/mule-development/resources/post-development-checklist.md
 test -f .agents/skills/mule-troubleshooting/agents/openai.yaml
 test -f .agents/skills/mule-ops/agents/openai.yaml
+test -f .agents/skills/review-mulesoft-project/SKILL.md
+test -f .agents/skills/review-mulesoft-project/agents/openai.yaml
+test -f .agents/skills/review-mulesoft-project/references/finding-policy.md
+test -f .agents/skills/review-mulesoft-project/references/review-domains.md
 test -f .agents/workflows/build.md
 python3 .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.py . --pretty
 ```
@@ -321,7 +326,7 @@ Report:
 1. Review `git status` and preserve local edits.
 2. Clone the latest repository into a new `mktemp` directory as in Step 2.
 3. Compare the installed skills, workflow, and MCP templates with the new versions.
-4. Update all four skills and `workflows/build.md` after reviewing their diffs.
+4. Update all five skills and `workflows/build.md` after reviewing their diffs.
 5. If an installed skill contains project identity or topology, move that context into `AGENTS.md`
    or a project-owned runbook before replacing the reusable skill.
 6. Review MCP package version changes and upstream release notes before changing pinned versions.
