@@ -120,5 +120,8 @@ The app deploys to **<!-- DEPLOYMENT_TARGET -->** as `<!-- APP_NAME -->`.
 
 <!-- Link to your project-specific docs -->
 
+Use the `document-mulesoft-project` skill for evidence-backed documentation creation and targeted
+refreshes after Mule XML, RAML/OAS, DataWeave, MUnit, configuration, or deployment changes.
+
 Detailed docs are in the [docs/](./docs/) folder:
 - <!-- [Topic](./docs/topic.md) — Description -->

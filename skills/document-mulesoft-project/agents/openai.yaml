@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document MuleSoft Project"
+  short_description: "Create evidence-backed MuleSoft project docs"
+  default_prompt: "Use $document-mulesoft-project to analyze this MuleSoft repository and create or update its documentation."

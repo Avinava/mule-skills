@@ -22,6 +22,9 @@ This project uses MD5 content hashing to deduplicate records in scheduler and li
 ## Build
 Use the `/build` workflow or `mule-build` MCP tools. Do NOT call Maven directly.
 
+## Documentation
+Use the `document-mulesoft-project` skill to create or refresh project documentation.
+
 ## Salesforce Org
 <!-- If your project connects to Salesforce, specify the org alias -->
 The connected Salesforce org alias is `<!-- ORG_ALIAS -->`.
