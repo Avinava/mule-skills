@@ -1,306 +1,322 @@
 # MuleSoft Skills — Agent Setup Instructions
 
-> **This file is an instruction set for AI coding agents.** When a user pastes the URL to this file, the agent should read and execute these steps to configure a MuleSoft project with reusable development skills.
+> **This file is an instruction set for AI coding agents.** When a user provides this URL,
+> follow these steps from the root of the Mule project being configured. Inspect first, preserve
+> existing project conventions, and ask only for facts that cannot be derived safely from source.
 
----
+## Safety and scope
 
-## Prerequisites
+- Treat the target repository as user-owned. Preserve unrelated and uncommitted changes.
+- Do not rename or delete an existing `.agent/`, `.agents/`, `.codex/`, `.cursor/`, or `.vscode/`
+  directory. Use `.agents/skills/` for the shared skills installed by this repository.
+- Never place credentials, access tokens, client secrets, or tenant IDs in agent or MCP configuration.
+  Keep reusable skills customer-neutral; include project-specific business names only when necessary
+  and confirmed by the user.
+- Configure only the agent hosts the user actually uses. Ask before changing files outside the
+  project, such as a user-level IDE or desktop configuration.
+- Show the final diff before committing. Do not push unless the user explicitly requests it.
 
-Before starting, verify:
-1. The current working directory contains a `pom.xml` (it's a Maven/Mule project)
-2. The `pom.xml` contains `mule-maven-plugin` or `mule-application` packaging (it's a Mule 4 project)
-3. `git` is available on the system
+## Verified toolchain
 
-If any prerequisite fails, inform the user and stop.
+These instructions were last verified on **2026-08-11** against:
 
----
+| Component                 | Verified version |
+| ------------------------- | ---------------: |
+| `@sfdxy/anypoint-connect` |          `0.9.0` |
+| `@sfdxy/mule-build`       |          `2.0.0` |
+| `@sfdxy/mule-lint`        |         `1.24.1` |
 
-## Step 1: Clone the Skills Repository
+The MCP templates pin these versions so a future package release cannot silently change a project's
+tooling. Upgrade the pins deliberately after reviewing the upstream release notes.
 
-```bash
-git clone https://github.com/Avinava/mule-skills.git /tmp/mule-skills
-```
+## 1. Verify the project and prerequisites
 
-If the clone fails (private repo, no access), ask the user to provide access or download the repo manually.
+Confirm all of the following before modifying the project:
 
----
+1. The current directory is the project root and contains `pom.xml`.
+2. `pom.xml` declares `<packaging>mule-application</packaging>` or configures
+   `mule-maven-plugin`.
+3. `git`, `python3`, `node`, `npm`, and `npx` are available.
+4. Node.js satisfies `>=20.19.0`. Prefer a supported LTS release (20.19+, 22, or 24).
+5. `git status --short` has been reviewed. Existing changes must remain intact.
 
-## Step 2: Create the Agent Directory Structure
+If the directory is not a Mule 4 project, stop and explain which check failed. If a runtime
+prerequisite is missing, report the exact prerequisite instead of partially installing the setup.
 
-Create the `.agents/` directory in the project root if it doesn't exist:
+## 2. Clone into an isolated temporary directory
 
-```bash
-mkdir -p .agents/skills
-mkdir -p .agents/workflows
-```
-
-> **Note:** Some tooling uses `.agent/` (singular). Use `.agents/` (plural) as the standard. If the project already has `.agent/`, rename it to `.agents/` and update any references.
-
----
-
-## Step 3: Copy Universal Skills
-
-Copy these skill directories from the cloned repo into the project:
-
-```bash
-cp -r /tmp/mule-skills/skills/document-mulesoft-project .agents/skills/
-cp -r /tmp/mule-skills/skills/mule-development .agents/skills/
-cp -r /tmp/mule-skills/skills/mule-troubleshooting .agents/skills/
-cp -r /tmp/mule-skills/skills/mule-ops .agents/skills/
-```
-
----
-
-## Step 4: Copy Workflows
+Do not use a fixed path such as `/tmp/mule-skills`; it may already contain user data.
 
 ```bash
-cp -r /tmp/mule-skills/workflows/build.md .agents/workflows/
+MULE_SKILLS_TMP="$(mktemp -d "${TMPDIR:-/tmp}/mule-skills.XXXXXX")"
+git clone --depth 1 https://github.com/Avinava/mule-skills.git "$MULE_SKILLS_TMP"
 ```
 
----
+Keep `MULE_SKILLS_TMP` set until cleanup in Step 12. If cloning fails, leave the project unchanged
+and ask the user to confirm repository access.
 
-## Step 5: Configure MCP Servers
+## 3. Install the shared skills and workflow
 
-The MuleSoft MCP servers give AI agents direct access to your Anypoint Platform (logs, metrics, deployments), build tooling, and static analysis. This step configures them for your IDE.
+Create the canonical repository-scoped skill directories:
 
-### 5a. Determine the IDE
+```bash
+mkdir -p .agents/skills .agents/workflows
+```
 
-Ask the user: **"Which IDE/agent are you using?"**
+Copy the four skills and build workflow:
 
-| IDE / Agent | Config file | Config format |
-|-------------|-------------|---------------|
-| **VS Code + Gemini Code Assist** | `.vscode/mcp.json` | `{ "servers": { ... } }` |
-| **VS Code + GitHub Copilot** | `.vscode/mcp.json` | `{ "servers": { ... } }` |
-| **Claude Desktop** | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) | `{ "mcpServers": { ... } }` |
-| **Cursor** | Project root `mcp.json` or `.cursor/mcp.json` | `{ "mcpServers": { ... } }` |
-| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` | `{ "mcpServers": { ... } }` |
+```bash
+cp -R "$MULE_SKILLS_TMP/skills/document-mulesoft-project" .agents/skills/
+cp -R "$MULE_SKILLS_TMP/skills/mule-development" .agents/skills/
+cp -R "$MULE_SKILLS_TMP/skills/mule-troubleshooting" .agents/skills/
+cp -R "$MULE_SKILLS_TMP/skills/mule-ops" .agents/skills/
+cp "$MULE_SKILLS_TMP/workflows/build.md" .agents/workflows/build.md
+```
 
-### 5b. Copy the Appropriate Config
+If any destination already exists, compare it with the source before copying. Preserve local
+customizations, especially `.agents/skills/mule-ops/SKILL.md`.
 
-**For VS Code (Gemini Code Assist / GitHub Copilot):**
+Codex discovers repository skills from `.agents/skills/` between the current directory and the Git
+root. Other agents can read the same files directly even if they also use a tool-specific directory.
+
+## 4. Configure MCP servers for the active agent
+
+The repository ships three credential-free MCP launch entries:
+
+| Server             | Package                         | Purpose                                                                                                          |
+| ------------------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `anypoint-connect` | `@sfdxy/anypoint-connect@0.9.0` | Anypoint applications, logs, metrics, deployments, API management, Exchange, Design Center, MQ, and Object Store |
+| `mule-build`       | `@sfdxy/mule-build@2.0.0`       | Mule build, validation, versioning, local runtime, and security checks                                           |
+| `mule-lint`        | `@sfdxy/mule-lint@1.24.1`       | Static analysis with 82 rules and table, JSON, SARIF, HTML, and CSV output                                       |
+
+Determine which agent or IDE the user is using. Configure only that host:
+
+| Agent / IDE                              | Project or user config                                                                 | Action                                                           |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Codex CLI, desktop, or IDE extension** | Project `.codex/config.toml`                                                           | Copy `mcp/.codex/config.toml`                                    |
+| **VS Code / GitHub Copilot**             | Project `.vscode/mcp.json`                                                             | Copy `mcp/.vscode/mcp.json`                                      |
+| **Claude Code**                          | Project `.mcp.json`                                                                    | Copy `mcp/mcp.json`                                              |
+| **Cursor**                               | Project `.cursor/mcp.json`                                                             | Copy `mcp/mcp.json`                                              |
+| **Gemini Code Assist for VS Code**       | User `~/.gemini/settings.json`                                                         | Merge the `mcpServers` object from `mcp/mcp.json` after approval |
+| **Claude Desktop**                       | User config (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`) | Merge the `mcpServers` object from `mcp/mcp.json` after approval |
+| **Windsurf Cascade**                     | User `~/.codeium/windsurf/mcp_config.json`                                             | Merge the `mcpServers` object from `mcp/mcp.json` after approval |
+
+### Codex
+
+```bash
+mkdir -p .codex
+cp "$MULE_SKILLS_TMP/mcp/.codex/config.toml" .codex/config.toml
+codex mcp list
+```
+
+Codex also supports `codex mcp add`, but the checked-in project configuration is reproducible and is
+shared by Codex CLI, desktop, and the IDE extension. Codex requires the project to be trusted before
+loading project-scoped MCP configuration. See the official [Codex MCP documentation](https://developers.openai.com/codex/mcp/).
+
+### VS Code / GitHub Copilot
 
 ```bash
 mkdir -p .vscode
-cp /tmp/mule-skills/mcp/.vscode/mcp.json .vscode/mcp.json
+cp "$MULE_SKILLS_TMP/mcp/.vscode/mcp.json" .vscode/mcp.json
 ```
 
-This creates `.vscode/mcp.json` with:
-```json
-{
-  "servers": {
-    "anypoint-connect": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@sfdxy/anypoint-connect", "mcp"]
-    },
-    "mule-build": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@sfdxy/mule-build", "mcp"]
-    },
-    "mule-lint": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@sfdxy/mule-lint", "mcp"]
-    }
-  }
-}
-```
+Merge the `servers` object instead of replacing `.vscode/mcp.json` when that file already exists.
 
-**For Claude Desktop / Cursor / Windsurf:**
-
-Copy the root `mcp.json` from the mule-skills repo:
-```bash
-cp /tmp/mule-skills/mcp/mcp.json ./mcp.json
-```
-
-This creates `mcp.json` with:
-```json
-{
-  "mcpServers": {
-    "anypoint-connect": {
-      "command": "npx",
-      "args": ["-y", "@sfdxy/anypoint-connect", "mcp"]
-    },
-    "mule-build": {
-      "command": "npx",
-      "args": ["-y", "@sfdxy/mule-build", "mcp"]
-    },
-    "mule-lint": {
-      "command": "npx",
-      "args": ["-y", "@sfdxy/mule-lint", "mcp"]
-    }
-  }
-}
-```
-
-> For **Claude Desktop**, merge the `mcpServers` block into the existing `claude_desktop_config.json` rather than creating a project-level file.
-
-### 5c. Configure Anypoint Connect Authentication
-
-The `anypoint-connect` MCP server requires a one-time OAuth2 setup with Anypoint Platform:
-
-1. Ask the user: **"Have you already run `anc config init` and `anc auth login`?"**
-2. If **no**, instruct them to:
-   ```bash
-   # Install the CLI
-   npm install -g @sfdxy/anypoint-connect
-
-   # Initialize config (creates OAuth2 profile)
-   anc config init
-
-   # Authenticate via browser
-   anc auth login
-
-   # Verify
-   anc auth status
-   ```
-3. Bind the project to the correct profile:
-   ```bash
-   anc config use <PROFILE_NAME>
-   ```
-   This creates `.anypoint-connect.json` in the project root, which the MCP server auto-detects.
-
-> **Multi-org support:** If the user manages multiple Anypoint orgs, they can create named profiles (`anc config init --profile client-a`) and bind each project to a different profile.
-
-### 5d. MCP Server Summary
-
-| Server | npm Package | Purpose |
-|--------|-------------|---------|
-| **anypoint-connect** | `@sfdxy/anypoint-connect` | Anypoint Platform operations — logs, metrics, deployments, API management, Exchange, Design Center, Anypoint MQ, Object Store |
-| **mule-build** | `@sfdxy/mule-build` | Local build, run, and release — Maven packaging, version bumps, security scanning, local Mule runtime |
-| **mule-lint** | `@sfdxy/mule-lint` | Static analysis — 56 rules covering error handling, security, naming, logging, performance. HTML/SARIF/CSV reports |
-
----
-
-## Step 6: Verify Bundled Resources
-
-The `mule-development` skill includes `resources/post-development-checklist.md` which was copied in Step 3. Verify it exists:
+### Claude Code or Cursor
 
 ```bash
-ls .agents/skills/mule-development/resources/post-development-checklist.md
-ls .agents/skills/document-mulesoft-project/references/privacy-and-evidence.md
+# Claude Code
+cp "$MULE_SKILLS_TMP/mcp/mcp.json" .mcp.json
+
+# Cursor (use this instead of the Claude Code destination)
+mkdir -p .cursor
+cp "$MULE_SKILLS_TMP/mcp/mcp.json" .cursor/mcp.json
+```
+
+Merge the `mcpServers` object when the destination already exists. Do not create a root `mcp.json`;
+neither Claude Code nor Cursor uses that path for shared project configuration.
+
+### User-level clients
+
+For Gemini Code Assist, Claude Desktop, or Windsurf, display the relevant destination and proposed
+`mcpServers` block, then obtain approval before editing the user-level file. Preserve all existing
+servers and settings. Never copy secrets into a project or user configuration.
+
+After configuration, restart or reload the active client and verify all three servers initialize.
+
+## 5. Configure Anypoint authentication when needed
+
+Only `anypoint-connect` requires Anypoint authentication. If the project will use Anypoint operations,
+ask whether the user has already configured and authenticated a profile.
+
+For a new setup, first check whether `anc` is already available. Obtain approval before installing a
+global npm package:
+
+```bash
+npm install -g @sfdxy/anypoint-connect@0.9.0
+anc config init
+anc auth login
+anc auth status
+```
+
+For multiple Anypoint organizations, use a neutral local profile identifier and bind it to the current
+project:
+
+```bash
+anc config init --profile org-a
+anc auth login --profile org-a
+anc config use org-a
+anc auth status
+```
+
+`anc config use` creates `.anypoint-connect.json`. It contains a local profile binding, not credentials,
+but it can reveal an organization label and is machine-specific. Keep it out of version control and do
+not use customer names as profile identifiers.
+
+## 6. Verify the installed skill resources
+
+```bash
+test -f .agents/skills/document-mulesoft-project/SKILL.md
+test -f .agents/skills/document-mulesoft-project/agents/openai.yaml
+test -f .agents/skills/document-mulesoft-project/references/privacy-and-evidence.md
+test -f .agents/skills/document-mulesoft-project/scripts/audit_documentation.py
+test -f .agents/skills/mule-development/resources/post-development-checklist.md
+test -f .agents/workflows/build.md
 python3 .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.py . --pretty
 ```
 
-> This checklist is a starting point. Add your own project-specific gotchas to the "Project-Specific Gotchas" section at the bottom as you discover them.
+The inventory command is read-only and returns a repository-relative JSON index. Confirm it identifies
+the current directory as a Mule project. Do not commit its output unless the project intentionally
+maintains that artifact.
 
-The inventory command is read-only and returns a repository-relative JSON index. It must identify the
-current directory as a Mule project before the documentation skill is used. Do not commit inventory
-output unless the project explicitly wants it as a maintained artifact.
+## 7. Configure the project copy of `mule-ops`
 
----
+Inspect the project's flows, deployment files, and Anypoint application metadata before asking for
+names. Then edit `.agents/skills/mule-ops/SKILL.md`:
 
-## Step 7: Configure the Mule Ops Skill
+1. Replace `<YOUR_PAPI_APP>` with the deployed Process API application name, if present.
+2. Replace `<YOUR_SAPI_APP>` with the deployed System API application name, if present.
+3. Set the configuration table's default environment to the project's normal analysis environment.
+4. If the project does not use a PAPI/SAPI pair, adapt the application list and correlation workflow to
+   the architecture actually found. Do not invent companion applications.
 
-Open `.agents/skills/mule-ops/SKILL.md` and replace the placeholder values at the top of the file:
+Ask the user only for values that cannot be established from repository or authorized Anypoint evidence.
 
-1. Ask the user: **"What is the name of your Process API (PAPI) application as deployed in CloudHub?"**
-   - Replace all instances of `<YOUR_PAPI_APP>` with the answer
-2. Ask the user: **"What is the name of your System API (SAPI) application as deployed in CloudHub?"**
-   - Replace all instances of `<YOUR_SAPI_APP>` with the answer
-3. Ask the user: **"What environment should be the default for log analysis?"** (default: `Production`)
+## 8. Generate project agent context
 
-If the project doesn't have a PAPI/SAPI architecture, skip this step or adapt the skill to the project's architecture.
+Run the inventory from Step 6, then inspect `pom.xml`, Mule XML, RAML/OAS, DataWeave, MUnit,
+configuration, and deployment files. Use that evidence to fill
+`$MULE_SKILLS_TMP/templates/AGENTS.md` and write `AGENTS.md` at the project root.
 
----
+Derive when possible:
 
-## Step 8: Generate AGENTS.md
+- what the application does and its API layer (Experience, Process, System, or another pattern);
+- external systems and companion Mule applications;
+- environments and deployment target;
+- key flows, schedules, configuration keys, error handling, and operational constraints.
 
-Read the template at `/tmp/mule-skills/templates/AGENTS.md` and generate a project-specific version.
+Remove irrelevant template sections and placeholders. Never copy assumptions, credentials, tokens,
+tenant IDs, customer names from unrelated examples, or unsupported claims into the generated file.
+If a business or customer name is necessary for project context, confirm it with the user first.
 
-Ask the user the following questions to fill in the template:
+## 9. Generate host-specific context files
 
-1. **What does this project do?** (one paragraph description)
-2. **What systems does it integrate?** (e.g., Salesforce, NetSuite, Ramp, SAP, Workday)
-3. **Is this a Process API (PAPI), System API (SAPI), or Experience API (XAPI)?**
-4. **What is the companion API name?** (if PAPI, what SAPI does it call? If SAPI, what PAPI calls it?)
-5. **What environments exist?** (e.g., Development, Sandbox, Production)
-6. **How is it deployed?** (CloudHub 1.0, CloudHub 2.0, Runtime Fabric, On-Prem)
+Always create `AGENTS.md`. Generate the following only for agents the project actually uses:
 
-Generate `AGENTS.md` in the project root with the user's answers filling the template placeholders.
+- `GEMINI.md` from `templates/GEMINI.md`
+- `CLAUDE.md` from `templates/CLAUDE.md`
 
----
+Fill only evidence-backed sections. Remove the content-hash, Salesforce, or other optional sections when
+they do not apply. Do not ask for a Salesforce alias unless the project actually connects to Salesforce.
 
-## Step 9: Generate GEMINI.md and CLAUDE.md
+## 10. Update `.gitignore`
 
-Read the templates at `/tmp/mule-skills/templates/GEMINI.md` and `/tmp/mule-skills/templates/CLAUDE.md`.
-
-Generate both files in the project root, filling in:
-- Project name from Step 8
-- Build instructions (reference the `/build` workflow)
-- Salesforce org alias — ask the user: **"What is your Salesforce org alias?"** (if applicable)
-- Any project-specific agent directives the user wants to add
-
----
-
-## Step 10: Update .gitignore
-
-Ensure the project's `.gitignore` does NOT ignore the `.agents/` or `.vscode/` directories. If it contains `.*` patterns, add exceptions:
+Ensure shared agent configuration is trackable when selected, even if the project has a broad hidden-file
+ignore rule:
 
 ```gitignore
 !.agents/
+!.agents/**
+!.codex/
+!.codex/**
+!.cursor/
+!.cursor/**
 !.vscode/
+!.vscode/**
+!.mcp.json
 ```
 
----
+Add this local binding to `.gitignore`:
 
-## Step 11: Cleanup
+```gitignore
+.anypoint-connect.json
+```
+
+Add exceptions only for directories the setup actually created. Do not weaken unrelated ignore rules.
+
+## 11. Validate and review
+
+Run these checks before committing:
 
 ```bash
-rm -rf /tmp/mule-skills
+python3 .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.py . --pretty
+python3 .agents/skills/document-mulesoft-project/scripts/audit_documentation.py AGENTS.md
+git diff --check
+git status --short
+git diff -- .agents AGENTS.md GEMINI.md CLAUDE.md .codex .cursor .vscode .mcp.json .gitignore
 ```
 
----
+Also verify:
 
-## Step 12: Commit
+- every copied skill has a valid `SKILL.md` with `name` and `description` frontmatter;
+- no unresolved `<!-- PLACEHOLDER -->` or `<YOUR_...>` values remain in generated project files;
+- no secrets, credentials, customer names, or unrelated client details were introduced;
+- existing project content was not overwritten accidentally;
+- the configured MCP client lists all selected servers successfully.
+
+## 12. Clean up the temporary clone
+
+Resolve and validate the temporary path before removing it:
 
 ```bash
-git add .agents/ .vscode/ AGENTS.md GEMINI.md CLAUDE.md
-git commit -m "feat: add AI agent skills, MCP servers, and project configuration
-
-- Added mule-development skill (best practices, patterns, gotchas)
-- Added mule-troubleshooting skill (RCA methodology)
-- Added mule-ops skill (production log analysis)
-- Added document-mulesoft-project skill (evidence-backed documentation and Mermaid diagrams)
-- Added build workflow
-- Configured MCP servers (anypoint-connect, mule-build, mule-lint)
-- Generated project-specific AGENTS.md, GEMINI.md, CLAUDE.md
-- Added post-development checklist"
+test -n "$MULE_SKILLS_TMP" && test -d "$MULE_SKILLS_TMP/.git" && rm -rf -- "$MULE_SKILLS_TMP"
+unset MULE_SKILLS_TMP
 ```
 
----
+This removes only the isolated clone created in Step 2.
 
-## Step 13: Report
+## 13. Commit when authorized
 
-After setup is complete, report to the user:
-
-1. ✅ Skills installed: `document-mulesoft-project`, `mule-development`, `mule-troubleshooting`, `mule-ops`
-2. ✅ Workflow installed: `build`
-3. ✅ MCP servers configured: `anypoint-connect`, `mule-build`, `mule-lint`
-4. ✅ Project files generated: `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`
-5. ✅ Post-development checklist: `.agents/skills/mule-development/resources/post-development-checklist.md`
-6. 📋 Remind the user to review and customize:
-   - `AGENTS.md` — add specific flow details, configuration, and architecture patterns
-   - Post-development checklist — add project-specific gotchas as they're discovered
-   - `mule-ops/SKILL.md` — verify app names and scheduler patterns match their project
-7. 📋 Remind the user to complete auth setup if not done:
-   - `anc config init` → `anc auth login` → `anc config use <profile>`
-
----
-
-## Updating Skills
-
-To update skills from the upstream repo:
+Show the user the validation results and diff summary. If the setup request includes authorization to
+commit, stage only the files created or intentionally updated by this setup and use a conventional commit:
 
 ```bash
-git clone https://github.com/Avinava/mule-skills.git /tmp/mule-skills
-cp -r /tmp/mule-skills/skills/document-mulesoft-project .agents/skills/
-cp -r /tmp/mule-skills/skills/mule-development .agents/skills/
-cp -r /tmp/mule-skills/skills/mule-troubleshooting .agents/skills/
-# Don't overwrite mule-ops — it has project-specific config
-# Don't overwrite templates — they have project-specific content
-rm -rf /tmp/mule-skills
+git commit -m "feat: add MuleSoft agent skills and tooling"
 ```
 
-> **`document-mulesoft-project`**, **`mule-development`**, and **`mule-troubleshooting`** are safe to overwrite — they're universal. **`mule-ops`** has project-specific app names — merge manually.
+Do not push unless the user explicitly requested a push.
+
+## 14. Report the result
+
+Report:
+
+1. installed skills and workflow;
+2. generated project context files;
+3. configured MCP host and exact config path;
+4. Anypoint profile status without revealing profile or organization names;
+5. validation results;
+6. files changed and commit hash, if committed;
+7. any values or optional integrations still requiring user action.
+
+## Updating an existing installation
+
+1. Review `git status` and preserve local edits.
+2. Clone the latest repository into a new `mktemp` directory as in Step 2.
+3. Compare the installed skills, workflow, and MCP templates with the new versions.
+4. Update `document-mulesoft-project`, `mule-development`, `mule-troubleshooting`, and
+   `workflows/build.md` after reviewing their diffs.
+5. Merge changes to `mule-ops` manually so deployed application names and architecture remain intact.
+6. Review MCP package version changes and upstream release notes before changing pinned versions.
+7. Never overwrite generated `AGENTS.md`, `GEMINI.md`, or `CLAUDE.md` with templates. Refresh their
+   content from current project evidence instead.
+8. Repeat Steps 11–14.
