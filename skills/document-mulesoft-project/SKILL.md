@@ -200,3 +200,5 @@ Then:
 - Never replace customer/project identity in generated project documentation unless the user asks
   for anonymization, but always redact secrets and personal data.
 - Never include examples or terminology from unrelated customer projects in this reusable skill.
+  Generalize the mechanism; do not retain prior application names, topology, fields, endpoints,
+  schedules, volumes, error counts, exact log text, or numeric tuning values.

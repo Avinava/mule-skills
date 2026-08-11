@@ -1,127 +1,131 @@
 # <!-- PROJECT_NAME --> — Project Guide
 
-## What This Project Does
+> Generate this file from current repository evidence. Remove every unused section and unresolved
+> placeholder. Do not copy identity, topology, examples, or operating values from another project.
 
-<!-- Describe what this project does in 2-3 sentences. Include:
-- What type of API is it? (Process API, System API, Experience API)
-- What systems does it integrate?
-- Where does it run? (CloudHub 1.0, CloudHub 2.0, Runtime Fabric, On-Prem)
--->
+## Purpose and boundary
 
-This is a **MuleSoft Mule 4** <!-- PAPI/SAPI/XAPI --> that <!-- DESCRIPTION -->. It runs on <!-- DEPLOYMENT_TARGET --> and communicates with <!-- COMPANION_API --> for <!-- PURPOSE -->.
+<!-- Describe the business capability, intended users, application role, deployment target, and
+system boundary. Attribute user-provided business context and keep runtime claims evidence-backed. -->
 
----
+This Mule 4 application <!-- DESCRIPTION -->.
 
-## Project Structure
+## Source map
 
-```
-src/main/mule/
-├── global.xml                    # Global configs (HTTP, connectors)
-├── interface.xml                 # API router (APIkit)
-├── implementation/               # Business logic flows
-│   └── <!-- LIST YOUR FLOW FILES -->
-└── queues/
-    └── <!-- LIST YOUR QUEUE/SCHEDULER FILES -->
+<!-- Replace this example with the actual repository structure. -->
 
-src/main/resources/
-├── properties/
-│   ├── local.yaml / dev.yaml / prod.yaml           # Environment configs
-│   └── secure/                                      # Encrypted credentials
-└── dwl/                                             # DataWeave transform modules
-    └── <!-- LIST YOUR DWL FILES -->
-```
+| Path | Responsibility |
+| --- | --- |
+| `pom.xml` | Build and dependency metadata |
+| `mule-artifact.json` | Mule runtime compatibility |
+| `src/main/mule/` | Mule configuration and flows |
+| `src/main/resources/` | Contracts, DataWeave, and configuration templates |
+| `src/test/` | MUnit tests and fixtures |
 
----
+## Runtime paths
 
-## Key Integration Flows
+| Trigger or endpoint | Owning flow | Main collaborators | Outcome |
+| --- | --- | --- | --- |
+| <!-- Trigger --> | <!-- Flow --> | <!-- Flows/systems --> | <!-- Result --> |
 
-<!-- Add tables documenting your key flows. Example format: -->
+Document synchronous responses, asynchronous acknowledgement, retry, error, and recovery paths
+when they differ.
 
-### Entity Sync
-| Entity | Direction | Trigger |
-|--------|-----------|---------|
-| <!-- Entity --> | <!-- Direction --> | <!-- Trigger type --> |
+## Architecture and delivery semantics
 
-### Scheduled Jobs
-| Flow | Trigger | Purpose |
-|------|---------|---------|
-| <!-- Flow name --> | <!-- Scheduler/Event --> | <!-- Description --> |
+<!-- Include only patterns proven by source or explicitly provided by project stakeholders. -->
 
----
-
-## Architecture Patterns
-
-<!-- Document the architectural patterns used in this project. Common patterns include: -->
-
-- **API Layering** — <!-- e.g., PAPI never calls external systems directly -->
-- **VM Queues** — <!-- e.g., Schedulers publish to VM queues, listeners consume -->
-- **Error Logging** — <!-- e.g., All errors flow through errorLogFlow -->
-- **Secure Properties** — Production uses `${secure::property}` syntax with encrypted YAML files. Sandbox builds strip the `secure::` prefix.
-
-## Content-Hash Dedup Architecture
-
-<!-- If your project uses content-hash deduplication, document it here.
-This is critical — when you add/remove fields from DWL transforms,
-the corresponding hash must be updated. -->
-
-> **⚠️ CRITICAL RULE:** When you add or remove a field from any DWL transform listed below, you MUST update the corresponding hash subflow to include/exclude that field. A stale hash will silently skip records that have genuinely changed.
-
-### Hash Registry
-
-| Flow | Cache Key | Hash Subflow | Hashed Fields | DWL Transform |
-|------|-----------|-------------|---------------|---------------|
-| <!-- Flow --> | <!-- Key pattern --> | <!-- Subflow name --> | <!-- Fields --> | <!-- DWL file --> |
-
----
+- **Application role:** <!-- entry API, orchestration, system-facing API, worker, scheduler, other -->
+- **Dependencies:** <!-- role-based summary with links to owning docs -->
+- **Error strategy:** <!-- local/global handlers and observable caller/source outcome -->
+- **Queues/events:** <!-- acknowledgement, persistence, ordering, redelivery, idempotency -->
+- **Correlation:** <!-- inbound adoption and outbound propagation -->
+- **Security boundary:** <!-- mechanism and property keys; never values -->
 
 ## Configuration
 
-Environment-specific settings are in `src/main/resources/properties/{env}.yaml`:
+Document property keys without values:
 
-| Config Area | Key Properties |
-|-------------|----------------|
-| <!-- Area --> | <!-- property.key --> |
+| Key | Purpose | Source | Required/defaulted evidence |
+| --- | --- | --- | --- |
+| <!-- property.key --> | <!-- Purpose --> | <!-- Relative path --> | <!-- Status --> |
 
----
+Never include secrets, ciphertext, private hosts, tenant identifiers, personal data, or local
+machine paths.
 
-## Build & Deploy
+## Concurrency, timeouts, and state
 
-```bash
-# Build using MCP tool (recommended)
-# The mule-build MCP server handles Maven packaging
+<!-- Keep values only when verified in this repository. -->
 
-# Or use shell scripts:
-./build.sh sandbox       # Strips secure:: prefixes for dev
-./build.sh production    # Keeps secure:: prefixes for prod
-```
+| Boundary | Current behavior | Constraint or rationale | Evidence |
+| --- | --- | --- | --- |
+| <!-- Flow/queue/batch/call --> | <!-- Consumers/concurrency/timeouts/state --> | <!-- Why --> | <!-- Path --> |
 
-The app deploys to **<!-- DEPLOYMENT_TARGET -->** as `<!-- APP_NAME -->`.
+Distinguish connect, response, read, connection-idle, retry, proxy, and total upstream deadlines.
+Calculate concurrency across sources, flows, batch jobs, parallel scopes, replicas, pools, and
+dependency capacity.
 
----
+## Conditional invariants
 
-## Known Tech Debt
+Record only invariants actually used by this project. Examples include:
 
-<!-- Track tech debt items here. Use strikethrough for resolved items. -->
+- a content hash must change when its documented source fields change;
+- a cache miss must follow a specific source-of-record path;
+- an event must remain idempotent across redelivery;
+- a public contract change requires coordinated consumer updates.
 
-- <!-- **Item description** — details -->
+| Invariant | Owning source | Affected files | Required validation |
+| --- | --- | --- | --- |
+| <!-- Rule --> | <!-- Evidence --> | <!-- Paths --> | <!-- Test/check --> |
 
-### DataWeave Gotchas
-- **Field names cannot start with `_`** — DWeave requires identifiers to start with a letter. Use `resolvedProject` not `_resolvedProject`. See the `mule-development` skill for full rules.
-- **`try()` requires explicit import** — `import try from dw::Runtime` must be added when using the `try()` function.
-- **Batch Jobs & Kryo Serialization** — Never use `output application/java` to create thick, nested payloads that persist across `<batch:step>` boundaries. This crashes the batch engine's Kryo serializer. Keep large payloads as `application/json` strings.
-- **Scatter-gather replaces payload** — After scatter-gather, access results via `payload.'0'.payload`, `payload.'1'.payload`. Save original payload to a variable before scatter-gather if needed downstream.
-- **Null-guard SOQL variables** — Always `!isEmpty()` check variables before embedding them in SOQL strings. A null variable produces `WHERE Id = 'null'` which returns 400 errors.
-- **Include all downstream fields in SOQL** — If a DWL transform accesses `vars.contact.AccountId`, the SOQL query must `SELECT AccountId`. Missing fields cause silent `null` values.
-- **`idleTimeout` must be ≥ `responseTimeout`** — If `idleTimeout` fires first, Grizzly kills the connection mid-request, causing silent HTTP failures.
+## Build, test, and deploy
 
----
+Use only commands verified in this repository:
+
+| Action | Command or tool | Notes |
+| --- | --- | --- |
+| Validate | <!-- Command --> | <!-- Scope --> |
+| Test | <!-- Command --> | <!-- Expected suites --> |
+| Package | <!-- Command --> | <!-- Artifact path pattern --> |
+| Deploy | <!-- Workflow/tool --> | <!-- Environment inputs, no values --> |
+
+Do not assume configuration is deployed separately, tests should be skipped, or a build implies a
+release. Use the repository's release policy.
+
+## Operational checks
+
+| Signal | Healthy evidence | Investigation path |
+| --- | --- | --- |
+| <!-- Scheduler/API/queue/batch --> | <!-- Completion/latency/outcome --> | <!-- Log/metric/flow --> |
+
+Record actual telemetry coverage before comparing applications. Treat deploy overlap, missing error
+logs, retry summaries, and memory sawtooth patterns as signals rather than proof of root cause.
+
+## Development guardrails
+
+- Follow the `mule-development` skill and its post-development checklist for source changes.
+- Validate query inputs and select every field consumed downstream.
+- Keep batch records and queue messages minimal and serializable.
+- Verify Object Store miss behavior; a `null` default still raises `OS:KEY_NOT_FOUND`.
+- Verify effective local or global error handling and the final caller/source outcome.
+- Preserve correlation without logging raw payloads or sensitive identifiers.
+- Update contracts, tests, operations guidance, and documentation when behavior changes.
+
+## Known gaps and decisions
+
+| State | Item | Evidence or next check |
+| --- | --- | --- |
+| <!-- Verified/Inferred/Provided/Unresolved/Recommended --> | <!-- Item --> | <!-- Source/action --> |
 
 ## Documentation
 
-<!-- Link to your project-specific docs -->
-
 Use the `document-mulesoft-project` skill for evidence-backed documentation creation and targeted
-refreshes after Mule XML, RAML/OAS, DataWeave, MUnit, configuration, or deployment changes.
+refreshes. Link the current documentation set here:
 
-Detailed docs are in the [docs/](./docs/) folder:
-- <!-- [Topic](./docs/topic.md) — Description -->
+- <!-- Documentation path — Description -->
+
+## Review
+
+Use the `review-mulesoft-project` skill for change, PR, whole-project, and release-readiness reviews.
+Reviews report evidence-backed findings and remediation options without modifying source or PR state
+unless explicitly requested.

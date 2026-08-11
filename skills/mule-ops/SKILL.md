@@ -1,325 +1,228 @@
 ---
 name: mule-ops
-description: Comprehensive cross-system analysis of Process API and System API Production logs, metrics, errors, and performance. Use this skill whenever asked to analyze logs, investigate errors, check performance, or do a health check.
+description: Analyze MuleSoft runtime health across one or more applications using Anypoint logs, metrics, deployment state, and cross-system correlation. Use for production or non-production health checks, incident windows, error spikes, latency or memory investigations, deployment-impact checks, and recurring operational reviews. Use the available Anypoint connector when configured, or apply the same evidence workflow to exported telemetry. Do not use for source-code changes unless the user also requests a fix.
 ---
 
-# Production Log Analysis Skill
+# Mule Operations Analysis
 
-This skill provides a structured workflow for analyzing a **Process API (PAPI)** and its companion **System API (SAPI)** in Production. It covers logs, errors, metrics, memory, performance, and deployment activity — producing a single connected report.
+Produce an evidence-backed operational assessment across the applications that participate in a
+request, event, scheduler, or batch path. Treat application roles as discovered facts rather than
+assuming every project uses a Process API and System API pair.
 
-## Configuration
+## Privacy and reuse boundary
 
-> **Before using this skill, configure these values for your project:**
->
-> | Variable | Value | Description |
-> |----------|-------|-------------|
-> | `PAPI_APP` | `<YOUR_PAPI_APP>` | Process API application name as deployed in CloudHub |
-> | `SAPI_APP` | `<YOUR_SAPI_APP>` | System API application name as deployed in CloudHub |
-> | `ENV` | `Production` | Default environment for analysis |
+- Treat logs, audit records, configuration, payloads, correlation identifiers, application names,
+  organization details, user names, and endpoints as potentially sensitive.
+- Use actual identifiers only when required to query the authorized environment. Do not copy them
+  into this reusable skill, examples, unrelated reports, or future project guidance.
+- Never include secrets, tokens, raw payloads, personal data, tenant identifiers, private hostnames,
+  or deployer identity in a report. Paraphrase representative messages and redact identifiers.
+- Generalize prior incident lessons into diagnostic checks. Never encode a prior client's topology,
+  volumes, schedules, retention periods, error counts, or system names as defaults.
 
-Replace `<YOUR_PAPI_APP>` and `<YOUR_SAPI_APP>` throughout this document with your actual application names.
+## Establish the analysis map
 
-## When to Use
+Before collecting telemetry, determine:
 
-- User asks to "check logs", "analyze errors", "what's going on in prod", "health check"
-- Investigating a specific incident or error spike
-- Routine daily/weekly health review
-- Performance baselining or degradation investigation
+1. Requested environment, time window, and reporting timezone.
+2. Entry application and all known participating Mule applications.
+3. Each application's role, such as entry API, orchestration service, system-facing API, worker,
+   scheduler, or event consumer.
+4. Expected dependency edges and correlation mechanism from repository or deployment evidence.
+5. Whether the user wants a single-app check, an end-to-end chain, or an environment-wide review.
 
-## Prerequisites
+Discover these facts from the current repository and authorized Anypoint metadata first. If scope is
+still ambiguous, offer concise options and allow the user to skip unknown items. Do not invent a
+companion application or an API-led layer.
 
-- Anypoint Connect MCP server must be available
-- Both apps are deployed in the target environment
+Use neutral placeholders in examples:
 
----
+| Placeholder | Meaning |
+| --- | --- |
+| `<ENTRY_APP>` | Application where the observed path begins |
+| `<DEPENDENCY_APP>` | Participating downstream or asynchronous Mule application |
+| `<ENV>` | Authorized Anypoint environment |
+| `<HOURS>` | Requested lookback window |
 
-## Step 1: Parallel Data Collection (PAPI + SAPI)
+## Evidence states
 
-> **CRITICAL**: Make ALL of these calls in parallel to minimize latency. Use `hoursBack` matching the user's request (default: 24).
+Classify material conclusions:
 
-### 1a. Log Health (both apps, parallel)
+| State | Meaning |
+| --- | --- |
+| Observed | Directly present in telemetry or deployment metadata |
+| Correlated | Events align by correlation ID or timestamp with adequate coverage |
+| Hypothesis | Plausible explanation that still needs a discriminating check |
+| Confirmed | Hypothesis supported by the relevant application and dependency evidence |
+| Unresolved | Evidence is missing, contradictory, or outside retention |
 
-```
-mcp_anypoint-connect_get_log_stats(appName: "<YOUR_PAPI_APP>", environment: "<ENV>", hoursBack: <N>)
-mcp_anypoint-connect_get_log_stats(appName: "<YOUR_SAPI_APP>", environment: "<ENV>", hoursBack: <N>)
-```
+Never label temporal overlap as causation by itself.
 
-**What to extract:**
-- Total entries, unique transactions
-- Level distribution (INFO/WARN/ERROR counts and %)
-- Error rate
-- Error spike windows (time + rate)
-- Log retention range (SAPI may have shorter retention due to high volume + DEBUG noise)
+## Workflow
 
-### 1b. Error Analysis (both apps, parallel)
+### 1. Collect broad signals
 
-```
-mcp_anypoint-connect_analyze_errors(appName: "<YOUR_PAPI_APP>", environment: "<ENV>", hoursBack: <N>)
-mcp_anypoint-connect_analyze_errors(appName: "<YOUR_SAPI_APP>", environment: "<ENV>", hoursBack: <N>)
-```
+For every in-scope application, collect independent telemetry in parallel when the tools support it:
 
-**What to extract:**
-- Error groups: pattern, count, time range, affected flows
-- Full context: before/after log lines for each error sample
-- Correlation IDs for cross-system tracing
-- Error types (HTTP:INTERNAL_SERVER_ERROR, CUSTOMER:NOT_FOUND, etc.)
-
-### 1c. Log Patterns (both apps, parallel)
-
-```
-mcp_anypoint-connect_get_log_patterns(appName: "<YOUR_PAPI_APP>", environment: "<ENV>", hoursBack: <N>)
-mcp_anypoint-connect_get_log_patterns(appName: "<YOUR_SAPI_APP>", environment: "<ENV>", hoursBack: <N>)
-```
-
-**What to extract:**
-- Top patterns and % of log volume
-- Active flows and their frequency
-- Filtered/skipped record patterns
-- Scheduler start/end pairs (confirm jobs complete)
-
-### 1d. Performance Metrics (both apps, parallel)
-
-```
-mcp_anypoint-connect_get_metrics(environment: "<ENV>", hoursBack: <N>)
-mcp_anypoint-connect_get_performance_metrics(environment: "<ENV>", hoursBack: <N>)
+```text
+mcp_anypoint-connect_get_log_stats(appName: "<APP>", environment: "<ENV>", hoursBack: <HOURS>)
+mcp_anypoint-connect_analyze_errors(appName: "<APP>", environment: "<ENV>", hoursBack: <HOURS>)
+mcp_anypoint-connect_get_log_patterns(appName: "<APP>", environment: "<ENV>", hoursBack: <HOURS>)
+mcp_anypoint-connect_get_app_status(appName: "<APP>", environment: "<ENV>")
 ```
 
-**What to extract:**
-- Per-app: request count, avg response time, p50/p95/p99 latency
-- Outbound request counts and response times
-- Identify apps with high p99 or unusual request volume
+Collect environment metrics once, then filter to the in-scope applications:
 
-### 1e. Memory & JVM Metrics (both apps, parallel)
-
-```
-mcp_anypoint-connect_get_memory_metrics(environment: "<ENV>", hoursBack: <N>)
+```text
+mcp_anypoint-connect_get_metrics(environment: "<ENV>", hoursBack: <HOURS>)
+mcp_anypoint-connect_get_performance_metrics(environment: "<ENV>", hoursBack: <HOURS>)
+mcp_anypoint-connect_get_memory_metrics(environment: "<ENV>", hoursBack: <HOURS>)
+mcp_anypoint-connect_get_worker_metrics(environment: "<ENV>", hoursBack: <HOURS>)
 ```
 
-**What to extract:**
-- Heap used vs committed vs max
-- GC count and time (high GC → memory pressure)
-- Thread count (monitor for thread leaks)
+Record for each source:
 
-### 1f. Worker Metrics (parallel)
+- requested window and actual earliest/latest timestamp
+- entry count, unique correlations when available, and log-level distribution
+- grouped errors with counts, first/last occurrence, flow, and representative correlation IDs
+- request volume, average and percentile latency, outbound calls, memory, GC, and replica balance
+- gaps, truncation, sampling, aggregation interval, and tool errors
 
-```
-mcp_anypoint-connect_get_worker_metrics(environment: "<ENV>", hoursBack: <N>)
-```
+Do not compare applications over unequal coverage without narrowing to their overlapping window.
 
-**What to extract:**
-- Per-replica request distribution (detect load imbalance)
-- Per-replica latency (identify unhealthy replicas)
+### 2. Add deployment and change context
 
----
+Query recent application audit activity and current status:
 
-## Step 2: Deployment & Change Context
-
-### 2a. Audit Log
-
-```
-mcp_anypoint-connect_get_audit_log(hoursBack: 48, objectTypes: ["Application"], limit: 50)
+```text
+mcp_anypoint-connect_get_audit_log(hoursBack: <AUDIT_WINDOW>, objectTypes: ["Application"], limit: <LIMIT>)
 ```
 
-**What to extract:**
-- Recent deploys: app name, version, timestamp, success/failure
-- Who deployed (userName)
-- Failed deploys (artifact not found, etc.)
-- **CRITICAL**: Convert epoch timestamps to human-readable and check if any deploy overlaps with error windows
+Convert epoch timestamps explicitly and report the timezone. Compare deployments, restarts, replica
+transitions, and configuration changes with error or latency windows. Treat audit snapshots as
+historical state and query current application status before describing present health.
 
-### 2b. App Status (both apps)
+Read the current repository's changelog, commit history, deployment workflow, and version metadata
+when available. Match the running artifact version before attributing a behavior to a code change.
 
-```
-mcp_anypoint-connect_get_app_status(appName: "<YOUR_PAPI_APP>", environment: "<ENV>")
-mcp_anypoint-connect_get_app_status(appName: "<YOUR_SAPI_APP>", environment: "<ENV>")
-```
+### 3. Build a coverage ledger
 
-**What to extract:**
-- Deployment status (APPLIED vs STARTED)
-- Artifact version (verify expected version is running)
-- Replica states (STARTED, PENDING, STARTING, FAILED)
-- Replica scheduling issues (Insufficient CPU, node taints)
-- vCores allocation
+Create a compact table before drawing conclusions:
 
-### 2c. Recent Code Changes (CHANGELOG)
+| Source | Requested window | Actual coverage | Gaps | Safe comparison window |
+| --- | --- | --- | --- | --- |
+| Entry logs | ... | ... | ... | ... |
+| Dependency logs | ... | ... | ... | ... |
+| Metrics | ... | ... | ... | ... |
+| Audit events | ... | ... | ... | ... |
 
-Read the project CHANGELOG to understand what changed in the currently deployed and recent versions:
+High-volume or verbose logging can shorten accessible history. Verify retention from timestamps;
+never assume one application retains less data because of its architectural role.
 
-```
-view_file(AbsolutePath: "<project_root>/CHANGELOG.md", StartLine: 1, EndLine: 50)
-```
+### 4. Correlate the path
 
-**What to extract:**
-- What changed in the **currently running version** (match with artifact version from 2b)
-- Changes in the 2-3 previous versions (in case a recent deploy introduced a regression)
-- New flows, modified DWL transforms, scheduler changes, dedup logic changes
-- Any config-only changes (yaml files) that wouldn't trigger a version bump
+For each dominant or high-severity signature:
 
-**How to use this context:**
-- If errors reference a specific flow, check if that flow was modified in a recent version
-- If error patterns changed after a deploy, the CHANGELOG tells you exactly what code changed
-- If dedup-related issues appear (records skipping or not skipping), check if hash fields were modified
-- Correlate the CHANGELOG entries with error patterns from Step 1b to narrow root cause
+1. Identify the earliest observed failing component and time.
+2. Trace the same correlation identifier across participating applications when propagation is
+   verified. If it is not propagated, correlate by a narrow timestamp, route, and operation while
+   lowering confidence.
+3. Separate the component that reports an error from the component that originates it.
+4. Check response status, connector error, retry wrapper, error-handler outcome, and final caller
+   result.
+5. Deduplicate multiple log entries from the same transaction before calculating incident counts.
+6. Verify whether logs cover the interval and whether relevant failures are logged at ERROR, WARN,
+   INFO, or only as structured response fields.
 
----
+A caller-side 5xx with no dependency ERROR entry does not prove that an external system caused the
+failure. Possible explanations include incomplete retention, different log levels, handled errors,
+missing correlation propagation, proxy behavior, or an unobserved dependency. List the checks that
+would distinguish them.
 
-## Step 3: Deep Dives (Conditional)
+### 5. Investigate conditional signals
 
-Only do these if Step 1-2 reveal issues:
+- **Latency:** Pull time series for the affected app and compare latency with traffic, outbound
+  duration, CPU, memory, GC, and replica balance.
+- **Error bursts:** Compare the burst with schedulers, batch instances, queue depth, retries,
+  dependency limits, and deployments.
+- **Memory:** Look for sustained baseline growth after GC, allocation spikes, full-GC pressure, or
+  a single replica diverging from peers. A sawtooth alone is normal and not proof of a leak.
+- **Back pressure or rate limits:** Estimate effective concurrency from flow limits, source
+  consumers, batch-job concurrency, parallel scopes, replicas, and dependency quotas.
+- **Warnings:** Sample by pattern and verify recovery or impact. Do not declare a reconnect,
+  recursive-flow warning, ignored body, or cache miss harmless without checking the actual outcome.
 
-### 3a. If PAPI errors reference SAPI 500s
+Use focused retrieval only after broad collection identifies a reason:
 
-```
-mcp_anypoint-connect_get_logs(appName: "<YOUR_SAPI_APP>", environment: "<ENV>", search: "<endpoint>", lines: 200)
-```
-
-Check if SAPI logged errors for the same endpoint. If SAPI shows 0 errors, the 500 came from the **downstream system** (e.g., NetSuite, Salesforce), not from the SAPI itself.
-
-### 3b. If error spikes correlate with deploys
-
-Compare error spike timestamps with audit log deploy timestamps. If a deploy occurred during the error window, that's likely the root cause (rolling deploy causing transient failures).
-
-### 3c. If performance degradation is found
-
-```
-mcp_anypoint-connect_get_metrics_timeseries(environment: "<ENV>", appName: "<app>", hoursBack: <N>, granularity: "5m")
-mcp_anypoint-connect_get_memory_timeseries(environment: "<ENV>", appName: "<app>", hoursBack: <N>, granularity: "5m")
+```text
+mcp_anypoint-connect_get_logs(appName: "<APP>", environment: "<ENV>", search: "<SAFE_TERM>", lines: <LIMIT>)
+mcp_anypoint-connect_get_metrics_timeseries(environment: "<ENV>", appName: "<APP>", hoursBack: <HOURS>, granularity: "5m")
+mcp_anypoint-connect_get_memory_timeseries(environment: "<ENV>", appName: "<APP>", hoursBack: <HOURS>, granularity: "5m")
 ```
 
-Look for:
-- Response time spikes correlating with memory/GC spikes
-- Gradual heap growth (memory leak)
-- Traffic spikes preceding latency increases
+Search with the least sensitive stable term that identifies the flow or operation. Do not expose
+raw results when a count and sanitized pattern are sufficient.
 
-### 3d. If WARN logs are elevated
+### 6. Report the result
 
-Download WARN-level logs to check for:
-- **Salesforce streaming 403s**: Normal reconnect cycle, no action needed
-- **Recursive flow-ref warnings**: Review flow for bounded termination
-- **HTTP body ignored warnings**: Incorrect HTTP method + body combination
+Return the analysis in the requested location or directly in the response. Do not create a durable
+artifact unless the user asks for one.
 
-```
-mcp_anypoint-connect_get_logs(appName: "<app>", environment: "<ENV>", level: "WARN", lines: 100)
-```
-
----
-
-## Step 4: Cross-System Correlation
-
-This is the most important analytical step. Connect the dots:
-
-### Known Error Patterns
-
-| PAPI Error | SAPI Behavior | Root Cause | Action |
-|------------|---------------|------------|--------|
-| `HTTP:INTERNAL_SERVER_ERROR` on SAPI endpoint | SAPI has 0 errors | Downstream system returned 500 | Check downstream system |
-| `HTTP:INTERNAL_SERVER_ERROR` on SAPI endpoint | SAPI also has errors | SAPI code bug or config issue | Debug SAPI flow |
-| `HTTP:TIMEOUT` on SAPI endpoint | SAPI shows slow responses | Downstream system slow or SAPI overloaded | Check SAPI metrics + timeouts |
-| `CUSTOMER:NOT_FOUND` | N/A | Business error — customer not synced yet | Check entity sync timing |
-| `Connection was lost` (SF streaming) | N/A | SF CometD session expired | No action — auto-recovers |
-| `Failed after 0 retries` | Companion to other errors | Retry exhaustion log — look for the actual error | Find the preceding error |
-
-### Log Retention Gaps
-
-> **IMPORTANT**: SAPI log retention is typically shorter than PAPI because SAPI may have DEBUG-level HTTP logging enabled (66%+ noise). If SAPI logs don't cover the error window, note this in the report.
-
-### Correlation Approach
-
-1. Get the **time window** of PAPI errors
-2. Check if SAPI logs **cover that window** (compare log time ranges)
-3. Check if any **deploys** occurred during that window (audit log)
-4. If SAPI has 0 errors → downstream system caused the 500
-5. If SAPI also has errors → SAPI is the root cause
-6. If a deploy overlaps → rolling deploy caused transient failures
-
----
-
-## Step 5: Report Generation
-
-Generate the report as an artifact at the standard path. Use the following structure:
+Use this structure:
 
 ```markdown
-# Production Log Analysis — PAPI + SAPI (Last <N>h)
+# Runtime health analysis
 
-**Period:** <start> → <end>
-**Apps analyzed:** <YOUR_PAPI_APP>, <YOUR_SAPI_APP>
+**Window:** <START> to <END> <TIMEZONE>
+**Scope:** <ROLE-BASED APPLICATION LIST>
 
-## Health at a Glance
-| Metric | PAPI | SAPI |
-|--------|------|------|
-| Total entries | ... | ... |
-| Error rate | ... | ... |
-| Avg response time | ... | ... |
-| p95 latency | ... | ... |
-| Heap used / max | ... | ... |
-| Replicas | ... | ... |
+## Assessment
+One paragraph with current health, impact, and confidence.
 
-## Performance Summary
-- Request volumes, response times, percentiles
-- Outbound call patterns
-- Memory and GC trends
+## Coverage
+Actual telemetry coverage and material gaps.
 
-## Error Analysis
-- Each error group with: count, window, affected flows, root cause
-- Cross-system correlation (PAPI ↔ SAPI ↔ downstream)
-- Sequence diagram or ASCII flow showing the error path
+## Health signals
+Comparable log, error, latency, memory, GC, and replica observations.
 
-## Activity Patterns
-- Top log patterns and what they indicate
-- Scheduler execution confirmation
-- Filtered/skipped records
+## Correlated incidents
+Signature, affected path, count of unique transactions, evidence state, and user impact.
 
-## Deploy Activity
-- Recent deploys with timestamps and outcomes
-- Any correlation with errors
+## Deployment and change context
+Verified overlaps and what remains unproven.
 
-## Recommendations
-- Prioritized actions (🔴 🟡 🟢)
+## Actions
+Prioritized immediate checks, durable improvements, owner role, and verification signal.
+
+## Unresolved questions
+Only questions whose answers would change the assessment.
 ```
 
----
+State denominators and windows for every rate. Present percentile latency with request count. Keep
+expected business filters separate from technical failures, and preserve an `Unresolved` state when
+coverage cannot support attribution.
 
-## Key Facts Reference
+## Reusable diagnostic lessons
 
-### App Architecture
-- **PAPI** → HTTP → **SAPI** → HTTP → **External Systems**
-- PAPI never calls downstream systems directly
-- SAPI proxies errors from downstream — a SAPI 500 usually means the external system returned 500
+- A retry-exhaustion summary is often secondary evidence; locate the underlying connector or
+  business error with the same correlation ID.
+- Structured logger and exception-listener entries can describe one failed transaction; deduplicate
+  by correlation ID, flow, signature, and time before counting.
+- A deployment overlapping an error spike is a hypothesis until lifecycle messages, replica state,
+  version changes, or before/after behavior support it.
+- Application status and replica state are point-in-time observations. Distinguish desired,
+  transitioning, current, and last-successful versions when the API exposes them.
+- Percentiles are unstable at low request counts. Always report the sample size.
+- Correlation propagation must be verified in source or telemetry. Mule can adopt an inbound
+  `X-CORRELATION-ID`, but outbound propagation depends on configuration.
+- Default log level, custom error handling, and proxy behavior determine where a failure appears;
+  absence from an error-grouping tool is not evidence of absence.
 
-### Common Gotchas
+## Completion checklist
 
-#### Log Retention & Coverage
-1. **SAPI logs are much shorter than PAPI** — SAPI may have DEBUG-level HTTP request/response logging enabled, which generates 66%+ noise. This fills the log buffer faster, so SAPI typically retains only ~14h vs PAPI's 24h+. Always check the `Time range` in log stats before assuming you have coverage.
-2. **SAPI errors won't show downstream errors** — When an external system returns a 500, the SAPI forwards it to PAPI as a 500 response. The SAPI treats this as a "successful" proxied response and logs it at INFO level, NOT ERROR. So `analyze_errors` on the SAPI will show 0 errors even though the PAPI saw 500s.
-3. **`download_logs` vs `get_logs`** — Use `get_logs` for quick checks (returns structured JSON, searchable). Use `download_logs` for time-window filtering and level filtering. `get_logs` returns the most recent N entries regardless of time.
-
-#### Audit Log Timestamps
-4. **Audit log timestamps are epoch milliseconds** — The `timestamp` field in audit entries is Unix epoch in ms (e.g., `1774546428281`). You must convert these to compare with error windows. Don't confuse with the human-readable `lastModifiedDate` on the deployment response.
-5. **`APPLIED` vs `STARTED`** — `get_app_status` may return `APPLIED` during a rolling deploy. This does NOT mean the app is down — the old replicas continue serving. Only `FAILED` status indicates an actual problem. Check individual replica states for the real picture.
-6. **Replica state snapshots are point-in-time** — The audit log captures replica states at deploy time. `PENDING`/`STARTING` replicas in the audit log may have already resolved. Always cross-reference with a fresh `get_app_status` call.
-
-#### Error Analysis Traps
-7. **"Failed after 0 retries" is NOT the root error** — This is the retry-exhaustion summary log. The actual error is in a separate log entry with the same correlation ID, usually immediately before or after. Count these separately from the real errors to avoid double-counting.
-8. **Error logging entries are INFO, not ERROR** — After the PAPI logs the ERROR, it may call an error logging flow to write to an external system. This second log entry appears at INFO or ERROR level as a `DefaultExceptionListener` entry. Don't count it as a separate error.
-9. **Error groups may double-count** — `analyze_errors` groups by message pattern. A single transaction can produce both a structured logger ERROR entry AND a `DefaultExceptionListener` entry. These are the same error seen by different loggers.
-
-#### Metrics Interpretation
-10. **Metrics are per-environment, not per-app by default** — `get_metrics` and `get_performance_metrics` return all apps in the environment. Filter by `appName` when investigating a specific app.
-11. **SAPI appears to have low request counts** — SAPI handles internal PAPI→SAPI traffic only. Don't expect external traffic volumes. Compare SAPI request counts to PAPI's outbound request counts for consistency.
-12. **p95/p99 can be misleading with low volumes** — If an app handles only 10 requests in the window, a single slow request will skew p99 to the max latency. Always check request count alongside percentiles.
-
-#### Cross-System Debugging
-13. **Correlation IDs cross the PAPI→SAPI boundary** — PAPI sends `X-Correlation-Id` on every SAPI request via HTTP request default headers. The SAPI's `http:listener` automatically adopts this as its `correlationId`. Use the correlation ID to trace a request end-to-end across both apps.
-14. **SAPI `search` on endpoint names** — When searching SAPI logs for a specific endpoint, use partial matches (e.g., `get_logs(search: "ns-Invoice")`) without the trailing 's' to catch both singular and plural references.
-15. **SF streaming drops cascade** — When Salesforce streaming drops (HTTP 500/503 on CometD), multiple listener flows drop simultaneously because they share the same SF connection. A single SF hiccup can produce 3-5 `Connection was lost` ERROR entries across different flows within the same second. These are ONE incident, not separate ones.
-
-#### Build & Deploy
-16. **Failed deploys leave ghost versions** — A failed deploy (e.g., artifact not found in catalog) creates an audit entry with `failed: true` but the previous version keeps running. The `desiredVersion` in the response may differ from `lastSuccessfulVersion` — always check `lastSuccessfulVersion` for what's actually running.
-
-### Common False Alarms
-1. **SF streaming 403 + reconnect** — Normal CometD lifecycle, ~200+ WARN entries per day
-2. **Business filter logs** (e.g., "field X is blank") — Expected filter, not an error
-3. **"User license is not Salesforce"** — Expected filter for non-SF users
-4. **"response success. retries: 0"** — Healthy SAPI response (can be 49%+ of all PAPI logs)
-5. **"Body is ignored since the HTTP Method is between the empty body methods"** — GET requests with a body — harmless, the body is just ignored
-6. **"Found a possible infinite recursion involving flows named '...'"** — Mule runtime detects recursive flow-refs. If this is a pagination pattern that terminates when there are no more pages, it's bounded but Mule can't statically verify that
-7. **`OS:KEY_NOT_FOUND` on cache stores** — Cache misses in cache-aside patterns. If the flow has a fallback path that queries the system of record on miss, this is expected behavior, not a real error. Fix with `<os:default-value>#[null]</os:default-value>` to prevent the error entirely.
+- Confirm every in-scope source's actual coverage.
+- Confirm counts represent unique transactions or clearly label raw log-entry counts.
+- Separate observations, hypotheses, confirmed causes, and recommendations.
+- Confirm current state after any deployment-window finding.
+- Remove secrets, payloads, identities, private endpoints, and raw correlation identifiers.
+- State what was not checked and why.
