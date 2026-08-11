@@ -90,7 +90,8 @@ Use only commands verified in this repository:
 | Deploy | <!-- Workflow/tool --> | <!-- Environment inputs, no values --> |
 
 Do not assume configuration is deployed separately, tests should be skipped, or a build implies a
-release. Use the repository's release policy.
+release. Read `.agents/workflows/build.md` for validation, packaging, and explicitly requested
+release actions. Use the repository's release policy.
 
 ## Operational checks
 
@@ -100,10 +101,13 @@ release. Use the repository's release policy.
 
 Record actual telemetry coverage before comparing applications. Treat deploy overlap, missing error
 logs, retry summaries, and memory sawtooth patterns as signals rather than proof of root cause.
+Read `.agents/skills/mule-ops/SKILL.md` for runtime health analysis and
+`.agents/skills/mule-troubleshooting/SKILL.md` when a causal diagnosis is required.
 
 ## Development guardrails
 
-- Follow the `mule-development` skill and its post-development checklist for source changes.
+- Read `.agents/skills/mule-development/SKILL.md` and complete its post-development checklist for
+  source changes.
 - Validate query inputs and select every field consumed downstream.
 - Keep batch records and queue messages minimal and serializable.
 - Verify Object Store miss behavior; a `null` default still raises `OS:KEY_NOT_FOUND`.
@@ -119,13 +123,13 @@ logs, retry summaries, and memory sawtooth patterns as signals rather than proof
 
 ## Documentation
 
-Use the `document-mulesoft-project` skill for evidence-backed documentation creation and targeted
-refreshes. Link the current documentation set here:
+Read `.agents/skills/document-mulesoft-project/SKILL.md` for evidence-backed documentation creation
+and targeted refreshes. Link the current documentation set here:
 
 - <!-- Documentation path — Description -->
 
 ## Review
 
-Use the `review-mulesoft-project` skill for change, PR, whole-project, and release-readiness reviews.
-Reviews report evidence-backed findings and remediation options without modifying source or PR state
-unless explicitly requested.
+Read `.agents/skills/review-mulesoft-project/SKILL.md` for change, PR, whole-project, and
+release-readiness reviews. Reviews report evidence-backed findings and remediation options without
+modifying source or PR state unless explicitly requested.

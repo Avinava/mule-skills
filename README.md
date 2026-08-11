@@ -19,12 +19,37 @@ From the Mule project you want to configure, give your coding agent this instruc
 
 ```text
 Follow https://github.com/Avinava/mule-skills/blob/main/SETUP.md to install or reconcile the
-MuleSoft skills for this repository. Preserve existing changes, configure only the agent host I use,
-and show me the validation results before committing.
+MuleSoft skills for this repository. Preserve existing changes, configure only the agent hosts I
+use, and show me the validation results before committing.
 ```
 
 The setup runbook installs the skills under `.agents/skills/`, adds the build workflow, configures
-only the selected MCP host, creates evidence-backed project guidance, and validates the result.
+only the selected MCP hosts, creates evidence-backed shared and host-specific project guidance, and
+validates the result.
+
+## Agent support
+
+The five skills and build workflow are shared. Host-specific instruction files tell each agent how
+to find them; MCP configuration is optional and installed only for hosts the project uses.
+
+| Host | Repository instructions | Workflow access | MCP configuration | Verification |
+| --- | --- | --- | --- | --- |
+| Codex CLI, desktop, and IDE extension | `AGENTS.md` | Automatically discovers `.agents/skills/`; build workflow is referenced from project guidance | `.codex/config.toml` | `codex mcp list` |
+| Claude Code | `CLAUDE.md` and `AGENTS.md` | `CLAUDE.md` routes tasks to `.agents/skills/*/SKILL.md` and `.agents/workflows/build.md` | `.mcp.json` | `claude mcp list` |
+| GitHub Copilot in VS Code | `.github/copilot-instructions.md` and supported `AGENTS.md` surfaces | Copilot instructions route tasks to the installed workflows | `.vscode/mcp.json` | Reload VS Code and inspect its MCP server list |
+| GitHub Copilot CLI | `.github/copilot-instructions.md` and `AGENTS.md` | Copilot instructions route tasks to the installed workflows | `.mcp.json` | `copilot mcp list` |
+| Gemini coding agents | `GEMINI.md` and `AGENTS.md` | `GEMINI.md` routes tasks to the installed workflows | Host-specific merge from `mcp/mcp.json` when supported | Use the active host's MCP status view |
+| Other compatible coding agents | `AGENTS.md` plus host-supported instruction files | Read the matching workflow directly from `.agents/` | Merge `mcp/mcp.json` only when the host accepts `mcpServers` | Use the host's documented MCP check |
+
+Local MCP files do not configure GitHub-hosted Copilot agents or code review; configure hosted MCP
+access through repository settings. Claude Code asks for approval before using project-scoped MCP
+servers. See [SETUP.md](SETUP.md#4-configure-the-selected-mcp-host) for safe merge and verification
+instructions.
+
+Current host behavior is documented by [OpenAI Docs for Codex skills](https://developers.openai.com/codex/skills/),
+[OpenAI Docs for Codex MCP](https://developers.openai.com/codex/mcp/),
+[Anthropic's Claude Code guidance](https://docs.anthropic.com/en/docs/claude-code/memory), and
+[GitHub Copilot custom-instruction guidance](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions-in-your-ide/add-repository-instructions-in-your-ide).
 
 ## Included workflows
 
@@ -111,15 +136,10 @@ Each skill has a required `SKILL.md` and may include:
 - `references/` or `resources/` for guidance loaded by the workflow;
 - `scripts/` for deterministic, repeatable inspection and validation.
 
-Host instruction templates keep shared project facts in `AGENTS.md` and add only host-specific
-routing:
-
-| Template | Installed path | Host |
-| --- | --- | --- |
-| `templates/AGENTS.md` | `AGENTS.md` | Shared project context for coding agents |
-| `templates/CLAUDE.md` | `CLAUDE.md` | Claude Code |
-| `templates/copilot-instructions.md` | `.github/copilot-instructions.md` | GitHub Copilot Chat, coding agent, CLI, and code review where supported |
-| `templates/GEMINI.md` | `GEMINI.md` | Gemini coding agents |
+Host instruction templates keep shared project facts in `AGENTS.md` and add only the routing needed
+by Claude Code, GitHub Copilot, or Gemini. They are `templates/AGENTS.md`, `templates/CLAUDE.md`,
+`templates/copilot-instructions.md`, and `templates/GEMINI.md`; the support matrix above shows their
+installed locations and MCP configuration.
 
 After installation, the shared project layout is:
 
