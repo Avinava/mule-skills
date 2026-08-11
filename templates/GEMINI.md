@@ -1,30 +1,29 @@
 # <!-- PROJECT_NAME --> — Gemini Instructions
 
-Read `AGENTS.md` for full project context. This file contains Gemini-specific directives.
+Read `AGENTS.md` for the current project's evidence-backed context. Repository instructions and the
+current source are authoritative over reusable examples.
 
-## Content-Hash Dedup — Mandatory Update Rule
+## Development
 
-<!-- If your project uses content-hash deduplication, include this section. -->
+Use the `mule-development` skill for Mule source changes and complete its post-development checklist.
+Preserve contracts, delivery semantics, error outcomes, privacy boundaries, and project conventions.
 
-This project uses MD5 content hashing to deduplicate records in scheduler and listener flows. Hashes are computed from the fields consumed by downstream DWL transforms.
+## Troubleshooting and operations
 
-**When modifying any DWL file in `src/main/resources/dwl/`:**
-1. Check the Hash Registry table in `AGENTS.md` → "Content-Hash Dedup Architecture"
-2. If the DWL file is listed, find the corresponding hash subflow
-3. If you added/removed/renamed a field in the DWL, update the hash subflow to match
-4. A stale hash will silently skip genuinely changed records — this is a production-breaking bug
-
-**Hash locations:**
-<!-- Update these paths for your project -->
-- Scheduler hashes: `src/main/mule/queues/schedulers.xml` (subflows at bottom)
-- Entity hashes: <!-- path to hash subflows -->
+Use `mule-troubleshooting` for RCA and `mule-ops` for runtime health analysis. Separate observations,
+hypotheses, confirmed causes, and unresolved gaps.
 
 ## Build
-Use the `/build` workflow or `mule-build` MCP tools. Do NOT call Maven directly.
+
+Use the project build workflow or configured Mule build tools. Treat versioning, changelog updates,
+tags, deployment, and test skipping as explicit release choices rather than automatic build steps.
 
 ## Documentation
-Use the `document-mulesoft-project` skill to create or refresh project documentation.
 
-## Salesforce Org
-<!-- If your project connects to Salesforce, specify the org alias -->
-The connected Salesforce org alias is `<!-- ORG_ALIAS -->`.
+Use `document-mulesoft-project` for documentation creation and targeted refreshes.
+
+## Privacy
+
+Do not introduce identity, topology, payloads, endpoints, schedules, volumes, or incident details
+from another project. Never expose secrets, tenants, private hosts, personal data, or raw production
+payloads.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule Development"
+  short_description: "Build and validate reliable Mule 4 flows"
+  default_prompt: "Use $mule-development to implement this Mule 4 change and validate the affected behavior."

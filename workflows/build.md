@@ -1,123 +1,125 @@
 ---
-description: Build the Mule application JAR for deployment
+description: Validate and package a Mule application, with release actions only when requested
 ---
 
-# Build Mule JAR
+# Build Mule Application
 
-Build the Mule 4 application using the mule-build MCP server.
+Build the current Mule 4 application using its repository instructions and configured build tools.
+Default to a validation and package operation. Do not turn a build request into a release.
 
-// turbo-all
+## 1. Establish scope
 
-## 1. Determine Version Bump
+Distinguish these modes:
 
-Before building, review the uncommitted or recent changes and decide whether a version bump is needed using semver (`MAJOR.MINOR.PATCH`):
+| Mode | Actions |
+| --- | --- |
+| Validate | Static checks and tests only |
+| Package | Validate, test, and create a deployable artifact |
+| Release | Explicit version, changelog, tag, and optional publish/deploy workflow |
 
-| Change Type | Bump | Examples |
-|---|---|---|
-| Bug fixes, SOQL field additions, config changes, comment updates, log improvements | **PATCH** | Fix null query params, expand SOQL fields, update timeout values |
-| New flows, new integrations, new scheduler, new sub-flows, new DWL modules | **MINOR** | Add transaction sync, new entity termination flow |
-| Breaking API contract changes, removed flows, restructured payloads, connector upgrades | **MAJOR** | Change SAPI endpoint paths, drop support for a sync direction |
+If the user says only `build`, use **Package**. Version bumps, changelog edits, commits, tags,
+publishing, deployment, and pushing require explicit user scope.
 
-**Guidelines:**
-- If only properties/config changed (yaml files only): **no bump needed** (config is deployed separately via CloudHub properties)
-- If any XML flow file changed: **bump at least PATCH**
-- If a new flow file was added: **bump MINOR**
-- When in doubt, bump **PATCH**
+## 2. Inspect before changing anything
 
-If a bump is needed, use the `mule-build release_version` tool:
-- `bump`: `patch`, `minor`, or `major`
-- `cwd`: project root directory
-- `noPush`: `true` (push manually after verifying)
-- `noTag`: `false`
+1. Read repository instructions, `pom.xml`, `mule-artifact.json`, build scripts, CI workflows, and
+   relevant changelog or release policy.
+2. Review `git status --short` and preserve unrelated or uncommitted changes.
+3. Confirm required Java, Maven, Mule runtime, and connector versions.
+4. Identify the project's established validation, test, package, and release commands.
+5. Check whether the requested build needs network or authenticated artifact repositories.
 
-## 2. Update CHANGELOG.md
+Do not copy organization names, application identity, repositories, profiles, endpoints, or
+credentials into reusable commands or output.
 
-Maintain a `CHANGELOG.md` in the project root following [Keep a Changelog](https://keepachangelog.com/) format.
+## 3. Validate the source
 
-**Format:**
-```markdown
-# Changelog
+Run the project's configured checks before packaging. Prefer, when available:
 
-All notable changes to this project will be documented in this file.
+1. XML, DataWeave, RAML/OAS, and configuration validation;
+2. Mule lint and security checks;
+3. focused MUnit tests for changed behavior;
+4. the required full test suite.
 
-## [1.2.0] - 2026-03-20
+Do not skip tests by default. Skip them only when the user requests it or the repository's documented
+workflow requires a separate test stage, and state the resulting verification gap.
 
-### Added
-- New user management flows for deferred user creation
+When Mule source changed, use the `mule-development` post-development checklist before building.
 
-### Changed
-- Expanded batch SOQL to include additional fields
+## 4. Reconcile contracts and documentation
 
-### Fixed
-- Resolved 405 Method Not Allowed for upsert (POST → PATCH)
-- Removed hardcoded null query params from update requests
+Review the changed files and update only documentation made stale by the change:
 
-### Removed
-- Deprecated legacy restlet endpoint
+| Change | Check |
+| --- | --- |
+| Endpoint, event, or payload | API/event contract and consumer guidance |
+| Flow, route, or dependency | Architecture and flow documentation |
+| Scheduler, batch, queue, retry, timeout, or concurrency | Operations guidance |
+| Configuration key or deployment input | Onboarding and configuration tables |
+| Error mapping or recovery behavior | Contract, troubleshooting, and runbook |
+| Test or validation command | Contributor/build guidance |
 
-## [1.1.1] - 2026-03-15
-...
-```
+Use the `document-mulesoft-project` targeted-refresh workflow when installed. Do not rewrite
+unrelated prose or add unsupported business context.
 
-**Rules:**
-- Group changes under: `Added`, `Changed`, `Fixed`, `Deprecated`, `Removed`, `Security`
-- Only include sections that have entries (omit empty sections)
-- Each entry should be a single concise line describing the user-facing impact
-- Reference the Salesforce object or flow name when relevant
-- Most recent version goes at the top
-- Date format: `YYYY-MM-DD`
-- Keep an `[Unreleased]` section at the top for changes not yet deployed
+## 5. Package
 
-## 3. Tag the Release
+Use the repository's established command or the configured Mule build tool. For a tool call, pass the
+project root as `cwd` and preserve the project's normal test behavior.
 
-After committing all changes (version bump, CHANGELOG, flow changes), create an annotated git tag:
+Before running, show or record:
 
-```bash
-git tag -a v<VERSION> -m "v<VERSION>: <brief description of changes>"
-```
+- command or tool and relevant non-secret options;
+- whether tests are enabled;
+- expected artifact directory;
+- any known network or authentication dependency.
 
-**Rules:**
-- Tag format: `v` prefix + semver (e.g., `v1.2.0`)
-- Only tag after the commit is made — the tag must point to the final commit
-- If the `mule-build release_version` tool was used with `noTag: false`, the tag is already created — skip this step
-- Use `git tag -l` to verify the tag was created
+If the build fails, report the first actionable failure and relevant context. Do not mask a failed
+test by rerunning with tests skipped unless the user approves that diagnostic step.
 
-## 4. Update Documentation
+## 6. Release actions, only when requested
 
-Review the changes made in this session and check whether any project documentation needs updating to stay aligned. Scan for relevant docs by checking:
+When the user explicitly requests a release:
 
-| If you changed... | Update these docs |
-|---|---|
-| Scheduler frequency, batch sizes, concurrency | Operations docs (Performance Tuning tables) |
-| External API flows, OAuth, entity management | Integration docs |
-| New flows, removed flows, renamed flows | `AGENTS.md` (Key Integration Flows tables) |
-| Config properties (yaml keys) | `AGENTS.md` (Configuration table) |
-| New tech debt or resolved tech debt | Tech debt docs |
-| New gotchas discovered during development | Post-development checklist |
+1. Apply the repository's versioning policy. If none exists, propose patch, minor, or major with the
+   compatibility rationale and obtain direction when the choice is material.
+2. Update all evidenced version surfaces that must remain synchronized.
+3. Update an existing changelog using its established format; do not create one unless requested or
+   required by repository instructions.
+4. Re-run validation, tests, and packaging after version changes.
+5. Commit or tag only when authorized. Make an annotated tag only after the final release commit.
+6. Push, publish, or deploy only when explicitly requested.
 
-**How to check:**
-1. List the files changed in this session (`git diff --name-only` or review recent edits)
-2. For each changed flow/config file, check the table above for matching docs
-3. Read the relevant doc sections and update any outdated information (scheduler frequencies, connection limits, flow names, property keys, etc.)
-4. If no docs need updating, skip this step
+Use semantic-version guidance as a starting point, not a replacement for the project's release
+policy:
 
-> Only update docs that are **factually outdated** by the changes. Do not rewrite docs for style or add speculative content.
+| Change | Typical bump |
+| --- | --- |
+| Backward-compatible fix | Patch |
+| Backward-compatible capability | Minor |
+| Breaking public contract or runtime compatibility | Major |
 
-When the `document-mulesoft-project` skill is installed, use its targeted-refresh workflow for the
-affected documents. Preserve unrelated prose and run its documentation audit before continuing.
+Configuration-only changes do not universally mean “no version bump”; follow how the project
+packages and deploys configuration.
 
-## 5. Sync Application Version
+## 7. Verify the artifact
 
-Read the `<version>` from `pom.xml` and update the `json.logger.application.version` value in all environment property files to match (e.g., `prod.yaml`, `dev.yaml`, `local.yaml`).
+After a successful package:
 
-Find the line containing `version: "..."` under the `json.logger.application` section and replace the value with the pom.xml version.
+- locate the generated deployable artifact;
+- confirm it was produced by the current build and is not a stale file;
+- confirm the packaged version matches the intended build or release version;
+- report whether tests, lint, and security checks passed, failed, or were skipped;
+- confirm no secret-bearing configuration or unintended generated files entered the diff.
 
-## 6. Build
+## 8. Report
 
-Run the mule-build `run_build` tool with the following settings:
-- `cwd`: project root directory
-- `skipTests`: `true`
-- Do NOT set `stripSecure` or `environment`
+Provide:
 
-## 7. Report the JAR Path
-Report the build result to the user. You MUST explicitly provide the exact full path to the generated JAR file as part of your final response so the user can easily locate and deploy the artifact.
+1. build mode and outcome;
+2. exact artifact path;
+3. validations and tests run;
+4. tests or checks skipped and why;
+5. files changed by the workflow;
+6. version, commit, and tag only when release actions occurred;
+7. remaining warnings or user actions.

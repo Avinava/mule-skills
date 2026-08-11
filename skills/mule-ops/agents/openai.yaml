@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule Operations"
+  short_description: "Analyze Mule runtime health end to end"
+  default_prompt: "Use $mule-ops to assess runtime health across the affected Mule application path."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule Troubleshooting"
+  short_description: "Diagnose Mule incidents with evidence"
+  default_prompt: "Use $mule-troubleshooting to trace this Mule incident and produce an evidence-backed RCA."
