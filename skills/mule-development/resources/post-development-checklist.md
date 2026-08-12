@@ -1,177 +1,195 @@
 # Post-Development Checklist
 
-Run after every Mule source change. Apply only checks relevant to the changed path, but always
-complete privacy, contract, error disposition, and diff review.
+Run after every Mule source or contract change. Apply checks relevant to the changed path, but
+always complete scope/privacy, security/configuration, contract authority, failure disposition,
+validation, and final-diff review.
 
-This checklist is the **verification surface** for the five invariant classes in
-`../SKILL.md`. It does not restate full tutorials.
+This is the verification surface for
+[Invariant classes and cross-cutting gates](../references/invariant-classes.md), not a tutorial.
+Prioritize by credible project impact and evidence; do not infer severity from the class label.
 
-| Class | Question |
+| Class | Verification question |
 | --- | --- |
-| **A** | Do values match the next consumer's shape, type, and media type? |
-| **B** | Is every embedded `#[…]` still complete after XML/CDATA parsing? |
-| **C** | Does the bound contract (local file or published pin) match routes both ways? |
-| **D** | Is every failure classified, bounded, attributed, and durably signaled? |
-| **E** | Are cache, source, watermark, hash, and event-state behaviors intentional? |
+| **A** | Do values match the next consumer's shape, type, media type, nullability, and serialization contract? |
+| **B** | Is every embedded `#[…]` complete after XML/CDATA parsing? |
+| **C** | Does the authoritative API/event contract agree with reachable implementation and consumers? |
+| **D** | Is every failure classified, observable, correctly attributed, and deliberately dispositioned? |
+| **E** | Are cache, source, watermark, replay, hash, and duplicate behaviors intentional? |
 
 ## Contents
 
-1. [Scope and privacy](#1-scope-and-privacy)
+1. [Scope, privacy, and security](#1-scope-privacy-and-security)
 2. [Class A — Value contracts](#2-class-a--value-contracts)
 3. [Class B — Expression embedding](#3-class-b--expression-embedding)
-4. [Class C — Contract authority](#4-class-c--contract-authority)
+4. [Class C — Contract authority and reachability](#4-class-c--contract-authority-and-reachability)
 5. [Class D — Failure disposition](#5-class-d--failure-disposition)
 6. [Class E — State and idempotency](#6-class-e--state-and-idempotency)
-7. [Concurrency, timeouts, queues, and HTTP](#7-concurrency-timeouts-queues-and-http)
+7. [Cross-cutting runtime and delivery gates](#7-cross-cutting-runtime-and-delivery-gates)
 8. [Build, tests, and documentation](#8-build-tests-and-documentation)
-9. [Quick scan](#9-quick-scan)
+9. [Impact scan](#9-impact-scan)
 
-## 1. Scope and privacy
+## 1. Scope, privacy, and security
 
-- Confirm only intended files and behaviors changed.
-- Confirm no prior-client name, topology, endpoint, payload, identifier, schedule, volume, or
-  incident detail entered source, comments, fixtures, logs, tests, or documentation.
-- Confirm no secret, token, private hostname, tenant identifier, personal data, or production
-  payload was added.
-- Use synthetic, structurally minimal test data.
-- Preserve unrelated user-authored changes and existing conventions.
+- Confirm only intended files, contracts, and behaviors changed; preserve unrelated user work.
+- Confirm no prior-client identity, topology, endpoint, payload, identifier, schedule, volume,
+  incident detail, or tuning value entered source, comments, fixtures, logs, or documentation.
+- Confirm no secret, token, secure-property value/ciphertext, private host, tenant identifier,
+  personal data, local machine path, or production payload was added or exposed.
+- Verify authentication, authorization, TLS/trust, policy assumptions, input trust, least privilege,
+  secure-property use, and environment configuration for changed boundaries.
+- Confirm required property keys exist in templates and deployment inputs without opening values.
+- Use synthetic, structurally representative test data.
 
 ## 2. Class A — Value contracts
 
-- Pin `output` on multi-branch expressions, `targetValue` attributes, and string concatenations that
-  mix typed variables so media-type inference cannot fail under concurrency.
-- Confirm batch records, persistent queue payloads, and batch-step HTTP bodies use values that
-  serialize on the target runtime (avoid map views / connector objects across batch steps; JSON is
-  commonly appropriate for HTTP bodies inside `<batch:step>`).
-- Remember `default` covers null and **absent** fields; present empty strings/collections need
-  `isEmpty` / first-non-empty selection.
-- Prefer already-known request identifiers over re-deriving from dual attribute/bean accessors;
-  normalize at the system-facing boundary when that app owns the shape.
-- Coerce types to what the target API accepts (for example Number vs String).
-- Confirm MUnit fixtures match the worst-case production shape for the changed path.
-- Validate query inputs; select every field downstream transforms consume. Escape or bind
-  user-derived values with the connector's supported mechanism—presence checks alone do not prevent
-  injection.
-- Confirm empty results, null results, pagination (or single-page limits), and connector-specific
-  result shapes are handled for the changed query path.
-- Save the original message before scatter-gather when later steps need it.
-- Unquoted DW identifiers start with a letter.
-- Import `try` from `dw::Runtime` whenever the script calls `try()`.
+- Make `output` explicit when mixed input media types, inference mismatch, or the next consumer's
+  writer contract requires it; do not add it mechanically to every branch.
+- Confirm each variable, `targetValue`, connector parameter, header/query/URI map, and payload matches
+  the next consumer's shape, type, media type, and nullability.
+- Remember `default` covers null/absent values, not present empty strings or collections. Use
+  first-non-empty only where empty is equivalent to missing.
+- Validate required values before side effects; do not silently null invalid required data.
+- Prefer known request identifiers over ambiguous response accessors; normalize at the owning
+  boundary when appropriate.
+- Coerce values to accepted target types and handle coercion failure deliberately.
+- Keep batch/queue values simple and supported. Avoid lazy iterators, streams, map/entry views, and
+  connector-specific objects across serialization boundaries.
+- Preserve the outbound endpoint's media type for HTTP bodies inside batch steps and run a
+  representative target-runtime serialization test when the representation changes.
+- Test normal production shape and relevant adverse/alternate shapes; mocks must be capable of
+  failing the changed mechanism.
+- Validate query inputs, bind/escape user-derived values, select every downstream-consumed field,
+  and handle empty/null results and pagination.
+- Verify scatter-gather indexes and preserve the original message when later work needs it.
+- Confirm required DataWeave imports and valid quoted/unquoted identifiers.
 
 ## 3. Class B — Expression embedding
 
-- For every changed CDATA block that starts with `#[`, confirm the expression ends with `]`
-  **immediately before** the CDATA terminator `]]>` (three closing brackets before `>` when the
-  script ends with `}`: `}]]]>` not `}]]>`).
-- Do not assume sibling header/query/uri blocks prove the edited block is valid.
-- Packaging success is not proof that `#[…]` evaluates; connector Map/MultiMap transform errors after
-  markup edits are Class B until disproven.
+- Run:
 
-Heuristic (repo-relative):
+  ```bash
+  python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .
+  ```
 
-```bash
-# Flag CDATA that opens an expression and may truncate it (review each hit)
-rg -n '<!\[CDATA\[#\[' -g '*.xml' src || true
-```
+- For each changed CDATA body beginning with `#[`, confirm its trimmed content ends with `]` before
+  `]]>` (`}]]]>`, not `}]]>`, when the body ends with `}`).
+- Inspect changed direct XML attribute expressions and non-CDATA embedding separately.
+- Do not use packaging success or a valid sibling block as evaluation proof.
 
-## 4. Class C — Contract authority
+## 4. Class C — Contract authority and reachability
 
-- Identify the **bound** contract on `apikit:config` (or equivalent): local file path **or**
-  published Exchange/Maven pin. An unbound local copy is not runtime authority.
-- For local-bound contracts, edit the bound file and flows; do not invent an Exchange publish unless
-  the project already publishes that artifact.
-- For published-bound contracts, update source of truth, bump/publish pin, repoint APIKit if needed,
-  sync human-facing copies, and align consumers.
-- Inventory routes both ways:
-  - bound resource/method without flow → typically `APIKIT:NOT_IMPLEMENTED` / 501 + startup warnings
-  - path absent from bound contract → typically `APIKIT:NOT_FOUND` / 404
-  - path present, method missing → typically `APIKIT:METHOD_NOT_ALLOWED` / 405
-  - implementing flow with no bound resource → dead path
-- Verify methods, parameters, media types, status codes, and error envelopes against implementation.
-- Confirm `flow-ref` targets and renames update tests, logs, alerts, and docs.
+- Identify the authoritative boundary: APIKit-bound local contract, published Exchange/Maven pin,
+  event schema, connector metadata, or another evidenced source.
+- For a local APIKit binding, change the bound file and implementation; publish only if the project
+  already publishes that artifact.
+- For a published binding, update its source, publish/bump, update the pin/configuration, synchronize
+  intentional copies, and coordinate consumers.
+- Inventory resources/events in both directions. For APIKit, distinguish absent path (typically
+  404), absent method (typically 405), bound route without implementation (typically 501), and
+  implementation not selected by APIKit.
+- Before calling an APIKit-unbound flow dead, check sources, all `flow-ref` callers, evidenced dynamic
+  conventions, configuration, and tests.
+- Verify paths/topics, methods/operations, parameters, headers, security, schemas, payload nesting,
+  media types, examples, status codes, and error envelopes.
+- Trace renames through flow references, contracts/schema versions, tests, consumers, policies,
+  logs, alerts, dashboards, and documentation.
+- For events and queues, verify publisher/consumer compatibility, acknowledgement, ordering,
+  redelivery, deduplication, and side effects; mark APIKit checks not applicable when appropriate.
 
 ## 5. Class D — Failure disposition
 
-- Confirm permanent vs retryable classification for new or changed error paths; do not retry typical
-  permanent 4xx inside `until-successful`.
-- Retry 401 only when each attempt can refresh credentials, tokens, or signatures; otherwise treat
-  401 as permanent even if the operation is idempotent.
-- For app-driven re-selection of the same business record (scheduler/poll eligible set): explicit
-  disposition for permanent errors; use attempt budget + terminal state when bounded retry is
-  required—do not force terminal exit on intentional indefinite retryable recovery. For queue/event
-  listeners, prefer source-native redelivery/DLQ when already bounding retry.
-- For `until-successful`, permanent errors must not retry; diagnostics must survive attempt reset
-  (log in-attempt, durable capture, or nested cause)—not only vars that roll back on exhaustion.
-  Regenerate per-attempt auth material when retrying auth-sensitive calls. Bound retries with
-  backoff or jitter where appropriate so many records/replicas do not amplify dependency load.
-- Multi-hop `<try>` (dependency then writeback): attribute the hop that failed; gate "success"
-  messages on evidence the first hop completed.
-- Structured error payloads use stable keys the consumer reads; logger `flowName` matches the
-  enclosing flow.
-- Business-impactful skips are not log-only: durable error, metric, or intentional disposition.
-- `foreach` item isolation: `on-error-continue` when one item must not abort the rest. Do not equate
-  that with batch steps—batch isolates failed records via job/step failure policy; `on-error-continue`
-  on a batch step can hide failures.
-- Parse error payloads defensively (`try` / read); avoid error-handler double faults.
-- `on-error-continue` cannot discard work that still needs processing; queue delivery semantics
-  verified before swallow.
-- Never claim automatic reprocessing without source/queue evidence.
+- Classify changed failures as permanent, retryable, or explicitly context-dependent before retry.
+- Do not retry permanent validation/client/business failures. Retry 401 only when every attempt can
+  refresh auth material; validate actual connector error types.
+- Honor idempotency, total caller deadline, dependency quota, and `Retry-After`/backoff guidance.
+- For app-driven re-selection:
+  - permanent/poison records leave the eligible loop through terminal, quarantine/error-store, or
+    deliberate manual-recovery disposition;
+  - bounded retryable policies use durable atomic attempts/deadlines and protected exhaustion
+    handling;
+  - intentional indefinite retryable policies include backoff, monitoring, escalation/ownership,
+    recovery criteria, and replay/manual recovery.
+- For queue/event sources, prefer and document existing redelivery/DLQ behavior; verify
+  acknowledgement, max redelivery, replay, ordering, duplicates, and loss before adding counters or
+  swallowing errors.
+- For `until-successful`, catch only permanent types inside and turn them into a classified successful
+  scope result; let retryable types escape for retry. Handle permanent disposition after the scope.
+- Preserve diagnostics through failed-attempt resets with in-attempt logging, durable capture, or
+  verified nested cause—not only ordinary variables.
+- Attribute the operation actually reached and failed in multi-hop Try scopes; gate success messages
+  on evidence that preceding operations completed.
+- Confirm structured error keys match their consumer and logger flow/operation names are correct.
+- Give business-impactful skips a durable signal, metric, or intentional disposition.
+- Parse error payloads defensively and sanitize them; avoid error-handler double faults.
+- Keep `foreach` per-item continuation distinct from batch record failure policy; do not hide batch
+  failure with mechanical `on-error-continue`.
+- Deduplicate or distinguish originating failure, retry summary, structured error, and default
+  listener logs.
+- Never claim automatic retry/reprocessing without source, eligibility, or queue evidence.
 
 ## 6. Class E — State and idempotency
 
-- Object Store: non-null default or explicit `OS:KEY_NOT_FOUND` handling—never `#[null]` as default.
-- OS keys are store-legal types (encode Binary hashes as hex/string). Optional cache degrades to
-  source of record on store errors.
-- Verify TTL, maxEntries, persistence, multi-replica, stale-data, and **atomicity** for changed
-  stores—especially attempt counters or idempotency keys updated by overlapping schedulers/replicas
-  (retrieve-modify-store can lose concurrent updates unless the design accounts for it).
-- Polling/source connector defaults match sibling operations for the installed version when fields
-  required downstream are at risk.
-- Watermark/dedupe hold: document recovery if deploy does not re-emit failed ids.
-- Content-hash projects: hashed fields still match the outbound transform. Adding a consumed field
-  without hashing risks silent skip; removing a field from the transform but not the hash risks churn.
-- Event listeners read the verified nested payload shape for this project.
-- Continuous listeners use an appropriate reconnection strategy for the installed connector.
-- Creates/upserts remain idempotent across retry and failed writeback where duplicates are possible.
+- Treat `OS:KEY_NOT_FOUND` as an expected miss only for an evidenced optional/cache-aside path; use a
+  non-null default or catch that type explicitly.
+- Allow optional-cache fallback on availability failures such as `OS:STORE_NOT_AVAILABLE` only with
+  a degraded signal and safe load on the source of record.
+- Surface invalid/blank keys, null values, security/configuration failures, and programming errors;
+  never convert every Object Store error into a miss.
+- Use store-legal String keys, encode Binary hashes, and exclude secrets, personal data, and
+  unnecessary raw payloads from keys and values.
+- Verify TTL, `maxEntries`, persistence, deployment support, multi-replica behavior, stale-data
+  policy, and atomicity. A retrieve-modify-store sequence can lose concurrent updates.
+- Verify polling/source defaults for the installed connector when downstream fields depend on them.
+- Document recovery when watermark/dedupe state prevents failed identifiers from being re-emitted.
+- Keep content-hash inputs aligned with outbound transform fields; manage skip-list TTL/invalidation
+  separately.
+- Verify event wrapper nesting, continuous reconnection, replay, and duplicate behavior.
+- Keep create/upsert side effects idempotent across retry, redelivery, and failed writeback.
 
-## 7. Concurrency, timeouts, queues, and HTTP
+## 7. Cross-cutting runtime and delivery gates
 
-- Effective concurrency accounts for consumers, `maxConcurrency`, parallel scopes, batch, replicas,
-  pools, and dependency limits.
-- Queue messages stay minimal and serializable.
-- Timeout budget covers inner calls, retries, and error mapping with margin.
-- Confirm idle timeout is not used as a substitute for response/read timeout on active requests
-  (idle typically governs unused persistent connections).
-- Connection pool bounds are deliberate and valid for the installed connector version.
-- For GET, HEAD, or OPTIONS, rely on verified connector body behavior or set `sendBodyMode="NEVER"`
-  when the project needs an explicit no-body guarantee.
-- Correlation propagation verified when end-to-end tracing is claimed.
+- Calculate effective concurrency across source consumers, `maxConcurrency`, parallel scopes, batch,
+  replicas, pools, and dependency limits. Derive numbers from current evidence.
+- Treat batch block size as memory/scheduling, not request concurrency; bound streaming,
+  materialization, variables, and payload logging for memory safety.
+- Budget connect, response/read, idle, proxy, retry, and total caller deadlines correctly; idle
+  connection lifetime is not active response timeout.
+- Verify connection-pool special values and deployment-target compatibility for installed versions.
+- Keep queue messages minimal, serializable, and free of unnecessary sensitive data.
+- Verify transient/persistent VM support, acknowledgement, recovery, and duplicate/loss semantics on
+  the actual deployment target.
+- Confirm transactions are explicit where needed and every connector's participation, commit, and
+  rollback behavior is understood; flows/subflows do not create implicit transaction boundaries.
+- For GET, HEAD, and OPTIONS, use verified connector body behavior or an explicit no-body mode when
+  required by contract.
+- Verify inbound correlation adoption and outbound propagation before claiming end-to-end tracing.
+- Match operational version metadata to the packaged artifact.
 
 ## 8. Build, tests, and documentation
 
-- Run formatter/linter and focused MUnit for the changed path, then the required full build.
-- Tests cover success and meaningful failure; fixtures can fail the real mechanism.
-- Operational version metadata matches the packaged artifact when the project logs a version.
-- Update owning docs, runbooks, recovery notes, `AGENTS.md` invariants, and changelog when behavior
-  changed.
-- Review the final diff for unsupported assumptions and unrelated edits.
+- Run the embedded-expression checker for XML changes, then project formatter/linter, focused MUnit,
+  and the required integration/package gate.
+- Cover success and meaningful failure/disposition paths with assertions that can detect the actual
+  mechanism.
+- Re-run contract/schema validation and route/event mapping checks; packaging alone is insufficient.
+- Update contracts, schemas, operations guidance, diagrams, recovery notes, `AGENTS.md` invariants,
+  and changelog when behavior changes.
+- Review the final diff for unsupported assumptions, unrelated edits, stale links, copied identity,
+  and accidental generated artifacts.
+- Report commands, outcomes, skipped checks, tool failures, and remaining evidence gaps.
 
-## 9. Quick scan
+## 9. Impact scan
 
-| Priority | Check | Class |
-| --- | --- | --- |
-| High | No secrets or client-derived identity introduced | — |
-| High | Embedded `#[…]` intact after CDATA/XML (Class B) | B |
-| High | Bound contract (local file or published pin) and routes agree both ways (Class C) | C |
-| High | Failures classified and attributed; permanent/poison bounded; retryable policy explicit; 401 gated (Class D) | D |
-| High | Batch/queue serialization safe; no delivery loss | A/D |
-| High | Retries and concurrency within proven dependency budget | D |
-| Medium | Media types, empty vs null, dual accessors, fixture fidelity | A |
-| Medium | OS miss/keys, source defaults, watermark recovery, hash parity | E |
-| Medium | Timeout budget, minimal queues, correlation | — |
-| Low | Names, imports, version strings, docs aligned | — |
+Escalate based on credible consequence in the current path:
+
+| Consequence | Examples to scan |
+| --- | --- |
+| Security, privacy, data/message loss | Exposed values; unsafe trust boundary; swallowed delivery; non-recoverable state |
+| Incorrect results, outage, contract break | Wrong types/shapes; broken bound route; retry storm; duplicate side effects |
+| Reliability or operability degradation | Missing terminal/recovery signal; stale cache; unsupported VM persistence; timeout mismatch |
+| Maintainability/documentation | Stale names, imports, versions, runbooks, links, or project invariants |
 
 ## Project-local additions
 
-Keep project-specific checks in the consuming repository, not in this reusable skill. Use neutral
-mechanism-based wording if a local lesson is later promoted upstream.
+Keep project-specific checks in the consuming repository. Promote lessons upstream only after
+removing identity and expressing the reusable mechanism.

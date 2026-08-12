@@ -45,6 +45,13 @@ Do not skip tests by default. Skip them only when the user requests it or the re
 workflow requires a separate test stage, and state the resulting verification gap.
 
 When Mule source changed, use the `mule-development` post-development checklist before building.
+When Mule XML changed and the development skill is installed, run:
+
+```bash
+python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .
+```
+
+This catches truncated `#[…]` expressions in CDATA that XML parsing and packaging can miss.
 
 ## 4. Reconcile contracts and documentation
 

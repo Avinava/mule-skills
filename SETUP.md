@@ -88,7 +88,7 @@ The complete shared set is:
 | Skill | Required content |
 | --- | --- |
 | `document-mulesoft-project` | `SKILL.md`, metadata, references, inventory script, documentation audit |
-| `mule-development` | `SKILL.md`, metadata, post-development checklist |
+| `mule-development` | `SKILL.md`, metadata, invariant reference, post-development checklist, embedded-expression checker |
 | `mule-troubleshooting` | `SKILL.md`, metadata |
 | `mule-ops` | `SKILL.md`, metadata |
 | `review-mulesoft-project` | `SKILL.md`, metadata, review domains, finding policy |
@@ -234,7 +234,9 @@ test -f .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.
 test -f .agents/skills/document-mulesoft-project/scripts/audit_documentation.py
 test -f .agents/skills/mule-development/SKILL.md
 test -f .agents/skills/mule-development/agents/openai.yaml
+test -f .agents/skills/mule-development/references/invariant-classes.md
 test -f .agents/skills/mule-development/resources/post-development-checklist.md
+test -f .agents/skills/mule-development/scripts/check_embedded_expressions.py
 test -f .agents/skills/mule-troubleshooting/SKILL.md
 test -f .agents/skills/mule-troubleshooting/agents/openai.yaml
 test -f .agents/skills/mule-ops/SKILL.md
@@ -250,6 +252,13 @@ Then run the read-only inventory:
 
 ```bash
 python3 .agents/skills/document-mulesoft-project/scripts/inventory_mule_project.py . --pretty
+```
+
+For an existing Mule project with `src/**/*.xml`, also run the deterministic embedded-expression
+check:
+
+```bash
+python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .
 ```
 
 Treat its project classification as one signal. Reconcile it with direct source evidence, especially

@@ -204,6 +204,9 @@ coverage cannot support attribution.
 
 ## Reusable diagnostic lessons
 
+- Interpret recurring mechanisms through `mule-development` Classes A–E and its mandatory
+  cross-cutting gates. Use source inspection or troubleshooting before turning an operational signal
+  into a code conclusion.
 - A retry-exhaustion summary is often secondary evidence; locate the underlying connector or
   business error with the same correlation ID.
 - Structured logger and exception-listener entries can describe one failed transaction; deduplicate
@@ -234,6 +237,8 @@ coverage cannot support attribution.
 - Separate observations, hypotheses, confirmed causes, and recommendations.
 - Confirm current state after any deployment-window finding.
 - Flag repeating identical errors for disposition investigation (permanent/poison vs intentional retry).
+- Check applicable cross-cutting security/configuration, capacity/lifecycle, delivery/transaction,
+  privacy/observability, and validation evidence before recommending a durable change.
 - Match logged app version to packaged artifact when version metadata exists.
 - Remove secrets, payloads, identities, private endpoints, and raw correlation identifiers.
 - State what was not checked and why.

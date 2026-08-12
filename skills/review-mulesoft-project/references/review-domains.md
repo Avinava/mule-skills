@@ -70,7 +70,8 @@ Do not perform version changes, commits, tags, publishing, deployment, or approv
 
 ## Contracts and boundaries
 
-Apply the same **contract authority** mechanisms as `mule-development` (Class C):
+Apply Classes A–E and the mandatory **cross-cutting** gates from `mule-development`, including the
+following **contract authority and reachability** mechanisms (Class C):
 
 - Identify the **bound** contract on APIKit configuration: a local resource path **or** a published
   Exchange/Maven pin. Do not treat an unbound or drifted file as runtime authority.
@@ -81,10 +82,13 @@ Apply the same **contract authority** mechanisms as `mule-development` (Class C)
     startup missing-implementation warnings
   - path absent from bound contract → typically `APIKIT:NOT_FOUND` / 404
   - path present, method not allowed → typically `APIKIT:METHOD_NOT_ALLOWED` / 405
-  - implementation with no bound resource → dead path
+  - implementation with no bound resource → not APIKit-routable; inspect sources and `flow-ref`
+    callers before concluding it is unreachable
   - renames incomplete across contract, pin, local copy, and consumers
 - Compare resources, methods, parameters, headers, security, media types, schemas, examples, status
   codes, and error envelopes with listeners and APIKit routes.
+- For events, identify the authoritative schema/version and verify publisher/consumer mappings in
+  both directions; do not force APIKit checks onto non-API projects.
 - For events and queues, verify payload schema, acknowledgement, ordering, retry, deduplication, and
   side effects instead of forcing an HTTP model.
 - Detect removed or renamed routes, required fields, incompatible type changes, new validation,
@@ -102,8 +106,10 @@ Apply **value contracts** and **expression embedding** mechanisms (Classes A and
 - Verify DataWeave selectors, null vs empty handling (`default` covers null and absent fields;
   present empty strings need `isEmpty`), dual attribute/bean accessors, typed coercions, imports,
   media types, field mappings, and output shapes against actual inputs and downstream consumers.
-- Require explicit `output` on multi-branch expressions, `targetValue`, and mixed-type concatenations
-  when media-type inference can fail.
+- Require explicit `output` when mixed input media types, inference mismatch, or the next consumer's
+  writer contract makes it necessary; do not require it mechanically for every branch.
+- Distinguish optional defaults from required-data validation; do not silently null invalid required
+  values to avoid an exception.
 - Prefer already-known request identifiers over re-deriving ambiguous response ids when evidence
   shows dual or empty representations.
 - Check scatter-gather route indexes and preservation of message state when later processors need it.
@@ -128,15 +134,18 @@ Apply **failure disposition** mechanisms (Class D):
   terminal loss behavior.
 - Before accepting `on-error-continue`, verify it cannot acknowledge or discard work that still
   requires processing.
-- Verify permanent vs retryable classification; retries are limited to appropriate errors and safe for
-  idempotency. Flag unbounded retry of **permanent, poison, or unclassified** errors on app-driven
-  re-selection. Documented indefinite retry of only retryable failures until dependency recovery is
-  allowed—require attempt budget and terminal state when the project claims a bounded policy. For
-  listeners, verify source redelivery/DLQ before requiring app counters.
+- Verify permanent vs retryable classification; retries are limited to appropriate errors, safe for
+  idempotency, and fit the caller/dependency budget. Flag retry of **permanent, poison, or
+  unclassified** errors on app-driven re-selection. For intentional indefinite retry of classified
+  retryable failures, require backoff, monitoring, escalation/ownership, recovery criteria, and a
+  replay/manual-recovery path. Require an attempt/deadline budget and exhaustion disposition only
+  when the project claims a bounded policy. For listeners, verify source redelivery/DLQ before
+  requiring app counters.
 - Inside `until-successful` or equivalent, permanent client errors should not be retried without a
   documented reason. Diagnostics must survive attempt reset (in-attempt log, durable capture, or
   nested cause)—ordinary vars may roll back before the outer `RETRY_EXHAUSTED` handler. Retry 401
-  only when each attempt can refresh credentials, tokens, or signatures.
+  only when each attempt can refresh credentials, tokens, or signatures. For selective retry, catch
+  permanent types inside the scope as a classified result and let retryable types escape.
 - Multi-hop try scopes must attribute the failing hop; success messages require evidence the first
   hop completed.
 - Business-impactful skip guards need a durable error, metric, or intentional disposition—not log
@@ -159,10 +168,12 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
   active request response/read deadline.
 - Check back pressure, ordering, race conditions, shared state, duplicate delivery, and overlapping
   scheduler or batch instances.
-- For Object Store, verify missing-key behavior, non-null defaults (never `#[null]` as default),
-  store-legal key types (encode Binary hashes), optional-cache degrade vs hard fail, TTL,
-  persistence, multi-replica access, atomicity (especially attempt counters under concurrent
-  writers), and stale-data behavior.
+- For Object Store, verify missing-key behavior and non-null defaults (never `#[null]` as default).
+  Treat only an evidenced `OS:KEY_NOT_FOUND` as an expected miss; an optional cache may degrade on
+  availability failures such as `OS:STORE_NOT_AVAILABLE`, while invalid keys, null values,
+  configuration/security errors, and programming defects remain visible. Verify store-legal String
+  keys (encode Binary hashes), TTL, persistence, multi-replica access, atomicity, sensitive-data
+  exclusion, and stale-data behavior.
 - When content hashes or skip-lists exist, verify hashed fields match the outbound transform: missing
   hash fields for new consumed inputs risk silent skip; hash fields left after transform removal risk
   unnecessary churn.
@@ -175,6 +186,8 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
 
 ## Security, configuration, and logging
 
+- Apply the security/configuration and privacy/observability cross-cutting gates even when no A–E
+  mechanism appears to be the primary changed behavior.
 - Review authentication and authorization boundaries, TLS, secure properties, policy assumptions,
   input validation, and least-privilege behavior at the mechanism level.
 - Never open or reproduce secret values, secure-property ciphertext, certificates, private keys, or
@@ -190,6 +203,7 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
 
 ## Tests, build, and deployment
 
+- Apply the validation/documentation and capacity/lifecycle cross-cutting gates.
 - Map tests to changed and critical behavior: success, alternate branches, transformations,
   connector errors, retries, error handlers, batch/queue semantics, and contract mapping.
 - Evaluate assertions and mocks, not only test count. Detect tests that cannot fail for the changed
@@ -199,6 +213,7 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
   routes.
 - Follow repository-required lint, security, test, and package commands. Do not weaken them to obtain
   a passing result.
+- Run the development skill's embedded-expression checker when Mule XML changes.
 - Verify POM, Mule artifact metadata, Java, connector, plugin, and deployment-target compatibility.
 - Check artifact version surfaces (including logger/app version properties), deployment inputs,
   rollback path, and current-vs-desired version interpretation when relevant.
@@ -206,6 +221,7 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
 
 ## Documentation and operations
 
+- Apply the delivery/transactions cross-cutting gate to asynchronous and stateful paths.
 - Confirm architecture, contract, onboarding, configuration, operations, and flow documentation
   remain consistent with reviewed behavior.
 - Check that operational guidance covers schedulers, batches, queues, retries, health signals,

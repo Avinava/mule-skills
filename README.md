@@ -87,6 +87,8 @@ then continues with verified technical evidence if the user skips.
   private hosts, personal data, or raw production payloads.
 - **Proportionate validation:** use focused checks for local changes and the complete required gate
   for release readiness.
+- **Shared mechanism model:** use Classes A–E for value, embedding, contract, failure, and state
+  invariants, plus explicit cross-cutting security, capacity, delivery, privacy, and validation gates.
 - **Explicit mutations:** reviews and diagnosis are read-only by default; commits, comments, tags,
   deployments, and releases require user authorization.
 - **Honest uncertainty:** missing access or evidence remains visible instead of being converted into
@@ -128,6 +130,8 @@ mule-skills/
 │   ├── mule-ops/                   # Runtime health workflow
 │   └── review-mulesoft-project/    # Change, project, and release-readiness review
 ├── workflows/build.md              # Validate, package, and explicit release workflow
+├── scripts/                         # Dependency-free repository validation
+├── tests/                           # Validator and checker tests
 ├── templates/                      # Project-owned AGENTS, Claude, Copilot, and Gemini guidance
 ├── mcp/                            # Codex, VS Code, and generic JSON MCP templates
 ├── README.md                       # Toolkit overview
@@ -139,6 +143,9 @@ Each skill has a required `SKILL.md` and may include:
 - `agents/openai.yaml` for interface metadata;
 - `references/` or `resources/` for guidance loaded by the workflow;
 - `scripts/` for deterministic, repeatable inspection and validation.
+
+Run `python3 -m unittest discover -s tests -v` and `python3 scripts/validate_repository.py .` when
+changing reusable skills. CI runs those checks plus the documentation audit.
 
 Host instruction templates keep shared project facts in `AGENTS.md` and add only the routing needed
 by Claude Code, GitHub Copilot, or Gemini. They are `templates/AGENTS.md`, `templates/CLAUDE.md`,
