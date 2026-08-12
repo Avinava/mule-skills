@@ -68,17 +68,20 @@ dependency capacity.
 ## Conditional invariants
 
 Record only invariants actually used by this project. Prefer mechanism language from
-`mule-development` Classes A–E. Examples include:
+`mule-development` Classes A–E and its mandatory cross-cutting gates. Examples include:
 
 - a content hash must change when its documented source fields change (hash fields == outbound DWL);
-- a cache miss must follow a specific source-of-record path; optional cache degrades on store errors;
+- a cache miss must follow a specific source-of-record path; optional cache degrades only on
+  classified availability failures, while invalid keys/configuration remain visible;
 - app-driven re-selection classifies permanent vs retryable errors; bounded policies use an attempt
   budget and terminal state; intentional indefinite retry of only retryable failures is documented;
   queue/event paths document source redelivery/DLQ when used;
 - the bound API contract (local file or published pin) is the routing authority; copies stay in sync;
 - event listeners read a verified nested payload shape (document the path used in this project);
 - an event or create path remains idempotent across redelivery and failed writeback;
-- a public contract change requires coordinated consumer updates.
+- a public contract change requires coordinated consumer updates;
+- required security/configuration, capacity/lifecycle, delivery/transaction, privacy/observability,
+  and validation gates are documented for each critical path.
 
 | Invariant | Owning source | Affected files | Required validation |
 | --- | --- | --- | --- |
@@ -114,14 +117,17 @@ Read `.agents/skills/mule-ops/SKILL.md` for runtime health analysis and
 
 - Read `.agents/skills/mule-development/SKILL.md` and complete its post-development checklist for
   source changes (Classes A–E: value contracts, expression embedding, contract authority, failure
-  disposition, state/idempotency).
+  disposition, state/idempotency; plus applicable cross-cutting gates).
 - Validate query inputs and select every field consumed downstream.
 - Keep batch records and queue messages minimal and serializable; pin media types for the next
   consumer.
-- Verify Object Store miss behavior; a `null` default still raises `OS:KEY_NOT_FOUND`.
+- Verify Object Store miss/failure classification; a `null` default still raises `OS:KEY_NOT_FOUND`,
+  and invalid key/configuration errors are not cache misses.
 - Verify effective local or global error handling, permanent vs retryable classification, and the
   final caller/source outcome.
 - Preserve correlation without logging raw payloads or sensitive identifiers.
+- Verify deployment-target support, transaction/delivery behavior, streaming/memory, and security
+  configuration when the changed path uses them.
 - Update contracts (bound local file or published version), tests, operations guidance, and
   documentation when behavior changes.
 
