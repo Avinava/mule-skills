@@ -70,8 +70,21 @@ Do not perform version changes, commits, tags, publishing, deployment, or approv
 
 ## Contracts and boundaries
 
-- Compare RAML/OAS resources, methods, parameters, headers, security, media types, schemas, examples,
-  status codes, and error envelopes with listeners and APIKit routes.
+Apply the same **contract authority** mechanisms as `mule-development` (Class C):
+
+- Identify the **bound** contract on APIKit configuration: a local resource path **or** a published
+  Exchange/Maven pin. Do not treat an unbound or drifted file as runtime authority.
+- Require Exchange publish/bump steps only when the project already binds a published contract
+  artifact; local-bound `api="*.raml"` projects edit the bound file without inventing a publish path.
+- Inventory routes both ways:
+  - bound resource/method without implementation → typically `APIKIT:NOT_IMPLEMENTED` / 501 and
+    startup missing-implementation warnings
+  - path absent from bound contract → typically `APIKIT:NOT_FOUND` / 404
+  - path present, method not allowed → typically `APIKIT:METHOD_NOT_ALLOWED` / 405
+  - implementation with no bound resource → dead path
+  - renames incomplete across contract, pin, local copy, and consumers
+- Compare resources, methods, parameters, headers, security, media types, schemas, examples, status
+  codes, and error envelopes with listeners and APIKit routes.
 - For events and queues, verify payload schema, acknowledgement, ordering, retry, deduplication, and
   side effects instead of forcing an HTTP model.
 - Detect removed or renamed routes, required fields, incompatible type changes, new validation,
@@ -81,20 +94,32 @@ Do not perform version changes, commits, tags, publishing, deployment, or approv
 
 ## Flows and DataWeave
 
+Apply **value contracts** and **expression embedding** mechanisms (Classes A and B):
+
 - Trace success, alternate, empty-input, and terminal error paths through `flow-ref` edges.
 - Check that source-less flows and subflows use the intended error strategy and do not assume an
   implicit transaction boundary.
-- Verify DataWeave selectors, defaults, coercions, imports, media types, field mappings, and output
-  shapes against actual inputs and downstream consumers.
+- Verify DataWeave selectors, null vs empty handling (`default` covers null and absent fields;
+  present empty strings need `isEmpty`), dual attribute/bean accessors, typed coercions, imports,
+  media types, field mappings, and output shapes against actual inputs and downstream consumers.
+- Require explicit `output` on multi-branch expressions, `targetValue`, and mixed-type concatenations
+  when media-type inference can fail.
+- Prefer already-known request identifiers over re-deriving ambiguous response ids when evidence
+  shows dual or empty representations.
 - Check scatter-gather route indexes and preservation of message state when later processors need it.
 - Verify batch records and persistent queue messages contain supported serializable values; avoid
   lazy iterators, streams, map views, or connector-specific objects across serialization boundaries.
+- For changed CDATA `#[…]` in query-params, headers, or uri-params, verify the expression still ends
+  with `]` before `]]>` (packaging success is not evaluation proof; Map/MultiMap transform failures
+  after markup edits are Class B until disproven).
 - Check query inputs, escaping or binding, pagination, empty results, and selection of all fields
   consumed downstream.
 - Treat naming and decomposition as improvements unless they cause broken references, misleading
   operations, or unsafe behavior.
 
 ## Errors and delivery
+
+Apply **failure disposition** mechanisms (Class D):
 
 - Verify the effective local or global handler and the caller/source outcome for every meaningful
   failure path.
@@ -103,12 +128,26 @@ Do not perform version changes, commits, tags, publishing, deployment, or approv
   terminal loss behavior.
 - Before accepting `on-error-continue`, verify it cannot acknowledge or discard work that still
   requires processing.
-- Verify retries are bounded, limited to appropriate errors, and safe for idempotency.
+- Verify permanent vs retryable classification; retries are limited to appropriate errors and safe for
+  idempotency. Flag unbounded retry of **permanent, poison, or unclassified** errors on app-driven
+  re-selection. Documented indefinite retry of only retryable failures until dependency recovery is
+  allowed—require attempt budget and terminal state when the project claims a bounded policy. For
+  listeners, verify source redelivery/DLQ before requiring app counters.
+- Inside `until-successful` or equivalent, permanent client errors should not be retried without a
+  documented reason. Diagnostics must survive attempt reset (in-attempt log, durable capture, or
+  nested cause)—ordinary vars may roll back before the outer `RETRY_EXHAUSTED` handler. Retry 401
+  only when each attempt can refresh credentials, tokens, or signatures.
+- Multi-hop try scopes must attribute the failing hop; success messages require evidence the first
+  hop completed.
+- Business-impactful skip guards need a durable error, metric, or intentional disposition—not log
+  only.
 - Group connector failure, retry summary, structured logger, and default exception-listener entries
   when they describe the same transaction.
 - Do not claim automatic reprocessing or recovery without source and queue evidence.
 
 ## Concurrency, latency, and state
+
+Apply **state and idempotency** mechanisms (Class E) alongside concurrency and latency:
 
 - Calculate effective concurrency from source consumers, flow limits, batch-job concurrency,
   parallel scopes, replicas, pools, and dependency quotas.
@@ -116,11 +155,22 @@ Do not perform version changes, commits, tags, publishing, deployment, or approv
   dependency requests.
 - Distinguish connect, response, read, connection-idle, proxy, retry, and total caller deadlines.
 - For synchronous paths, verify inner calls, retries, and error mapping fit inside the upstream
-  deadline with margin.
+  deadline with margin. Treat connection idle timeout as unused-connection lifetime, not as the
+  active request response/read deadline.
 - Check back pressure, ordering, race conditions, shared state, duplicate delivery, and overlapping
   scheduler or batch instances.
-- For Object Store, verify missing-key behavior, non-null defaults, TTL, persistence, multi-replica
-  access, atomicity, and stale-data behavior.
+- For Object Store, verify missing-key behavior, non-null defaults (never `#[null]` as default),
+  store-legal key types (encode Binary hashes), optional-cache degrade vs hard fail, TTL,
+  persistence, multi-replica access, atomicity (especially attempt counters under concurrent
+  writers), and stale-data behavior.
+- When content hashes or skip-lists exist, verify hashed fields match the outbound transform: missing
+  hash fields for new consumed inputs risk silent skip; hash fields left after transform removal risk
+  unnecessary churn.
+- Check polling/source defaults against sibling operations when downstream ids or body fields are
+  required; note watermark/dedupe hold and recovery when deploy does not re-emit failed records.
+- Verify event listener payload nesting against the project's verified shape and reconnection policy
+  for continuous streams.
+- Prefer idempotent create/upsert patterns where failed writebacks can duplicate work.
 - Require current workload and dependency evidence before recommending numeric tuning values.
 
 ## Security, configuration, and logging
@@ -134,7 +184,8 @@ Do not perform version changes, commits, tags, publishing, deployment, or approv
 - Detect hard-coded credentials, private endpoints, tenant identifiers, and environment-specific
   identity in reusable source or documentation.
 - Check logs for full payloads, secrets, personal data, unsafe identifiers, incorrect flow names,
-  duplicate failures, and missing safe correlation or outcome fields.
+  structured error-key mismatches against consumers, duplicate failures, and missing safe correlation
+  or outcome fields.
 - Treat log absence as inconclusive when retention, level, sampling, or error handling can hide an event.
 
 ## Tests, build, and deployment
@@ -142,12 +193,15 @@ Do not perform version changes, commits, tags, publishing, deployment, or approv
 - Map tests to changed and critical behavior: success, alternate branches, transformations,
   connector errors, retries, error handlers, batch/queue semantics, and contract mapping.
 - Evaluate assertions and mocks, not only test count. Detect tests that cannot fail for the changed
-  behavior or that mock away the mechanism under review.
+  behavior, that mock away the mechanism under review, or that encode a more convenient shape than
+  production (fixture fidelity).
+- Packaging success does not prove CDATA expressions evaluate or that the bound contract matches
+  routes.
 - Follow repository-required lint, security, test, and package commands. Do not weaken them to obtain
   a passing result.
 - Verify POM, Mule artifact metadata, Java, connector, plugin, and deployment-target compatibility.
-- Check artifact version surfaces, deployment inputs, rollback path, and current-vs-desired version
-  interpretation when relevant.
+- Check artifact version surfaces (including logger/app version properties), deployment inputs,
+  rollback path, and current-vs-desired version interpretation when relevant.
 - Treat deployment overlap as a hypothesis until lifecycle, replica, or before/after evidence supports it.
 
 ## Documentation and operations

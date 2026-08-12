@@ -67,11 +67,17 @@ dependency capacity.
 
 ## Conditional invariants
 
-Record only invariants actually used by this project. Examples include:
+Record only invariants actually used by this project. Prefer mechanism language from
+`mule-development` Classes A–E. Examples include:
 
-- a content hash must change when its documented source fields change;
-- a cache miss must follow a specific source-of-record path;
-- an event must remain idempotent across redelivery;
+- a content hash must change when its documented source fields change (hash fields == outbound DWL);
+- a cache miss must follow a specific source-of-record path; optional cache degrades on store errors;
+- app-driven re-selection classifies permanent vs retryable errors; bounded policies use an attempt
+  budget and terminal state; intentional indefinite retry of only retryable failures is documented;
+  queue/event paths document source redelivery/DLQ when used;
+- the bound API contract (local file or published pin) is the routing authority; copies stay in sync;
+- event listeners read a verified nested payload shape (document the path used in this project);
+- an event or create path remains idempotent across redelivery and failed writeback;
 - a public contract change requires coordinated consumer updates.
 
 | Invariant | Owning source | Affected files | Required validation |
@@ -107,13 +113,17 @@ Read `.agents/skills/mule-ops/SKILL.md` for runtime health analysis and
 ## Development guardrails
 
 - Read `.agents/skills/mule-development/SKILL.md` and complete its post-development checklist for
-  source changes.
+  source changes (Classes A–E: value contracts, expression embedding, contract authority, failure
+  disposition, state/idempotency).
 - Validate query inputs and select every field consumed downstream.
-- Keep batch records and queue messages minimal and serializable.
+- Keep batch records and queue messages minimal and serializable; pin media types for the next
+  consumer.
 - Verify Object Store miss behavior; a `null` default still raises `OS:KEY_NOT_FOUND`.
-- Verify effective local or global error handling and the final caller/source outcome.
+- Verify effective local or global error handling, permanent vs retryable classification, and the
+  final caller/source outcome.
 - Preserve correlation without logging raw payloads or sensitive identifiers.
-- Update contracts, tests, operations guidance, and documentation when behavior changes.
+- Update contracts (bound local file or published version), tests, operations guidance, and
+  documentation when behavior changes.
 
 ## Known gaps and decisions
 

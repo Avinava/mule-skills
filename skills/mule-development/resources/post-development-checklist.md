@@ -1,21 +1,30 @@
 # Post-Development Checklist
 
-Run this checklist after every Mule source change. Apply only the checks relevant to the changed
-path, but always complete privacy, contract, error, test, and diff review.
+Run after every Mule source change. Apply only checks relevant to the changed path, but always
+complete privacy, contract, error disposition, and diff review.
+
+This checklist is the **verification surface** for the five invariant classes in
+`../SKILL.md`. It does not restate full tutorials.
+
+| Class | Question |
+| --- | --- |
+| **A** | Do values match the next consumer's shape, type, and media type? |
+| **B** | Is every embedded `#[…]` still complete after XML/CDATA parsing? |
+| **C** | Does the bound contract (local file or published pin) match routes both ways? |
+| **D** | Is every failure classified, bounded, attributed, and durably signaled? |
+| **E** | Are cache, source, watermark, hash, and event-state behaviors intentional? |
 
 ## Contents
 
 1. [Scope and privacy](#1-scope-and-privacy)
-2. [Contracts and flow behavior](#2-contracts-and-flow-behavior)
-3. [Error handling](#3-error-handling)
-4. [DataWeave and serialization](#4-dataweave-and-serialization)
-5. [Queries and connector inputs](#5-queries-and-connector-inputs)
-6. [Concurrency, queues, and batch](#6-concurrency-queues-and-batch)
-7. [Timeouts, retries, and connections](#7-timeouts-retries-and-connections)
-8. [State and Object Store](#8-state-and-object-store)
-9. [HTTP and correlation](#9-http-and-correlation)
-10. [Build, tests, and documentation](#10-build-tests-and-documentation)
-11. [Quick scan](#11-quick-scan)
+2. [Class A — Value contracts](#2-class-a--value-contracts)
+3. [Class B — Expression embedding](#3-class-b--expression-embedding)
+4. [Class C — Contract authority](#4-class-c--contract-authority)
+5. [Class D — Failure disposition](#5-class-d--failure-disposition)
+6. [Class E — State and idempotency](#6-class-e--state-and-idempotency)
+7. [Concurrency, timeouts, queues, and HTTP](#7-concurrency-timeouts-queues-and-http)
+8. [Build, tests, and documentation](#8-build-tests-and-documentation)
+9. [Quick scan](#9-quick-scan)
 
 ## 1. Scope and privacy
 
@@ -27,143 +36,140 @@ path, but always complete privacy, contract, error, test, and diff review.
 - Use synthetic, structurally minimal test data.
 - Preserve unrelated user-authored changes and existing conventions.
 
-## 2. Contracts and flow behavior
+## 2. Class A — Value contracts
 
-- Cross-check RAML/OAS or event schema against listeners, APIKit routes, request/response mapping,
-  status codes, and error envelopes.
-- Verify every changed `flow-ref` resolves and every renamed flow is updated in tests, logs, alerts,
-  and documentation.
-- Verify all paths: success, alternate branch, empty input, dependency failure, retry exhaustion,
-  and local/global error handling.
-- Confirm `on-error-continue` produces a deliberate successful continuation or asynchronous
-  disposition. Use `on-error-propagate` when the caller or source must observe failure.
-- Confirm queue acknowledgement, redelivery, dead-letter, idempotency, and message-loss behavior
-  before swallowing any error.
+- Pin `output` on multi-branch expressions, `targetValue` attributes, and string concatenations that
+  mix typed variables so media-type inference cannot fail under concurrency.
+- Confirm batch records, persistent queue payloads, and batch-step HTTP bodies use values that
+  serialize on the target runtime (avoid map views / connector objects across batch steps; JSON is
+  commonly appropriate for HTTP bodies inside `<batch:step>`).
+- Remember `default` covers null and **absent** fields; present empty strings/collections need
+  `isEmpty` / first-non-empty selection.
+- Prefer already-known request identifiers over re-deriving from dual attribute/bean accessors;
+  normalize at the system-facing boundary when that app owns the shape.
+- Coerce types to what the target API accepts (for example Number vs String).
+- Confirm MUnit fixtures match the worst-case production shape for the changed path.
+- Validate query inputs; select every field downstream transforms consume. Escape or bind
+  user-derived values with the connector's supported mechanism—presence checks alone do not prevent
+  injection.
+- Confirm empty results, null results, pagination (or single-page limits), and connector-specific
+  result shapes are handled for the changed query path.
+- Save the original message before scatter-gather when later steps need it.
+- Unquoted DW identifiers start with a letter.
+- Import `try` from `dw::Runtime` whenever the script calls `try()`.
 
-## 3. Error handling
+## 3. Class B — Expression embedding
 
-### Parse error payloads defensively
+- For every changed CDATA block that starts with `#[`, confirm the expression ends with `]`
+  **immediately before** the CDATA terminator `]]>` (three closing brackets before `>` when the
+  script ends with `}`: `}]]]>` not `}]]>`).
+- Do not assume sibling header/query/uri blocks prove the edited block is valid.
+- Packaging success is not proof that `#[…]` evaluates; connector Map/MultiMap transform errors after
+  markup edits are Class B until disproven.
 
-`error.errorMessage` or its payload can be absent, binary, text, or already structured. Keep risky
-access inside `try()` and log only sanitized fields:
+Heuristic (repo-relative):
 
-```dataweave
-%dw 2.0
-import try from dw::Runtime
-output application/java
-var parsed = try(() -> read(error.errorMessage.payload, "application/json"))
----
-if (parsed.success) parsed.result else {}
+```bash
+# Flag CDATA that opens an expression and may truncate it (review each hit)
+rg -n '<!\[CDATA\[#\[' -g '*.xml' src || true
 ```
 
-- Import `try` from `dw::Runtime` whenever the script calls `try()`.
-- Do not serialize and log the whole error payload as a fallback.
-- Verify error type access uses supported fields such as `error.errorType.identifier`.
-- Verify structured logger content names the correct enclosing flow and operation.
-- Deduplicate or clearly distinguish the originating failure, retry summary, error logger, and
-  default exception-listener entry.
-- Confirm the path has an effective local or global error strategy; do not add handlers solely to
-  satisfy a count-based rule.
+## 4. Class C — Contract authority
 
-## 4. DataWeave and serialization
+- Identify the **bound** contract on `apikit:config` (or equivalent): local file path **or**
+  published Exchange/Maven pin. An unbound local copy is not runtime authority.
+- For local-bound contracts, edit the bound file and flows; do not invent an Exchange publish unless
+  the project already publishes that artifact.
+- For published-bound contracts, update source of truth, bump/publish pin, repoint APIKit if needed,
+  sync human-facing copies, and align consumers.
+- Inventory routes both ways:
+  - bound resource/method without flow → typically `APIKIT:NOT_IMPLEMENTED` / 501 + startup warnings
+  - path absent from bound contract → typically `APIKIT:NOT_FOUND` / 404
+  - path present, method missing → typically `APIKIT:METHOD_NOT_ALLOWED` / 405
+  - implementing flow with no bound resource → dead path
+- Verify methods, parameters, media types, status codes, and error envelopes against implementation.
+- Confirm `flow-ref` targets and renames update tests, logs, alerts, and docs.
 
-- Confirm unquoted identifiers start with a letter; later characters can include underscores.
-  Quote output keys that require special characters or a leading underscore.
-- Remove only imports proven unused. Keep module imports required by functions in the script.
-- Null-guard optional selectors and avoid defaults that hide required-data errors.
-- Save the original message before scatter-gather when later processors need it; address route
-  results by their verified route index.
-- Choose output media type from the next component's contract.
-- Materialize only when needed; avoid retaining lazy iterators, streams, map views, or
-  connector-specific objects across batch steps or persistent queues.
-- When changing a batch record, variable, or HTTP body between `application/java`, JSON, or another
-  type, run a representative serialization test on the target runtime.
+## 5. Class D — Failure disposition
 
-## 5. Queries and connector inputs
+- Confirm permanent vs retryable classification for new or changed error paths; do not retry typical
+  permanent 4xx inside `until-successful`.
+- Retry 401 only when each attempt can refresh credentials, tokens, or signatures; otherwise treat
+  401 as permanent even if the operation is idempotent.
+- For app-driven re-selection of the same business record (scheduler/poll eligible set): explicit
+  disposition for permanent errors; use attempt budget + terminal state when bounded retry is
+  required—do not force terminal exit on intentional indefinite retryable recovery. For queue/event
+  listeners, prefer source-native redelivery/DLQ when already bounding retry.
+- For `until-successful`, permanent errors must not retry; diagnostics must survive attempt reset
+  (log in-attempt, durable capture, or nested cause)—not only vars that roll back on exhaustion.
+  Regenerate per-attempt auth material when retrying auth-sensitive calls. Bound retries with
+  backoff or jitter where appropriate so many records/replicas do not amplify dependency load.
+- Multi-hop `<try>` (dependency then writeback): attribute the hop that failed; gate "success"
+  messages on evidence the first hop completed.
+- Structured error payloads use stable keys the consumer reads; logger `flowName` matches the
+  enclosing flow.
+- Business-impactful skips are not log-only: durable error, metric, or intentional disposition.
+- `foreach` item isolation: `on-error-continue` when one item must not abort the rest. Do not equate
+  that with batch steps—batch isolates failed records via job/step failure policy; `on-error-continue`
+  on a batch step can hide failures.
+- Parse error payloads defensively (`try` / read); avoid error-handler double faults.
+- `on-error-continue` cannot discard work that still needs processing; queue delivery semantics
+  verified before swallow.
+- Never claim automatic reprocessing without source/queue evidence.
 
-- Validate required identifiers before building a dynamic query.
-- Escape or bind user-derived values using the connector's supported mechanism.
-- Confirm selected fields include every field consumed by downstream transforms and conditions.
-- Confirm empty results, null results, pagination, and connector-specific result shapes are handled.
-- Keep query examples and fixtures entity-neutral; do not copy real object names or identifiers from
-  another project.
+## 6. Class E — State and idempotency
 
-## 6. Concurrency, queues, and batch
+- Object Store: non-null default or explicit `OS:KEY_NOT_FOUND` handling—never `#[null]` as default.
+- OS keys are store-legal types (encode Binary hashes as hex/string). Optional cache degrades to
+  source of record on store errors.
+- Verify TTL, maxEntries, persistence, multi-replica, stale-data, and **atomicity** for changed
+  stores—especially attempt counters or idempotency keys updated by overlapping schedulers/replicas
+  (retrieve-modify-store can lose concurrent updates unless the design accounts for it).
+- Polling/source connector defaults match sibling operations for the installed version when fields
+  required downstream are at risk.
+- Watermark/dedupe hold: document recovery if deploy does not re-emit failed ids.
+- Content-hash projects: hashed fields still match the outbound transform. Adding a consumed field
+  without hashing risks silent skip; removing a field from the transform but not the hash risks churn.
+- Event listeners read the verified nested payload shape for this project.
+- Continuous listeners use an appropriate reconnection strategy for the installed connector.
+- Creates/upserts remain idempotent across retry and failed writeback where duplicates are possible.
 
-- Calculate effective concurrency from source consumers, flow `maxConcurrency`, parallel scopes,
-  batch-job concurrency, replicas, connection pools, and dependency limits.
-- Treat `maxConcurrency < numberOfConsumers` as a deliberate back-pressure choice or review signal.
-- Treat batch block size as a memory and scheduling control, not a direct count of simultaneous
-  dependency calls.
-- Select numeric limits from measured workload and documented dependency capacity; do not reuse
-  values from another project.
-- Keep queue messages minimal and serializable. Pass only fields required by the consumer.
-- Verify whether transient or persistent VM queues are supported on the deployment target and match
-  the required recovery semantics.
-- For lifecycle errors during deployment, verify acknowledgement and redelivery before adding
-  `on-error-continue`. Never claim automatic reprocessing without evidence.
+## 7. Concurrency, timeouts, queues, and HTTP
 
-## 7. Timeouts, retries, and connections
+- Effective concurrency accounts for consumers, `maxConcurrency`, parallel scopes, batch, replicas,
+  pools, and dependency limits.
+- Queue messages stay minimal and serializable.
+- Timeout budget covers inner calls, retries, and error mapping with margin.
+- Confirm idle timeout is not used as a substitute for response/read timeout on active requests
+  (idle typically governs unused persistent connections).
+- Connection pool bounds are deliberate and valid for the installed connector version.
+- For GET, HEAD, or OPTIONS, rely on verified connector body behavior or set `sendBodyMode="NEVER"`
+  when the project needs an explicit no-body guarantee.
+- Correlation propagation verified when end-to-end tracing is claimed.
 
-- Inventory connect, response, read, connection-idle, proxy, retry, and total upstream deadlines.
-- Ensure synchronous inner calls, retries, and error mapping fit within the caller's deadline with
-  margin.
-- Do not compare connection idle lifetime with request response timeout as if they are the same
-  timer.
-- Bound retries, define retryable errors, and include backoff or jitter where appropriate.
-- Confirm retries are safe for the operation's idempotency and do not multiply load beyond the
-  dependency's capacity.
-- Choose connection-pool behavior deliberately and verify special values against the installed
-  connector version.
+## 8. Build, tests, and documentation
 
-## 8. State and Object Store
-
-- Decide whether a missing key is expected or exceptional.
-- Remember that `os:retrieve` throws `OS:KEY_NOT_FOUND` when no key exists and no non-null default is
-  returned. `#[null]` is not a valid miss-suppressing default.
-- For cache-aside behavior, use a collision-safe non-null sentinel or handle only
-  `OS:KEY_NOT_FOUND` in a Try scope; keep store-unavailable and invalid-key failures visible.
-- Verify TTL, persistence, multi-replica access, atomicity, and stale-data behavior.
-- Confirm keys and values contain no secret or unnecessary personal data.
-
-## 9. HTTP and correlation
-
-- Confirm request method, path, query parameters, headers, body, and expected media type match the
-  contract.
-- For GET, HEAD, or OPTIONS, rely on verified connector behavior or set `sendBodyMode="NEVER"` when
-  the project needs an explicit guarantee. Do not add it mechanically when `AUTO` already meets the
-  installed connector's behavior.
-- Verify outbound correlation propagation configuration and inbound adoption before promising
-  end-to-end traceability.
-- Confirm error mapping preserves a safe correlation reference without returning internal details.
-- Avoid raw request/response logging; prefer safe route, outcome, duration, and redacted identifiers.
-
-## 10. Build, tests, and documentation
-
-- Run the project's formatter or linter and focused MUnit tests first, then the required full build.
-- Confirm tests cover the changed success path and meaningful failure path rather than only flow
-  execution.
-- Cross-check API specification routes against implementation and report intentional gaps.
-- Match operational version metadata to the packaged artifact when the project logs a version.
-- Update owning documentation, diagrams, runbooks, configuration tables, and changelog when behavior
+- Run formatter/linter and focused MUnit for the changed path, then the required full build.
+- Tests cover success and meaningful failure; fixtures can fail the real mechanism.
+- Operational version metadata matches the packaged artifact when the project logs a version.
+- Update owning docs, runbooks, recovery notes, `AGENTS.md` invariants, and changelog when behavior
   changed.
 - Review the final diff for unsupported assumptions and unrelated edits.
 
-## 11. Quick scan
+## 9. Quick scan
 
-| Priority | Check |
-| --- | --- |
-| High | No secrets, client-derived identity, payloads, or private endpoints introduced |
-| High | Contract, caller outcome, and queue delivery semantics remain correct |
-| High | Error handlers cannot double-fault or silently discard required work |
-| High | Batch and queue boundaries contain supported serializable values |
-| High | Retry and concurrency cannot exceed the proven dependency budget |
-| Medium | Timeout budget covers inner work, retries, and error mapping |
-| Medium | Query inputs are validated and all consumed fields are selected |
-| Medium | Correlation propagation and log attribution are verified |
-| Medium | Object Store miss, TTL, persistence, and failure behavior are intentional |
-| Medium | Queue payloads are minimal and recovery behavior is tested |
-| Low | Imports, names, versions, docs, and diagrams remain aligned |
+| Priority | Check | Class |
+| --- | --- | --- |
+| High | No secrets or client-derived identity introduced | — |
+| High | Embedded `#[…]` intact after CDATA/XML (Class B) | B |
+| High | Bound contract (local file or published pin) and routes agree both ways (Class C) | C |
+| High | Failures classified and attributed; permanent/poison bounded; retryable policy explicit; 401 gated (Class D) | D |
+| High | Batch/queue serialization safe; no delivery loss | A/D |
+| High | Retries and concurrency within proven dependency budget | D |
+| Medium | Media types, empty vs null, dual accessors, fixture fidelity | A |
+| Medium | OS miss/keys, source defaults, watermark recovery, hash parity | E |
+| Medium | Timeout budget, minimal queues, correlation | — |
+| Low | Names, imports, version strings, docs aligned | — |
 
 ## Project-local additions
 

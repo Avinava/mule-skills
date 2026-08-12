@@ -118,9 +118,11 @@ the optional questions in Open questions and invite the user to answer any item 
 
 ### 4. Review by domain
 
-Apply every relevant domain from `references/review-domains.md`. For change review, focus on changed
-behavior and directly affected dependencies. For project and readiness reviews, cover all domains
-and disclose any area not inspected.
+Apply every relevant domain from `references/review-domains.md`. Those domains encode the same
+mechanism classes as `mule-development` (value contracts, expression embedding, contract authority,
+failure disposition, state/idempotency). For change review, focus on changed behavior and directly
+affected dependencies. For project and readiness reviews, cover all domains and disclose any area
+not inspected.
 
 Prioritize behavioral correctness, contract compatibility, security, delivery semantics, failure
 outcomes, operability, and test evidence. Put non-defect design and maintainability suggestions in a

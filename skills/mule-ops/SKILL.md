@@ -217,6 +217,15 @@ coverage cannot support attribution.
   `X-CORRELATION-ID`, but outbound propagation depends on configuration.
 - Default log level, custom error handling, and proxy behavior determine where a failure appears;
   absence from an error-grouping tool is not evidence of absence.
+- The same error signature repeating every scheduler or poll cycle may be a dependency outage, a
+  permanent/poison record without terminal disposition, or intentional indefinite retry of retryable
+  errors. Hand off to troubleshooting Class D checks before assuming a terminal state is missing.
+- Logged application version that does not match the packaged artifact makes before/after and
+  deploy correlation unreliable—confirm version surfaces before attributing behavior to a release.
+- High-volume cache-miss ERROR noise can mean Object Store miss handling treats expected misses as
+  exceptional; confirm miss policy before scaling infrastructure.
+- Do not recommend concurrency or pool numbers without measured traffic, replica count, and
+  dependency capacity for this environment.
 
 ## Completion checklist
 
@@ -224,5 +233,7 @@ coverage cannot support attribution.
 - Confirm counts represent unique transactions or clearly label raw log-entry counts.
 - Separate observations, hypotheses, confirmed causes, and recommendations.
 - Confirm current state after any deployment-window finding.
+- Flag repeating identical errors for disposition investigation (permanent/poison vs intentional retry).
+- Match logged app version to packaged artifact when version metadata exists.
 - Remove secrets, payloads, identities, private endpoints, and raw correlation identifiers.
 - State what was not checked and why.
