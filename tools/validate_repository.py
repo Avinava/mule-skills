@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -11,6 +12,8 @@ from pathlib import Path
 FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SIBLING_RE = re.compile(r"\.\./([a-z0-9][a-z0-9-]*)/")
+PLACEHOLDER_RE = re.compile(r"<skills-root>/([a-z0-9][a-z0-9-]*)/")
 CLASS_NAMES = (
     "Class A — Value contracts",
     "Class B — Expression embedding",
@@ -65,10 +68,10 @@ def validate_skills(root: Path) -> list[str]:
 
 def validate_local_links(root: Path) -> list[str]:
     findings: list[str] = []
-    markdown_files = [root / "README.md", root / "SETUP.md"]
+    markdown_files = list(root.glob("*.md"))
     markdown_files.extend((root / "skills").rglob("*.md"))
-    markdown_files.extend((root / "templates").rglob("*.md"))
-    markdown_files.extend((root / "workflows").rglob("*.md"))
+    markdown_files.extend((root / "install").rglob("*.md"))
+    markdown_files.extend((root / "docs").rglob("*.md"))
 
     for path in sorted(set(markdown_files)):
         if not path.is_file():
@@ -108,10 +111,10 @@ def validate_alignment(root: Path) -> list[str]:
             )
 
     required_text = {
-        "skills/review-mulesoft-project/references/review-domains.md": ("Classes A", "cross-cutting"),
+        "skills/mule-review/references/review-domains.md": ("Classes A", "cross-cutting"),
         "skills/mule-troubleshooting/SKILL.md": ("Classes A", "cross-cutting"),
         "skills/mule-ops/SKILL.md": ("Classes A", "cross-cutting"),
-        "templates/AGENTS.md": ("Classes A", "cross-cutting"),
+        "install/templates/AGENTS.md": ("Classes A", "cross-cutting"),
     }
     for relative_path, tokens in required_text.items():
         text = (root / relative_path).read_text(encoding="utf-8")
@@ -153,11 +156,139 @@ def validate_alignment(root: Path) -> list[str]:
     return findings
 
 
+def validate_plugin_manifests(root: Path) -> list[str]:
+    """Check the Claude Code plugin and marketplace manifests without any dependency."""
+    findings: list[str] = []
+    plugin_path = root / ".claude-plugin/plugin.json"
+    marketplace_path = root / ".claude-plugin/marketplace.json"
+
+    plugin: dict[str, object] = {}
+    if not plugin_path.is_file():
+        findings.append(f"{plugin_path}: missing plugin manifest")
+    else:
+        try:
+            plugin = json.loads(plugin_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            findings.append(f"{plugin_path}: invalid JSON: {exc}")
+        else:
+            name = plugin.get("name")
+            if not isinstance(name, str) or not NAME_RE.fullmatch(name):
+                findings.append(f"{plugin_path}: name must be kebab-case, got {name!r}")
+            if not isinstance(plugin.get("version"), str):
+                findings.append(f"{plugin_path}: missing string version")
+
+    if not marketplace_path.is_file():
+        findings.append(f"{marketplace_path}: missing marketplace manifest")
+        return findings
+
+    try:
+        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        findings.append(f"{marketplace_path}: invalid JSON: {exc}")
+        return findings
+
+    for required in ("name", "owner", "plugins"):
+        if not marketplace.get(required):
+            findings.append(f"{marketplace_path}: missing non-empty {required}")
+
+    name = marketplace.get("name")
+    if isinstance(name, str) and not NAME_RE.fullmatch(name):
+        findings.append(f"{marketplace_path}: name must be kebab-case, got {name!r}")
+    if isinstance(marketplace.get("owner"), dict) and not marketplace["owner"].get("name"):
+        findings.append(f"{marketplace_path}: owner.name is required")
+
+    entries = marketplace.get("plugins")
+    if not isinstance(entries, list):
+        findings.append(f"{marketplace_path}: plugins must be a list")
+        return findings
+
+    for index, entry in enumerate(entries):
+        label = f"{marketplace_path}: plugins[{index}]"
+        if not isinstance(entry, dict):
+            findings.append(f"{label}: must be an object")
+            continue
+        entry_name = entry.get("name")
+        if not isinstance(entry_name, str) or not NAME_RE.fullmatch(entry_name):
+            findings.append(f"{label}: name must be kebab-case, got {entry_name!r}")
+        source = entry.get("source")
+        if not source:
+            findings.append(f"{label}: missing source")
+        elif isinstance(source, str):
+            if not source.startswith("./"):
+                findings.append(f"{label}: relative source must start with './', got {source!r}")
+            elif not (root / source).is_dir():
+                findings.append(f"{label}: source does not resolve: {source}")
+        version = entry.get("version")
+        if version is not None and version != plugin.get("version"):
+            findings.append(
+                f"{label}: version {version!r} disagrees with plugin.json {plugin.get('version')!r}"
+            )
+        if isinstance(source, str) and source in ("./", "."):
+            if entry_name != plugin.get("name"):
+                findings.append(
+                    f"{label}: name {entry_name!r} must match plugin.json "
+                    f"{plugin.get('name')!r} when source is the repository root"
+                )
+            for skill_dir in sorted((root / "skills").glob("*/")):
+                if not (skill_dir / "SKILL.md").is_file():
+                    findings.append(f"{skill_dir}: directory under skills/ has no SKILL.md")
+
+    return findings
+
+
+def validate_mcp_configs(root: Path) -> list[str]:
+    """The plugin's .mcp.json and the generic host template must not drift apart."""
+    findings: list[str] = []
+    plugin_config = root / ".mcp.json"
+    host_config = root / "install/hosts/mcp.json"
+    for path in (plugin_config, host_config):
+        if not path.is_file():
+            findings.append(f"{path}: missing MCP configuration")
+            return findings
+    try:
+        plugin_servers = json.loads(plugin_config.read_text(encoding="utf-8"))["mcpServers"]
+        host_servers = json.loads(host_config.read_text(encoding="utf-8"))["mcpServers"]
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        findings.append(f"{plugin_config} / {host_config}: unreadable mcpServers: {exc}")
+        return findings
+    if plugin_servers != host_servers:
+        findings.append(
+            f"{plugin_config} and {host_config} disagree; every host must get the same pins"
+        )
+    return findings
+
+
+def validate_skill_portability(root: Path) -> list[str]:
+    """Skills must not assume one install layout: no host-specific paths, siblings must exist."""
+    findings: list[str] = []
+    skills_root = root / "skills"
+    known = {path.name for path in skills_root.glob("*/") if (path / "SKILL.md").is_file()}
+
+    for path in sorted(skills_root.rglob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        if ".agents/skills/" in text and "when vendored" not in text:
+            findings.append(
+                f"{path}: hardcodes '.agents/skills/'; use <skill-root>/<skills-root> instead"
+            )
+        referenced = set(PLACEHOLDER_RE.findall(text))
+        # From a SKILL.md, '../name/' means a sibling skill. Deeper files use '../' to reach
+        # their own skill's other folders, so only the top level can be checked this way.
+        if path.parent.parent == skills_root:
+            referenced |= set(SIBLING_RE.findall(text))
+        for name in sorted(referenced):
+            if name not in known:
+                findings.append(f"{path}: references unknown sibling skill: {name}")
+    return findings
+
+
 def validate_repository(root: Path) -> list[str]:
     findings: list[str] = []
     findings.extend(validate_skills(root))
     findings.extend(validate_local_links(root))
     findings.extend(validate_alignment(root))
+    findings.extend(validate_plugin_manifests(root))
+    findings.extend(validate_skill_portability(root))
+    findings.extend(validate_mcp_configs(root))
     return findings
 
 

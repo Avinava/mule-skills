@@ -3,6 +3,8 @@
 > Generate this file from current repository evidence. Remove every unused section and unresolved
 > placeholder. Do not copy identity, topology, examples, or operating values from another project.
 
+<!-- SKILLS_LOCATION -->
+
 ## Purpose and boundary
 
 <!-- Describe the business capability, intended users, application role, deployment target, and
@@ -99,8 +101,7 @@ Use only commands verified in this repository:
 | Deploy | <!-- Workflow/tool --> | <!-- Environment inputs, no values --> |
 
 Do not assume configuration is deployed separately, tests should be skipped, or a build implies a
-release. Read `.agents/workflows/build.md` for validation, packaging, and explicitly requested
-release actions. Use the repository's release policy.
+release. Use the `mule-build` skill for validation, packaging, and explicitly requested release actions. Use the repository's release policy.
 
 ## Operational checks
 
@@ -110,13 +111,12 @@ release actions. Use the repository's release policy.
 
 Record actual telemetry coverage before comparing applications. Treat deploy overlap, missing error
 logs, retry summaries, and memory sawtooth patterns as signals rather than proof of root cause.
-Read `.agents/skills/mule-ops/SKILL.md` for runtime health analysis and
-`.agents/skills/mule-troubleshooting/SKILL.md` when a causal diagnosis is required.
+Use the `mule-ops` skill for runtime health analysis and `mule-troubleshooting` when a causal
+diagnosis is required.
 
 ## Development guardrails
 
-- Read `.agents/skills/mule-development/SKILL.md` and complete its post-development checklist for
-  source changes (Classes A–E: value contracts, expression embedding, contract authority, failure
+- Use the `mule-development` skill and complete its post-development checklist for source changes (Classes A–E: value contracts, expression embedding, contract authority, failure
   disposition, state/idempotency; plus applicable cross-cutting gates).
 - Validate query inputs and select every field consumed downstream.
 - Keep batch records and queue messages minimal and serializable; pin media types for the next
@@ -139,13 +139,11 @@ Read `.agents/skills/mule-ops/SKILL.md` for runtime health analysis and
 
 ## Documentation
 
-Read `.agents/skills/document-mulesoft-project/SKILL.md` for evidence-backed documentation creation
-and targeted refreshes. Link the current documentation set here:
+Use the `mule-docs` skill for evidence-backed documentation creation and targeted refreshes. Link the current documentation set here:
 
 - <!-- Documentation path — Description -->
 
 ## Review
 
-Read `.agents/skills/review-mulesoft-project/SKILL.md` for change, PR, whole-project, and
-release-readiness reviews. Reviews report evidence-backed findings and remediation options without
+Use the `mule-review` skill for change, PR, whole-project, and release-readiness reviews. Reviews report evidence-backed findings and remediation options without
 modifying source or PR state unless explicitly requested.

@@ -19,6 +19,14 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Validate repository structure
-        run: python scripts/validate_repository.py .
+        run: python tools/validate_repository.py .
       - name: Audit reusable documentation
-        run: python skills/document-mulesoft-project/scripts/audit_documentation.py .
+        run: python skills/mule-docs/scripts/audit_documentation.py .
+      - name: Lint the installer
+        run: shellcheck install/install.sh
+      - name: Validate marketplace manifest
+        run: npx -y @anthropic-ai/claude-code plugin validate . --strict
+      - name: Validate plugin manifest
+        # `plugin validate <dir>` only checks the marketplace when both files exist,
+        # so the plugin manifest needs its own invocation.
+        run: npx -y @anthropic-ai/claude-code plugin validate .claude-plugin/plugin.json --strict

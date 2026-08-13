@@ -1,5 +1,5 @@
 ---
-name: review-mulesoft-project
+name: mule-review
 description: Review MuleSoft Mule 4 working changes, commit ranges, branches, pull requests, whole repositories, or release readiness and return prioritized evidence-backed findings with remediation options. Use for code review, PR review, project health audits, architecture and contract consistency checks, incident-prevention reviews, and pre-release gates covering Mule XML, RAML/OAS, DataWeave, connectors, configuration, MUnit, deployment, operations, security, privacy, and documentation. Review and report by default; do not modify source, post comments, approve changes, or perform release actions unless the user explicitly requests them.
 ---
 
@@ -30,12 +30,14 @@ Read these files directly from this skill folder for every review:
 Route to sibling Mule skills only when their specialized workflow is material to the review. Do not
 load every sibling skill by default, and do not fail when one is absent:
 
-- Read `../mule-development/SKILL.md` and its post-development checklist when a changed Mule
-  implementation or contract needs checks beyond the bundled review domains.
-- Read `../mule-troubleshooting/SKILL.md` when a suspected defect requires causal analysis.
-- Read `../mule-ops/SKILL.md` only for authorized runtime verification.
-- Read `../document-mulesoft-project/SKILL.md` when using its inventory, documentation audit,
-  privacy checks, or Mermaid guidance.
+- Use `mule-development` and its post-development checklist when a changed Mule implementation or
+  contract needs checks beyond the bundled review domains.
+- Use `mule-troubleshooting` when a suspected defect requires causal analysis.
+- Use `mule-ops` only for authorized runtime verification.
+- Use `mule-docs` when using its inventory, documentation audit, privacy checks, or Mermaid guidance.
+
+Invoke a sibling skill by name on hosts that support skill invocation; otherwise read its `SKILL.md`
+from `<skills-root>/<name>/SKILL.md`.
 
 This review skill owns review scope, evidence policy, and interactive report formatting. Treat
 sibling instructions as specialized helpers; their stop conditions and durable-document path rules
@@ -93,8 +95,12 @@ release candidate and the repository's actual release policy.
 Use the documentation skill's read-only inventory when available:
 
 ```bash
-python3 ../document-mulesoft-project/scripts/inventory_mule_project.py <project-root> --pretty
+python3 <skills-root>/mule-docs/scripts/inventory_mule_project.py <project-root> --pretty
 ```
+
+`<skills-root>` is the directory holding the `mule-*` skills: `${CLAUDE_PLUGIN_ROOT}/skills` when
+installed as a Claude Code plugin, `.agents/skills` when vendored into the project. Skip this step
+when the `mule-docs` skill is not installed.
 
 The inventory's project classification is one signal, not a veto: reconcile it with direct source
 and the requested boundary. Then inspect relevant source directly. Build a working ledger of material claims and their

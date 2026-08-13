@@ -1,6 +1,6 @@
 ---
 name: mule-development
-description: Create or modify MuleSoft Mule 4 flows, DataWeave, error handling, connectors, queues, batch jobs, configuration, and MUnit tests using evidence-based project conventions and post-change validation. Use when implementing Mule application source or contract changes. Inspect runtime and connector versions before applying version-sensitive guidance, preserve existing contracts unless the user requests a breaking change, and route review-only work to the review-mulesoft-project skill.
+description: Create or modify MuleSoft Mule 4 flows, DataWeave, error handling, connectors, queues, batch jobs, configuration, and MUnit tests using evidence-based project conventions and post-change validation. Use when implementing Mule application source or contract changes. Inspect runtime and connector versions before applying version-sensitive guidance, preserve existing contracts unless the user requests a breaking change, and route review-only work to the mule-review skill.
 ---
 
 # MuleSoft Development
@@ -84,8 +84,10 @@ defect can be release-blocking when it risks incorrect results, duplicates, or d
 
 ### 3. Validate behavior and evidence
 
-1. Run `python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .` whenever
-   Mule XML changes in an installed project.
+1. Run `python3 <skill-root>/scripts/check_embedded_expressions.py .` whenever
+   Mule XML changes in an installed project. `<skill-root>` is this skill's own directory:
+   `${CLAUDE_PLUGIN_ROOT}/skills/mule-development` when installed as a Claude Code plugin,
+   `.agents/skills/mule-development` when vendored into the project.
 2. Run the project's formatter or linter and focused MUnit tests for the changed path.
 3. Exercise success, alternate, empty/invalid input, dependency failure, retry exhaustion or terminal
    disposition, and recovery paths that are material to the change.
