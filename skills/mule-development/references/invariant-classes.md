@@ -124,8 +124,12 @@ an embedding hypothesis until disproven.
 Run:
 
 ```bash
-python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .
+python3 <skill-root>/scripts/check_embedded_expressions.py .
 ```
+
+`<skill-root>` is the `mule-development` skill directory:
+`${CLAUDE_PLUGIN_ROOT}/skills/mule-development` when installed as a Claude Code plugin,
+`.agents/skills/mule-development` when vendored into the project.
 
 The checker scans `src/**/*.xml` CDATA content beginning with `#[` and reports expressions whose
 trimmed CDATA body does not end with `]`. Inspect changed direct XML attributes and non-CDATA
