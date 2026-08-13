@@ -51,6 +51,19 @@ a hardcoded path or an unknown sibling-skill reference reappears.
 
 `workflows/` was vacated because Claude Code reserves that directory for JavaScript workflow scripts.
 
+### Naming
+
+The marketplace and the plugin are both named `mule-skills`, so the install reads
+`mule-skills@mule-skills`. This is deliberate: it matches
+[`document-design-system`](https://github.com/Avinava/document-design-system), which already ships
+one repository as one plugin with its own self-named marketplace. Consistency across repositories
+beats an owner-scoped marketplace name here, and renaming a published marketplace is expensive —
+users must remove it, which uninstalls its plugins, then re-add it.
+
+If a single catalog spanning several repositories is ever wanted, the cheap path is a new
+`Avinava/claude-plugins` repository whose `marketplace.json` lists each plugin with a `github`
+source. That needs no change to this repository or to any existing one.
+
 ### Other
 
 - Added `LICENSE` (MIT). The README previously said "private repository — internal use only", which
