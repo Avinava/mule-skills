@@ -8,7 +8,7 @@ installing it no longer requires an agent to execute a copy runbook.
 ### Install
 
 - **Claude Code:** `/plugin marketplace add Avinava/mule-skills` then
-  `/plugin install mule-skills@sfdxy`. Skills and the three pinned MCP servers ship with the
+  `/plugin install mule-skills@mule-skills`. Skills and the three pinned MCP servers ship with the
   plugin.
 - **Other hosts:** `install/install.sh` vendors the skills into `.agents/skills/`, detects which
   hosts you use, and merges MCP configuration without overwriting existing entries. It is idempotent
@@ -53,22 +53,25 @@ a hardcoded path or an unknown sibling-skill reference reappears.
 
 ### Naming
 
-The plugin is `mule-skills`; the marketplace is `sfdxy`. The install therefore reads
-`/plugin install mule-skills@sfdxy`.
+Both the plugin and the marketplace are named `mule-skills`, so the install reads
+`/plugin install mule-skills@mule-skills`.
 
-The two names are deliberately different. `@` means "from", so the identifier names the plugin and
-the catalog it came from — naming both sides the same would read as a stutter and hide which side is
-which. A marketplace is a catalog, so it takes the publisher's name: `sfdxy` is the npm scope behind
-`@sfdxy/mule-build`, `@sfdxy/mule-lint`, and `@sfdxy/anypoint-connect`, the three MCP servers this
-plugin ships, so the plugin and its tooling read as one publisher's work.
+The repetition is deliberate, and it is the safe choice. Marketplace names are global per user:
+adding a second marketplace under a name already registered silently replaces the first, and the
+plugins installed from the replaced catalog stop resolving — they report `failed to load` and
+`plugin details` cannot find them. Because this repository publishes its own catalog rather than
+being listed in a shared one, the only name guaranteed not to collide with another catalog is the
+repository's own.
 
-Marketplace names are global per user, and adding a second marketplace under an existing name
-silently replaces the first, so a publisher-scoped name collides far less than a topical one. The
-marketplace name deliberately does not have to match the repository path typed in
-`/plugin marketplace add`; the two are separate identifiers.
+A publisher-scoped name such as an npm scope would read better in isolation, but it is exactly the
+name that collides: every repository publishing its own catalog under one publisher name would
+overwrite the previous one. That trade is only worth making behind a single shared catalog
+repository that lists each plugin with a `github` source, which is the path to take if these ever
+need to install from one marketplace.
 
-This was worth settling before publication: renaming a marketplace afterwards forces every user to
-remove it, which uninstalls the plugins installed from it, and then re-add it.
+Note that a marketplace name does not have to match the repository path typed in
+`/plugin marketplace add` — the two are separate identifiers — so this repetition is a choice about
+collision safety, not a constraint.
 
 ### Other
 
