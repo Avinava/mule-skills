@@ -8,7 +8,7 @@ installing it no longer requires an agent to execute a copy runbook.
 ### Install
 
 - **Claude Code:** `/plugin marketplace add Avinava/mule-skills` then
-  `/plugin install mule-skills@mule-skills`. Skills and the three pinned MCP servers ship with the
+  `/plugin install mule-skills@avinava`. Skills and the three pinned MCP servers ship with the
   plugin.
 - **Other hosts:** `install/install.sh` vendors the skills into `.agents/skills/`, detects which
   hosts you use, and merges MCP configuration without overwriting existing entries. It is idempotent
@@ -53,16 +53,18 @@ a hardcoded path or an unknown sibling-skill reference reappears.
 
 ### Naming
 
-The marketplace and the plugin are both named `mule-skills`, so the install reads
-`mule-skills@mule-skills`. This is deliberate: it matches
-[`document-design-system`](https://github.com/Avinava/document-design-system), which already ships
-one repository as one plugin with its own self-named marketplace. Consistency across repositories
-beats an owner-scoped marketplace name here, and renaming a published marketplace is expensive —
-users must remove it, which uninstalls its plugins, then re-add it.
+The plugin is `mule-skills`; the marketplace is `avinava`. The install therefore reads
+`/plugin install mule-skills@avinava`.
 
-If a single catalog spanning several repositories is ever wanted, the cheap path is a new
-`Avinava/claude-plugins` repository whose `marketplace.json` lists each plugin with a `github`
-source. That needs no change to this repository or to any existing one.
+The two names are deliberately different. `@` means "from", so the identifier names the plugin and
+the catalog it came from — naming both sides the same would read as a stutter and hide which side is
+which. Marketplace names are also global per user, and adding a second marketplace under an existing
+name silently replaces the first, so a publisher-scoped name collides far less than a topical one.
+`avinava` is the same identity already typed in `/plugin marketplace add Avinava/mule-skills`, so
+there is no unexplained jump between the two commands.
+
+This was worth settling before publication: renaming a marketplace afterwards forces every user to
+remove it, which uninstalls the plugins installed from it, and then re-add it.
 
 ### Other
 
