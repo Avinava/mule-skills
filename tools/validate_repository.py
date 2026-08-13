@@ -176,6 +176,13 @@ def validate_plugin_manifests(root: Path) -> list[str]:
                 findings.append(f"{plugin_path}: name must be kebab-case, got {name!r}")
             if not isinstance(plugin.get("version"), str):
                 findings.append(f"{plugin_path}: missing string version")
+            for field in ("description", "license", "repository", "homepage"):
+                if not plugin.get(field):
+                    findings.append(f"{plugin_path}: missing non-empty {field}")
+            if "displayName" in plugin:
+                findings.append(
+                    f"{plugin_path}: remove displayName: it is not in the schema and is ignored"
+                )
 
     if not marketplace_path.is_file():
         findings.append(f"{marketplace_path}: missing marketplace manifest")
@@ -196,6 +203,22 @@ def validate_plugin_manifests(root: Path) -> list[str]:
         findings.append(f"{marketplace_path}: name must be kebab-case, got {name!r}")
     if isinstance(marketplace.get("owner"), dict) and not marketplace["owner"].get("name"):
         findings.append(f"{marketplace_path}: owner.name is required")
+
+    # Marketplace names are global per user, and this repository publishes its
+    # own catalog rather than being listed in a shared one. Registering a second
+    # catalog under a name already in use silently displaces the first and
+    # orphans the plugins installed from it. Naming the catalog after the
+    # repository makes the name unique by construction. This is the rule settled
+    # in #5; nothing enforced it until now.
+    repository = plugin.get("repository")
+    if isinstance(name, str) and isinstance(repository, str):
+        repository_name = repository.rstrip("/").rsplit("/", 1)[-1]
+        if name != repository_name:
+            findings.append(
+                f"{marketplace_path}: marketplace name {name!r} must match the "
+                f"repository name {repository_name!r} — a catalog name shared "
+                "with another repository silently displaces its marketplace"
+            )
 
     entries = marketplace.get("plugins")
     if not isinstance(entries, list):
@@ -218,16 +241,43 @@ def validate_plugin_manifests(root: Path) -> list[str]:
                 findings.append(f"{label}: relative source must start with './', got {source!r}")
             elif not (root / source).is_dir():
                 findings.append(f"{label}: source does not resolve: {source}")
-        version = entry.get("version")
-        if version is not None and version != plugin.get("version"):
-            findings.append(
-                f"{label}: version {version!r} disagrees with plugin.json {plugin.get('version')!r}"
-            )
+        # A field duplicated from plugin.json is a field that can drift.
+        for field in ("version", "license", "repository", "homepage"):
+            value = entry.get(field)
+            if value is not None and plugin.get(field) is not None and value != plugin[field]:
+                findings.append(
+                    f"{label}: {field} {value!r} disagrees with plugin.json {plugin[field]!r}"
+                )
+
+        if entry.get("author") != marketplace.get("owner"):
+            findings.append(f"{label}: author must match the marketplace owner")
+
+        # A marketplace browser reads this entry, not plugin.json, so the entry
+        # has to carry its own discovery metadata.
+        for field in ("description", "license", "repository", "category", "tags"):
+            if not entry.get(field):
+                findings.append(f"{label}: missing non-empty {field}")
+
+        # `displayName` is in neither the marketplace nor the plugin-manifest
+        # schema, and both leave additionalProperties unset — so it validates
+        # while the CLI ignores it and renders `name`. A field that looks
+        # load-bearing but does nothing is worse than an absent one.
+        if "displayName" in entry:
+            findings.append(f"{label}: remove displayName: it is not in the schema and is ignored")
+
         if isinstance(source, str) and source in ("./", "."):
             if entry_name != plugin.get("name"):
                 findings.append(
                     f"{label}: name {entry_name!r} must match plugin.json "
                     f"{plugin.get('name')!r} when source is the repository root"
+                )
+            # With the source at the repository root, skills/ is scanned by
+            # default; declaring it explicitly can replace that scan rather
+            # than extend it, which silently drops skills.
+            if "skills" in plugin:
+                findings.append(
+                    f"{plugin_path}: remove \"skills\": skills/ is scanned by default, "
+                    "and declaring it can replace that scan rather than extend it"
                 )
             for skill_dir in sorted((root / "skills").glob("*/")):
                 if not (skill_dir / "SKILL.md").is_file():
