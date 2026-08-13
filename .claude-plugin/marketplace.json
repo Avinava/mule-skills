@@ -10,8 +10,11 @@
     {
       "name": "mule-skills",
       "source": "./",
-      "displayName": "Mule Skills",
       "description": "Evidence-backed MuleSoft Mule 4 agent skills for documentation, development, troubleshooting, operations, review, and build.",
+      "author": {
+        "name": "Avi",
+        "url": "https://github.com/Avinava"
+      },
       "category": "development",
       "tags": [
         "mulesoft",

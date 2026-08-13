@@ -204,6 +204,70 @@ class PluginManifestTests(unittest.TestCase):
             self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.24.1", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagree; every host must get the same pins")
 
+    def test_rejects_marketplace_named_for_the_publisher(self):
+        """The invariant #5 settled, which nothing enforced until now.
+
+        Marketplace names are global per user, so a catalog name shared across
+        repositories silently displaces the other repository's marketplace and
+        orphans the plugins installed from it.
+        """
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / ".claude-plugin/marketplace.json",
+                '"name": "mule-skills",\n  "description"',
+                '"name": "sfdxy",\n  "description"',
+            )
+            self.assert_finding(root, "must match the repository name")
+
+    def test_rejects_entry_missing_discovery_metadata(self):
+        """A marketplace browser reads the entry, not plugin.json."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(root / ".claude-plugin/marketplace.json", '"license": "MIT",', "")
+            self.assert_finding(root, "missing non-empty license")
+
+    def test_rejects_entry_drifting_from_plugin_manifest(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / ".claude-plugin/marketplace.json",
+                '"repository": "https://github.com/Avinava/mule-skills"',
+                '"repository": "https://github.com/Avinava/somewhere-else"',
+            )
+            self.assert_finding(root, "disagrees with plugin.json")
+
+    def test_rejects_entry_author_owner_mismatch(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / ".claude-plugin/marketplace.json",
+                '"author": {\n        "name": "Avi",',
+                '"author": {\n        "name": "Nobody",',
+            )
+            self.assert_finding(root, "author must match the marketplace owner")
+
+    def test_rejects_display_name(self):
+        """Not in either schema, and ignored by the CLI, which renders `name`."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / ".claude-plugin/plugin.json",
+                '"name": "mule-skills",',
+                '"name": "mule-skills",\n  "displayName": "Mule Skills",',
+            )
+            self.assert_finding(root, "remove displayName")
+
+    def test_rejects_reintroduced_skills_key(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / ".claude-plugin/plugin.json",
+                '"name": "mule-skills",',
+                '"name": "mule-skills",\n  "skills": "./skills/",',
+            )
+            self.assert_finding(root, 'remove "skills"')
+
 
 class RepositoryValidationTests(unittest.TestCase):
     def test_help(self):

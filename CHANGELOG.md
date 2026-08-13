@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.0.1
+
+Manifest hygiene, and validation for the packaging rules that were documented but not
+enforced. No skill, MCP, or install-path changes.
+
+### Removed
+
+- **`displayName` from both manifests.** It is in neither the marketplace nor the
+  plugin-manifest schema. Both schemas leave `additionalProperties` unset, so it validated
+  rather than erroring — but the CLI ignores it and renders `name`, which is why the plugin
+  always listed as `mule-skills@mule-skills` despite declaring `"Mule Skills"`. A field that
+  looks load-bearing but does nothing is worse than an absent one. The validator now rejects
+  it so it cannot come back.
+
+### Added
+
+- **The marketplace-name rule is now enforced.** `1.0.0` settled that the catalog takes the
+  repository's name, because marketplace names are global per user and a shared catalog name
+  silently displaces another repository's marketplace. That reasoning lived only in prose;
+  `validate_repository.py` now fails if the marketplace name and the repository name in
+  `plugin.json` disagree.
+- **Cross-manifest drift checks.** Only `version` was compared between the two manifests.
+  `license`, `repository`, and `homepage` are now compared too, and the marketplace entry's
+  `author` must match the marketplace `owner`.
+- **Entry discovery metadata is required.** A marketplace browser reads the entry in
+  `marketplace.json`, not `plugin.json`, so `description`, `license`, `repository`,
+  `category`, and `tags` must all be present on the entry. The entry also now declares
+  `author`, which it previously omitted.
+- **Plugin manifest completeness.** `description`, `license`, `repository`, and `homepage`
+  are now required rather than assumed.
+- **A reintroduced `"skills"` key is rejected.** With `source: "./"`, `skills/` is scanned by
+  default and an explicit declaration can replace that scan rather than extend it, silently
+  dropping skills.
+- Six tests asserting each new check actually rejects. A check that never fires is
+  indistinguishable from no check at all. The suite goes from 16 tests to 22.
+
 ## 1.0.0
 
 First packaged release. The repository is now both a Claude Code plugin and a plugin marketplace, so
