@@ -4,7 +4,7 @@
 #
 # Claude Code users should prefer the plugin install instead:
 #   /plugin marketplace add Avinava/mule-skills
-#   /plugin install mule-skills@avinava
+#   /plugin install mule-skills@sfdxy
 #
 # This script covers every other agent host by vendoring the skills into
 # .agents/skills/ and merging host MCP configuration without clobbering it.
@@ -140,7 +140,7 @@ case "$HOSTS" in
     if [ -d "$TARGET/.claude" ] || command -v claude >/dev/null 2>&1; then
       warn "Claude Code detected. Prefer the plugin over this vendored install:"
       warn "  /plugin marketplace add Avinava/mule-skills"
-      warn "  /plugin install mule-skills@avinava"
+      warn "  /plugin install mule-skills@sfdxy"
       warn "Pass --hosts claude to vendor a copy anyway."
     fi
     ;;

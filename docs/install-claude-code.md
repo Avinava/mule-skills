@@ -6,7 +6,7 @@ Claude Code installs Mule Skills as a plugin. Nothing is copied into your projec
 
 ```text
 /plugin marketplace add Avinava/mule-skills
-/plugin install mule-skills@avinava
+/plugin install mule-skills@sfdxy
 ```
 
 The first command registers this repository as a plugin marketplace. The second installs the plugin
@@ -16,7 +16,7 @@ Install for a whole team by committing the scope to the project instead:
 
 ```bash
 claude plugin marketplace add Avinava/mule-skills
-claude plugin install mule-skills@avinava --scope project
+claude plugin install mule-skills@sfdxy --scope project
 ```
 
 That writes to `.claude/settings.json`, so everyone who clones the repository gets the same plugin.
@@ -76,8 +76,8 @@ it picks up the matching skill.
 
 ```text
 /plugin marketplace update mule-skills
-/plugin update mule-skills@avinava
-/plugin uninstall mule-skills@avinava
+/plugin update mule-skills@sfdxy
+/plugin uninstall mule-skills@sfdxy
 ```
 
 ## Do I still need CLAUDE.md?

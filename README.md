@@ -21,7 +21,7 @@ Pick the path that matches your agent. All three install the same six skills.
 
 ```text
 /plugin marketplace add Avinava/mule-skills
-/plugin install mule-skills@avinava
+/plugin install mule-skills@sfdxy
 ```
 
 That's it. Skills and MCP servers come with the plugin; nothing is copied into your project. Details

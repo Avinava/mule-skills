@@ -8,7 +8,7 @@ installing it no longer requires an agent to execute a copy runbook.
 ### Install
 
 - **Claude Code:** `/plugin marketplace add Avinava/mule-skills` then
-  `/plugin install mule-skills@avinava`. Skills and the three pinned MCP servers ship with the
+  `/plugin install mule-skills@sfdxy`. Skills and the three pinned MCP servers ship with the
   plugin.
 - **Other hosts:** `install/install.sh` vendors the skills into `.agents/skills/`, detects which
   hosts you use, and merges MCP configuration without overwriting existing entries. It is idempotent
@@ -53,15 +53,19 @@ a hardcoded path or an unknown sibling-skill reference reappears.
 
 ### Naming
 
-The plugin is `mule-skills`; the marketplace is `avinava`. The install therefore reads
-`/plugin install mule-skills@avinava`.
+The plugin is `mule-skills`; the marketplace is `sfdxy`. The install therefore reads
+`/plugin install mule-skills@sfdxy`.
 
 The two names are deliberately different. `@` means "from", so the identifier names the plugin and
 the catalog it came from — naming both sides the same would read as a stutter and hide which side is
-which. Marketplace names are also global per user, and adding a second marketplace under an existing
-name silently replaces the first, so a publisher-scoped name collides far less than a topical one.
-`avinava` is the same identity already typed in `/plugin marketplace add Avinava/mule-skills`, so
-there is no unexplained jump between the two commands.
+which. A marketplace is a catalog, so it takes the publisher's name: `sfdxy` is the npm scope behind
+`@sfdxy/mule-build`, `@sfdxy/mule-lint`, and `@sfdxy/anypoint-connect`, the three MCP servers this
+plugin ships, so the plugin and its tooling read as one publisher's work.
+
+Marketplace names are global per user, and adding a second marketplace under an existing name
+silently replaces the first, so a publisher-scoped name collides far less than a topical one. The
+marketplace name deliberately does not have to match the repository path typed in
+`/plugin marketplace add`; the two are separate identifiers.
 
 This was worth settling before publication: renaming a marketplace afterwards forces every user to
 remove it, which uninstalls the plugins installed from it, and then re-add it.
