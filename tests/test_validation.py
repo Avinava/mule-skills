@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -115,6 +116,93 @@ class EmbeddedExpressionTests(unittest.TestCase):
         )
         self.assertEqual(0, result.returncode)
         self.assertIn("usage:", result.stdout)
+
+
+validator = load_module(VALIDATOR, "validate_repository")
+
+
+class PluginManifestTests(unittest.TestCase):
+    """The plugin and portability checks must fail on the breakage they were added for."""
+
+    def copy_repository(self, temporary: str) -> Path:
+        root = Path(temporary) / "repo"
+        shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+        return root
+
+    def assert_finding(self, root: Path, fragment: str):
+        findings = validator.validate_repository(root)
+        self.assertTrue(
+            any(fragment in finding for finding in findings),
+            f"expected a finding containing {fragment!r}, got: {findings}",
+        )
+
+    def edit(self, path: Path, old: str, new: str):
+        text = path.read_text(encoding="utf-8")
+        self.assertIn(old, text)
+        path.write_text(text.replace(old, new), encoding="utf-8")
+
+    def test_baseline_repository_is_clean(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.assertEqual([], validator.validate_repository(root))
+
+    def test_rejects_unresolvable_plugin_source(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(root / ".claude-plugin/marketplace.json", '"source": "./"', '"source": "./nope"')
+            self.assert_finding(root, "source does not resolve")
+
+    def test_rejects_version_disagreement(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / ".claude-plugin/marketplace.json",
+                '"source": "./"',
+                '"source": "./", "version": "9.9.9"',
+            )
+            self.assert_finding(root, "disagrees with plugin.json")
+
+    def test_rejects_name_disagreement_at_marketplace_root(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / ".claude-plugin/marketplace.json",
+                '"name": "mule-skills",\n      "source": "./"',
+                '"name": "other-name",\n      "source": "./"',
+            )
+            self.assert_finding(root, "must match plugin.json")
+
+    def test_rejects_invalid_manifest_json(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            (root / ".claude-plugin/plugin.json").write_text("{ not json", encoding="utf-8")
+            self.assert_finding(root, "invalid JSON")
+
+    def test_rejects_hardcoded_vendored_path_in_a_skill(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            path = root / "skills/mule-ops/SKILL.md"
+            path.write_text(
+                path.read_text(encoding="utf-8") + "\nRun `.agents/skills/mule-ops/scripts/x.py`.\n",
+                encoding="utf-8",
+            )
+            self.assert_finding(root, "hardcodes '.agents/skills/'")
+
+    def test_rejects_unknown_sibling_skill_reference(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            path = root / "skills/mule-review/SKILL.md"
+            path.write_text(
+                path.read_text(encoding="utf-8") + "\nSee <skills-root>/mule-absent/SKILL.md\n",
+                encoding="utf-8",
+            )
+            self.assert_finding(root, "references unknown sibling skill: mule-absent")
+
+    def test_rejects_mcp_configuration_drift(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.24.1", "@sfdxy/mule-lint@9.9.9")
+            self.assert_finding(root, "disagree; every host must get the same pins")
 
 
 class RepositoryValidationTests(unittest.TestCase):

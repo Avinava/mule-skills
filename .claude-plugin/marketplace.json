@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "mule-skills",
   "description": "Reusable AI-agent workflows for the MuleSoft Mule 4 engineering lifecycle.",
   "owner": {

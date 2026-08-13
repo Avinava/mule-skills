@@ -18,7 +18,11 @@ Or, from a clone of this repository:
 ./install/install.sh --target /path/to/your-mule-project
 ```
 
-By default the script detects which hosts you use and configures only those. Always preview first:
+By default the script detects which hosts you use and configures only those. Claude Code is
+deliberately excluded from detection — [install the plugin](install-claude-code.md) instead of
+vendoring a second copy. Pass `--hosts claude` if you want the vendored copy anyway.
+
+Always preview first:
 
 ```bash
 ./install/install.sh --target /path/to/project --dry-run
@@ -53,8 +57,12 @@ your-mule-project/
 ```
 
 Existing MCP servers in those files are preserved — the script adds only the entries that are
-missing. If a config file is not valid JSON, the script stops and tells you to merge by hand rather
-than guessing.
+missing. If a config file is not plain JSON (VS Code allows comments and trailing commas, which the
+merger cannot read), the script skips that file, prints the server names to add by hand, and
+continues with the rest of the install rather than guessing or aborting halfway.
+
+`AGENTS.md` is never overwritten, including with `--force`. It holds project context you wrote and
+cannot be regenerated from a template.
 
 ## Host reference
 
@@ -78,8 +86,16 @@ access through repository settings.
 
 If you cannot run the script, clone this repository and copy the six directories under `skills/`
 into `.agents/skills/`, then merge the matching file from `install/hosts/` into your host's MCP
-config and copy the instruction templates from `install/templates/`. The agent-followable version of
-this procedure is in [agent-install.md](agent-install.md).
+config and copy the instruction templates from `install/templates/`.
+
+The templates carry two placeholders the script normally fills in. Replace them by hand:
+
+| Placeholder | Replace with |
+| --- | --- |
+| `<!-- SKILLS_LOCATION -->` | A line stating that the skills live under `.agents/skills/` |
+| `<!-- PROJECT_NAME -->` | Your project's name |
+
+The agent-followable version of this procedure is in [agent-install.md](agent-install.md).
 
 ## Next
 

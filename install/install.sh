@@ -115,10 +115,10 @@ TARGET="$(cd "$TARGET" && pwd)"
 # --- Decide which hosts to configure ---
 
 detect_hosts() {
+  # 'claude' is deliberately not auto-detected. Claude Code should install the plugin
+  # instead of vendoring a second copy of the skills and MCP servers. Pass
+  # --hosts claude explicitly to vendor anyway.
   local found=""
-  if [ -d "$TARGET/.claude" ] || [ -f "$TARGET/CLAUDE.md" ] || command -v claude >/dev/null 2>&1; then
-    found="$found claude"
-  fi
   if [ -d "$TARGET/.codex" ] || command -v codex >/dev/null 2>&1; then
     found="$found codex"
   fi
@@ -135,7 +135,15 @@ detect_hosts() {
 }
 
 case "$HOSTS" in
-  auto) SELECTED="$(detect_hosts)" ;;
+  auto)
+    SELECTED="$(detect_hosts)"
+    if [ -d "$TARGET/.claude" ] || command -v claude >/dev/null 2>&1; then
+      warn "Claude Code detected. Prefer the plugin over this vendored install:"
+      warn "  /plugin marketplace add Avinava/mule-skills"
+      warn "  /plugin install mule-skills@mule-skills"
+      warn "Pass --hosts claude to vendor a copy anyway."
+    fi
+    ;;
   all)  SELECTED="claude codex vscode copilot gemini" ;;
   none) SELECTED="" ;;
   *)    SELECTED="$(printf '%s' "$HOSTS" | tr ',' ' ')" ;;
@@ -176,9 +184,20 @@ if os.path.exists(dest):
         try:
             config = json.loads(text)
         except json.JSONDecodeError as exc:
-            raise SystemExit(f"error: {dest} is not valid JSON ({exc}); merge it by hand")
+            # VS Code accepts JSONC (comments, trailing commas), which json cannot read.
+            # Skip this host rather than aborting an install that already placed skills.
+            print(f"    SKIPPED {label}: not plain JSON ({exc}). Add these by hand:")
+            for name in servers:
+                print(f"      {name}")
+            raise SystemExit(0)
+    if not isinstance(config, dict):
+        print(f"    SKIPPED {label}: top level is not an object. Merge by hand.")
+        raise SystemExit(0)
 
 existing = config.setdefault(key, {})
+if not isinstance(existing, dict):
+    print(f"    SKIPPED {label}: '{key}' is not an object. Merge by hand.")
+    raise SystemExit(0)
 added = []
 for name, entry in servers.items():
     if name in existing:
@@ -214,7 +233,15 @@ source_text = open(source, encoding="utf-8").read()
 
 existing_text = open(dest, encoding="utf-8").read() if os.path.exists(dest) else ""
 
-present = set(re.findall(r"^\s*\[mcp_servers\.([A-Za-z0-9_-]+)\]", existing_text, re.MULTILINE))
+# Codex accepts [mcp_servers.name], [mcp_servers."name"], and an inline
+# mcp_servers = { ... } table. Miss any of them and we append a duplicate table,
+# which makes Codex fail to parse its own config.
+present = set(
+    re.findall(r'^\s*\[\s*mcp_servers\s*\.\s*"?([A-Za-z0-9_-]+)"?\s*\]', existing_text, re.MULTILINE)
+)
+inline = re.search(r"^\s*mcp_servers\s*=\s*\{(.*)$", existing_text, re.MULTILINE)
+if inline:
+    present.update(re.findall(r'"?([A-Za-z0-9_-]+)"?\s*=\s*\{', inline.group(1)))
 
 # Split the source into one block per [mcp_servers.<name>] table.
 blocks, current, name = {}, [], None
@@ -243,11 +270,17 @@ PY
 }
 
 install_template() {
-  # install_template <template file> <destination> <skills location line>
-  local template="$1" dest="$2" location="$3"
+  # install_template <template file> <destination> <skills location line> [protected]
+  # A protected destination is never overwritten, not even with --force: AGENTS.md holds
+  # project context the user wrote and cannot be regenerated from a template.
+  local template="$1" dest="$2" location="$3" protected="${4:-0}"
   local label="${dest#"$TARGET"/}"
-  if [ -e "$dest" ] && [ "$FORCE" -eq 0 ]; then
-    info "kept existing $label"
+  if [ -e "$dest" ] && { [ "$FORCE" -eq 0 ] || [ "$protected" -eq 1 ]; }; then
+    if [ -e "$dest" ] && [ "$FORCE" -eq 1 ] && [ "$protected" -eq 1 ]; then
+      info "kept existing $label (--force never overwrites it)"
+    else
+      info "kept existing $label"
+    fi
     return 0
   fi
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -336,7 +369,7 @@ the workflow directs."
 
 log ""
 log "Instruction files"
-install_template "AGENTS.md" "$TARGET/AGENTS.md" "$LOCATION_LINE"
+install_template "AGENTS.md" "$TARGET/AGENTS.md" "$LOCATION_LINE" 1
 if has_host claude; then
   install_template "CLAUDE.md" "$TARGET/CLAUDE.md" "$LOCATION_LINE"
 fi

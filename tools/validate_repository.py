@@ -68,7 +68,7 @@ def validate_skills(root: Path) -> list[str]:
 
 def validate_local_links(root: Path) -> list[str]:
     findings: list[str] = []
-    markdown_files = [root / "README.md", root / "SETUP.md", root / "CHANGELOG.md"]
+    markdown_files = list(root.glob("*.md"))
     markdown_files.extend((root / "skills").rglob("*.md"))
     markdown_files.extend((root / "install").rglob("*.md"))
     markdown_files.extend((root / "docs").rglob("*.md"))
@@ -223,11 +223,38 @@ def validate_plugin_manifests(root: Path) -> list[str]:
             findings.append(
                 f"{label}: version {version!r} disagrees with plugin.json {plugin.get('version')!r}"
             )
-        if entry_name == plugin.get("name") and isinstance(source, str) and source in ("./", "."):
+        if isinstance(source, str) and source in ("./", "."):
+            if entry_name != plugin.get("name"):
+                findings.append(
+                    f"{label}: name {entry_name!r} must match plugin.json "
+                    f"{plugin.get('name')!r} when source is the repository root"
+                )
             for skill_dir in sorted((root / "skills").glob("*/")):
                 if not (skill_dir / "SKILL.md").is_file():
                     findings.append(f"{skill_dir}: directory under skills/ has no SKILL.md")
 
+    return findings
+
+
+def validate_mcp_configs(root: Path) -> list[str]:
+    """The plugin's .mcp.json and the generic host template must not drift apart."""
+    findings: list[str] = []
+    plugin_config = root / ".mcp.json"
+    host_config = root / "install/hosts/mcp.json"
+    for path in (plugin_config, host_config):
+        if not path.is_file():
+            findings.append(f"{path}: missing MCP configuration")
+            return findings
+    try:
+        plugin_servers = json.loads(plugin_config.read_text(encoding="utf-8"))["mcpServers"]
+        host_servers = json.loads(host_config.read_text(encoding="utf-8"))["mcpServers"]
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        findings.append(f"{plugin_config} / {host_config}: unreadable mcpServers: {exc}")
+        return findings
+    if plugin_servers != host_servers:
+        findings.append(
+            f"{plugin_config} and {host_config} disagree; every host must get the same pins"
+        )
     return findings
 
 
@@ -261,6 +288,7 @@ def validate_repository(root: Path) -> list[str]:
     findings.extend(validate_alignment(root))
     findings.extend(validate_plugin_manifests(root))
     findings.extend(validate_skill_portability(root))
+    findings.extend(validate_mcp_configs(root))
     return findings
 
 

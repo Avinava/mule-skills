@@ -38,7 +38,17 @@ Ask the user which agent hosts they use if the repository does not make it obvio
 
 ## 2. Prefer the script
 
-If a shell is available, this replaces steps 3 and 4 entirely:
+If a shell is available, this replaces steps 3 and 4 entirely. Prefer cloning, so the user can read
+the script before it runs:
+
+```bash
+MULE_SKILLS_TMP="$(mktemp -d)"
+git clone --depth 1 https://github.com/Avinava/mule-skills.git "$MULE_SKILLS_TMP/mule-skills"
+"$MULE_SKILLS_TMP/mule-skills/install/install.sh" --target . --dry-run
+```
+
+Only if `git` is unavailable, and after telling the user you are piping a remote script into a
+shell:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Avinava/mule-skills/main/install/install.sh \

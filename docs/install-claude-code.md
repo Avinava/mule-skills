@@ -34,8 +34,9 @@ Six skills, namespaced under the plugin:
 | `mule-review` | Working changes, commits, branches, PRs, release readiness |
 | `mule-build` | Validation, tests, packaging, explicitly requested release actions |
 
-Claude selects them from their descriptions, so you can just describe the task. To invoke one
-directly, use `/mule-review`, `/mule-docs`, and so on.
+Claude selects them from their descriptions, so you can just describe the task. Plugin skills are
+namespaced, so they appear as `mule-skills:mule-review`, `mule-skills:mule-docs`, and so on — use
+that form to invoke one directly.
 
 Plus three MCP servers — see below.
 
@@ -55,6 +56,10 @@ all three.
 
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate —
 see [project-setup.md](project-setup.md#optional-anypoint-access).
+
+The `mule-build` skill and the `mule-build` MCP server share a name but are different things: the
+skill is the workflow (`mule-skills:mule-build`), the server provides the tools it calls
+(`mcp__mule-build__*`). Either can be used without the other.
 
 Run `/mcp` to see connection status or to disable a server you do not want.
 
