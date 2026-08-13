@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule Build"
+  short_description: "Validate, package, and release Mule applications"
+  default_prompt: "Use $mule-build to validate and package this Mule application without performing release actions."

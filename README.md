@@ -13,69 +13,93 @@ from implemented behavior, and avoid carrying identity or tuning assumptions bet
 The skills work as instruction-only workflows and can use the included MCP configurations when
 local build, lint, or authorized Anypoint evidence is available.
 
-## Quick start
+## Install
 
-From the Mule project you want to configure, give your coding agent this instruction:
+Pick the path that matches your agent. All three install the same six skills.
+
+### Claude Code — plugin
 
 ```text
-Follow https://github.com/Avinava/mule-skills/blob/main/SETUP.md to install or reconcile the
-MuleSoft skills for this repository. Preserve existing changes, configure only the agent hosts I
-use, and show me the validation results before committing.
+/plugin marketplace add Avinava/mule-skills
+/plugin install mule-skills@mule-skills
 ```
 
-The setup runbook installs the skills under `.agents/skills/`, adds the build workflow, configures
-only the selected MCP hosts, creates evidence-backed shared and host-specific project guidance, and
-validates the result.
+That's it. Skills and MCP servers come with the plugin; nothing is copied into your project. Details
+in [docs/install-claude-code.md](docs/install-claude-code.md).
+
+### Codex, Copilot, Gemini — script
+
+From the root of your Mule project:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Avinava/mule-skills/main/install/install.sh | bash
+```
+
+It detects your hosts, vendors the skills into `.agents/skills/`, and merges MCP configuration
+without overwriting what is already there. Add `--dry-run` to preview. Options and host reference in
+[docs/install-other-agents.md](docs/install-other-agents.md).
+
+### Any agent — paste this prompt
+
+Works anywhere, including hosts with no plugin support and no shell:
+
+```text
+Follow https://github.com/Avinava/mule-skills/blob/main/docs/agent-install.md to install or
+reconcile the MuleSoft skills for this repository. Preserve existing changes, configure only the
+agent hosts I use, and show me the validation results before committing.
+```
+
+Then give the agent context about your project by following
+[docs/project-setup.md](docs/project-setup.md) — that step matters for every install path.
+
+## Skills
+
+| Skill | Use it for | Default result |
+| --- | --- | --- |
+| [`mule-docs`](skills/mule-docs/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
+| [`mule-development`](skills/mule-development/) | Mule XML, DataWeave, connectors, error handling, queues, batch, configuration, and MUnit changes | Implemented source change with proportionate validation |
+| [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
+| [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Evidence-backed operational assessment |
+| [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
+| [`mule-build`](skills/mule-build/) | Validation, tests, packaging, and explicitly requested release actions | Deployable artifact and validation summary |
+
+### Choosing the right skill
+
+| Request | Start with | Add when needed |
+| --- | --- | --- |
+| Explain or refresh the project | `mule-docs` | Optional business-context questions when source cannot establish purpose or ownership |
+| Implement a change | `mule-development` | Documentation refresh, then change review |
+| Diagnose a symptom | `mule-troubleshooting` | `mule-ops` for authorized runtime evidence; development only when a fix is requested |
+| Assess current runtime health | `mule-ops` | `mule-troubleshooting` when a specific causal question emerges |
+| Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
+| Prepare a release | `mule-build` | Release-readiness review before commit, tag, publish, or deploy |
+
+Documentation and review questions are optional and non-blocking. When business information would
+materially improve the result, the skill offers concise choices plus `Other` and `Not sure / Skip`,
+then continues with verified technical evidence if the user skips.
 
 ## Agent support
 
-The five skills and build workflow are shared. Host-specific instruction files tell each agent how
-to find them; MCP configuration is optional and installed only for hosts the project uses.
+The six skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
+reads them from `.agents/skills/`, with instruction files telling the agent how to route.
 
-| Host | Repository instructions | Workflow access | MCP configuration | Verification |
+| Host | Skill discovery | Repository instructions | MCP configuration | Verification |
 | --- | --- | --- | --- | --- |
-| Codex CLI, desktop, and IDE extension | `AGENTS.md` | Automatically discovers `.agents/skills/`; build workflow is referenced from project guidance | `.codex/config.toml` | `codex mcp list` |
-| Claude Code | `CLAUDE.md` and `AGENTS.md` | `CLAUDE.md` routes tasks to `.agents/skills/*/SKILL.md` and `.agents/workflows/build.md` | `.mcp.json` | `claude mcp list` |
-| GitHub Copilot in VS Code | `.github/copilot-instructions.md` and supported `AGENTS.md` surfaces | Copilot instructions route tasks to the installed workflows | `.vscode/mcp.json` | Reload VS Code and inspect its MCP server list |
-| GitHub Copilot CLI | `.github/copilot-instructions.md` and `AGENTS.md` | Copilot instructions route tasks to the installed workflows | `.mcp.json` | `copilot mcp list` |
-| Gemini coding agents | `GEMINI.md` and `AGENTS.md` | `GEMINI.md` routes tasks to the installed workflows | Host-specific merge from `mcp/mcp.json` when supported | Use the active host's MCP status view |
-| Other compatible coding agents | `AGENTS.md` plus host-supported instruction files | Read the matching workflow directly from `.agents/` | Merge `mcp/mcp.json` only when the host accepts `mcpServers` | Use the host's documented MCP check |
+| Claude Code | Plugin (`/plugin install`) | `AGENTS.md`; `CLAUDE.md` optional | Bundled in the plugin | `/plugin`, `/mcp` |
+| Codex CLI, desktop, and IDE extension | `.agents/skills/` | `AGENTS.md` | `.codex/config.toml` | `codex mcp list` |
+| GitHub Copilot in VS Code | `.agents/skills/` | `.github/copilot-instructions.md` and supported `AGENTS.md` surfaces | `.vscode/mcp.json` | Reload VS Code and inspect its MCP server list |
+| GitHub Copilot CLI | `.agents/skills/` | `.github/copilot-instructions.md` and `AGENTS.md` | `.mcp.json` | `copilot mcp list` |
+| Gemini coding agents | `.agents/skills/` | `GEMINI.md` and `AGENTS.md` | `.mcp.json` where supported | The host's MCP status view |
+| Other compatible coding agents | `.agents/skills/` | `AGENTS.md` plus host-supported instruction files | `.mcp.json` when the host accepts `mcpServers` | The host's documented MCP check |
 
 Local MCP files do not configure GitHub-hosted Copilot agents or code review; configure hosted MCP
 access through repository settings. Claude Code asks for approval before using project-scoped MCP
-servers. See [SETUP.md](SETUP.md#4-configure-the-selected-mcp-host) for safe merge and verification
-instructions.
+servers.
 
 Current host behavior is documented by [OpenAI Docs for Codex skills](https://developers.openai.com/codex/skills/),
 [OpenAI Docs for Codex MCP](https://developers.openai.com/codex/mcp/),
 [Anthropic's Claude Code guidance](https://docs.anthropic.com/en/docs/claude-code/memory), and
 [GitHub Copilot custom-instruction guidance](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions-in-your-ide/add-repository-instructions-in-your-ide).
-
-## Included workflows
-
-| Workflow | Use it for | Default result |
-| --- | --- | --- |
-| [`document-mulesoft-project`](skills/document-mulesoft-project/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
-| [`mule-development`](skills/mule-development/) | Mule XML, DataWeave, connectors, error handling, queues, batch, configuration, and MUnit changes | Implemented source change with proportionate validation |
-| [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
-| [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Evidence-backed operational assessment |
-| [`review-mulesoft-project`](skills/review-mulesoft-project/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
-| [`build`](workflows/build.md) | Validation, tests, packaging, and explicitly requested release actions | Deployable artifact and validation summary |
-
-### Choosing the right workflow
-
-| Request | Start with | Add when needed |
-| --- | --- | --- |
-| Explain or refresh the project | Documentation | Optional business-context questions when source cannot establish purpose or ownership |
-| Implement a change | Development | Documentation refresh, then change review |
-| Diagnose a symptom | Troubleshooting | Ops for authorized runtime evidence; development only when a fix is requested |
-| Assess current runtime health | Ops | Troubleshooting when a specific causal question emerges |
-| Review a change or repository | Project review | Ops only for authorized, material runtime verification |
-| Prepare a release | Build | Release-readiness review before commit, tag, publish, or deploy |
-
-Documentation and review questions are optional and non-blocking. When business information would
-materially improve the result, the skill offers concise choices plus `Other` and `Not sure / Skip`,
-then continues with verified technical evidence if the user skips.
 
 ## Operating principles
 
@@ -96,7 +120,7 @@ then continues with verified technical evidence if the user skips.
 
 ## MCP support
 
-The repository includes credential-free launch configurations for three pinned MCP servers:
+Credential-free launch configuration for three pinned MCP servers:
 
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
@@ -105,37 +129,38 @@ The repository includes credential-free launch configurations for three pinned M
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.24.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.24.1) | Static Mule analysis and machine-readable reports |
 
 Source links come from each published package's repository metadata. Package links resolve to the
-exact registry version used by the checked-in MCP launch configuration rather than an unpinned
-latest release.
+exact registry version used by the checked-in configuration rather than an unpinned latest release.
+Node.js `>=20.19.0` satisfies all three.
 
-Templates are provided for Codex (`mcp/.codex/config.toml`), VS Code and GitHub Copilot
-(`mcp/.vscode/mcp.json`), and hosts such as Claude Code or Copilot CLI that accept a project
-`mcpServers` object (`mcp/mcp.json`). Configure only the host in use and merge with existing settings
-rather than replacing them. The detailed procedure is in
-[SETUP.md](SETUP.md#4-configure-the-selected-mcp-host).
+`mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate;
+see [docs/project-setup.md](docs/project-setup.md#optional-anypoint-access).
 
-Codex discovers repository-scoped skills from `.agents/skills/` between the working directory and
-the repository root. See the official [Codex skills documentation](https://developers.openai.com/codex/skills/)
-and [Codex MCP documentation](https://developers.openai.com/codex/mcp/) for current host behavior.
+The plugin ships `.mcp.json` and starts these servers automatically when it is enabled — run `/mcp`
+to check status or disable one. For other hosts, `install/hosts/` holds the Codex, VS Code, and
+generic JSON forms, and the installer merges only the entries your config lacks.
 
 ## Repository layout
 
 ```text
 mule-skills/
-├── assets/                         # Project artwork
-├── skills/
-│   ├── document-mulesoft-project/  # Documentation workflow, references, and audit tools
+├── .claude-plugin/                 # Plugin and marketplace manifests
+├── .mcp.json                       # Pinned MCP servers shipped with the plugin
+├── skills/                         # The six reusable skills — host-neutral
+│   ├── mule-docs/                  # Documentation workflow, references, and audit tools
 │   ├── mule-development/           # Implementation workflow and post-change checklist
 │   ├── mule-troubleshooting/       # Root-cause analysis workflow
 │   ├── mule-ops/                   # Runtime health workflow
-│   └── review-mulesoft-project/    # Change, project, and release-readiness review
-├── workflows/build.md              # Validate, package, and explicit release workflow
-├── scripts/                         # Dependency-free repository validation
-├── tests/                           # Validator and checker tests
-├── templates/                      # Project-owned AGENTS, Claude, Copilot, and Gemini guidance
-├── mcp/                            # Codex, VS Code, and generic JSON MCP templates
-├── README.md                       # Toolkit overview
-└── SETUP.md                        # Installation and reconciliation runbook
+│   ├── mule-review/                # Change, project, and release-readiness review
+│   └── mule-build/                 # Validate, package, and explicit release workflow
+├── install/
+│   ├── install.sh                  # Vendored install for non-plugin hosts
+│   ├── hosts/                      # Codex, VS Code, and generic JSON MCP configurations
+│   └── templates/                  # Project-owned AGENTS, Claude, Copilot, and Gemini guidance
+├── tools/                          # Dependency-free repository validation
+├── tests/                          # Validator and checker tests
+├── docs/                           # Installation and project-setup guides
+├── README.md
+└── SETUP.md                        # Redirect to docs/
 ```
 
 Each skill has a required `SKILL.md` and may include:
@@ -144,49 +169,24 @@ Each skill has a required `SKILL.md` and may include:
 - `references/` or `resources/` for guidance loaded by the workflow;
 - `scripts/` for deterministic, repeatable inspection and validation.
 
-Run `python3 -m unittest discover -s tests -v` and `python3 scripts/validate_repository.py .` when
-changing reusable skills. CI runs those checks plus the documentation audit.
-
-Host instruction templates keep shared project facts in `AGENTS.md` and add only the routing needed
-by Claude Code, GitHub Copilot, or Gemini. They are `templates/AGENTS.md`, `templates/CLAUDE.md`,
-`templates/copilot-instructions.md`, and `templates/GEMINI.md`; the support matrix above shows their
-installed locations and MCP configuration.
-
-After installation, the shared project layout is:
-
-```text
-your-mule-project/
-├── .agents/
-│   ├── skills/                     # The five reusable Mule skills
-│   └── workflows/build.md
-├── .codex/config.toml              # Optional Codex MCP configuration
-├── .vscode/mcp.json                # Optional VS Code MCP configuration
-├── .mcp.json                       # Optional Claude Code or Copilot CLI MCP configuration
-├── .github/copilot-instructions.md # Optional GitHub Copilot repository instructions
-├── AGENTS.md                       # Evidence-backed project context
-├── CLAUDE.md                       # Optional Claude Code guidance
-├── GEMINI.md                       # Optional host-specific guidance
-├── pom.xml
-└── src/
-```
+Skills refer to bundled scripts through `<skill-root>` and `<skills-root>` placeholders rather than a
+fixed path, so the same file works under a plugin install and a vendored install.
 
 ## Example prompts
 
 ```text
-Use $document-mulesoft-project to refresh architecture and operations documentation. Ask optional
-business questions with choices where the repository cannot establish important context.
+Use mule-docs to refresh architecture and operations documentation. Ask optional business questions
+with choices where the repository cannot establish important context.
 
-Use $mule-development to implement this Mule change and complete the post-development checklist.
+Use mule-development to implement this Mule change and complete the post-development checklist.
 
-Use $mule-troubleshooting to diagnose this timeout. Separate observations, hypotheses, confirmed
-causes, and unresolved gaps.
+Use mule-troubleshooting to find the root cause of the timeouts in this flow, then stop before
+changing anything.
 
-Use $mule-ops to assess runtime health for the requested environment and time window.
+Use mule-review in change-review mode for this branch. Report findings and fix options; do not
+modify source or PR state.
 
-Use $review-mulesoft-project in change-review mode for this branch. Report findings and fix options;
-do not modify source or post PR comments.
-
-Use the build workflow to package the application. Do not release, tag, deploy, or push.
+Use mule-build to validate and package this application without performing any release action.
 ```
 
 ## Contributing
@@ -199,10 +199,24 @@ When adding or changing a reusable skill:
 3. Use neutral examples and mechanism-based guidance; do not retain prior-project fingerprints or
    numeric tuning values.
 4. Add `agents/openai.yaml` and only the references, resources, scripts, or assets the skill needs.
-5. Validate the skill, test it with neutral representative tasks, and inspect outputs for unsupported
+5. Refer to bundled scripts through `<skill-root>` or `<skills-root>`, never a host-specific path.
+6. Validate the skill, test it with neutral representative tasks, and inspect outputs for unsupported
    claims or sensitive data.
-6. Update README and SETUP when discovery, installation, routing, or required resources change.
+7. Update the README, `docs/`, and `install/install.sh` when discovery, installation, routing, or
+   required resources change.
+
+Run before opening a pull request:
+
+```bash
+python3 -m unittest discover -s tests -v
+python3 tools/validate_repository.py .
+python3 skills/mule-docs/scripts/audit_documentation.py .
+claude plugin validate . --strict
+```
+
+CI runs the same checks. See [CHANGELOG.md](CHANGELOG.md) for release history, including the skill
+rename table.
 
 ## License
 
-Private repository — internal use only.
+[MIT](LICENSE)

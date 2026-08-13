@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "mule-skills",
+  "description": "Reusable AI-agent workflows for the MuleSoft Mule 4 engineering lifecycle.",
+  "owner": {
+    "name": "Avinava",
+    "url": "https://github.com/Avinava"
+  },
+  "plugins": [
+    {
+      "name": "mule-skills",
+      "source": "./",
+      "displayName": "Mule Skills",
+      "description": "Evidence-backed MuleSoft Mule 4 agent skills for documentation, development, troubleshooting, operations, review, and build.",
+      "category": "development",
+      "tags": [
+        "mulesoft",
+        "mule4",
+        "anypoint",
+        "dataweave",
+        "munit",
+        "integration"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/Avinava/mule-skills",
+      "repository": "https://github.com/Avinava/mule-skills"
+    }
+  ]
+}

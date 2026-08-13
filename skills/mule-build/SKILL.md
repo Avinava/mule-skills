@@ -1,5 +1,6 @@
 ---
-description: Validate and package a Mule application, with release actions only when requested
+name: mule-build
+description: Validate, test, and package a MuleSoft Mule 4 application using its established repository commands and configured build tools, and perform release actions only when the user explicitly requests them. Use for build, validation, static analysis, MUnit test runs, packaging a deployable artifact, and release preparation covering version bumps, changelog entries, tags, publishing, and deployment. Default to validate-and-package; treat versioning, publishing, deploying, pushing, and skipping tests as explicit user choices rather than automatic build steps.
 ---
 
 # Build Mule Application
@@ -48,8 +49,11 @@ When Mule source changed, use the `mule-development` post-development checklist 
 When Mule XML changed and the development skill is installed, run:
 
 ```bash
-python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .
+python3 <skills-root>/mule-development/scripts/check_embedded_expressions.py .
 ```
+
+`<skills-root>` is the directory holding the `mule-*` skills: `${CLAUDE_PLUGIN_ROOT}/skills` when
+installed as a Claude Code plugin, `.agents/skills` when vendored into the project.
 
 This catches truncated `#[…]` expressions in CDATA that XML parsing and packaging can miss.
 
@@ -66,7 +70,7 @@ Review the changed files and update only documentation made stale by the change:
 | Error mapping or recovery behavior | Contract, troubleshooting, and runbook |
 | Test or validation command | Contributor/build guidance |
 
-Use the `document-mulesoft-project` targeted-refresh workflow when installed. Do not rewrite
+Use the `mule-docs` targeted-refresh workflow when installed. Do not rewrite
 unrelated prose or add unsupported business context.
 
 ## 5. Package
@@ -94,7 +98,7 @@ When the user explicitly requests a release:
 3. Update an existing changelog using its established format; do not create one unless requested or
    required by repository instructions.
 4. Re-run validation, tests, and packaging after version changes.
-5. Use `review-mulesoft-project` in release-readiness mode on the resulting candidate when the skill
+5. Use `mule-review` in release-readiness mode on the resulting candidate when the skill
    is installed. Do not continue on `Not ready` or `Unresolved`; complete or explicitly accept every
    condition before continuing from `Ready with conditions`.
 6. Commit or tag only when authorized. Make an annotated tag only after the final release commit.

@@ -68,8 +68,12 @@ Prioritize by credible project impact and evidence; do not infer severity from t
 - Run:
 
   ```bash
-  python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .
+  python3 <skill-root>/scripts/check_embedded_expressions.py .
   ```
+
+  `<skill-root>` is the `mule-development` skill directory:
+  `${CLAUDE_PLUGIN_ROOT}/skills/mule-development` when installed as a Claude Code plugin,
+  `.agents/skills/mule-development` when vendored into the project.
 
 - For each changed CDATA body beginning with `#[`, confirm its trimmed content ends with `]` before
   `]]>` (`}]]]>`, not `}]]>`, when the body ends with `}`).

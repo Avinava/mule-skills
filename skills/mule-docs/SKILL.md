@@ -1,5 +1,5 @@
 ---
-name: document-mulesoft-project
+name: mule-docs
 description: Analyze MuleSoft Mule 4 repositories and create or update evidence-backed Markdown documentation with Mermaid diagrams. Use for project overviews, architecture and flow documentation, API contracts, connector and DataWeave documentation, configuration guides, onboarding, deployment, operations, testing, troubleshooting, or documentation-gap audits. Use for full-project documentation and targeted refreshes after Mule XML, RAML/OAS, DataWeave, MUnit, configuration, or deployment changes. Do not use for generic non-Mule repositories or source-code changes unrelated to documentation.
 ---
 
@@ -51,6 +51,10 @@ Run the bundled inventory tool and inspect its JSON before reading individual im
 ```bash
 python3 <skill-root>/scripts/inventory_mule_project.py <project-root> --pretty
 ```
+
+`<skill-root>` is this skill's own directory: `${CLAUDE_PLUGIN_ROOT}/skills/mule-docs` when installed
+as a Claude Code plugin, `.agents/skills/mule-docs` when vendored into the project. Resolve it before
+running the command.
 
 Use the inventory to route deeper inspection. Verify important behavior in the actual source files;
 the inventory is an index, not a substitute for reading code.

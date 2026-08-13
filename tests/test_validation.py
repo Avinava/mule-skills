@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKER = ROOT / "skills/mule-development/scripts/check_embedded_expressions.py"
-VALIDATOR = ROOT / "scripts/validate_repository.py"
+VALIDATOR = ROOT / "tools/validate_repository.py"
 
 
 def load_module(path: Path, name: str):

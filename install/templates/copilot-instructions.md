@@ -6,15 +6,18 @@ examples.
 
 ## MuleSoft workflows
 
-When a task matches one of these workflows, read and follow its installed instructions:
+<!-- SKILLS_LOCATION -->
 
-- development: `.agents/skills/mule-development/SKILL.md`
-- troubleshooting and RCA: `.agents/skills/mule-troubleshooting/SKILL.md`
-- runtime health and operations: `.agents/skills/mule-ops/SKILL.md`
-- documentation: `.agents/skills/document-mulesoft-project/SKILL.md`
-- change, project, or release-readiness review:
-  `.agents/skills/review-mulesoft-project/SKILL.md`
-- validation, packaging, or an explicitly requested release: `.agents/workflows/build.md`
+When a task matches one of these workflows, follow its instructions:
+
+| Task | Skill |
+| --- | --- |
+| Mule source, DataWeave, connector, or MUnit changes | `mule-development` |
+| Incident diagnosis and root-cause analysis | `mule-troubleshooting` |
+| Runtime health and operations | `mule-ops` |
+| Documentation creation and targeted refreshes | `mule-docs` |
+| Change, project, or release-readiness review | `mule-review` |
+| Validation, packaging, or an explicitly requested release | `mule-build` |
 
 Load only the workflow and referenced resources relevant to the task. Preserve current-project
 contracts, delivery semantics, error outcomes, privacy boundaries, and repository conventions.
