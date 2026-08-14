@@ -83,7 +83,7 @@ lint, build, or static review workflows — the other two servers work with no c
 Check for an existing authenticated profile first, and get approval before a global install:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.9.1
+npm install -g @sfdxy/anypoint-connect@0.10.0
 anc config init
 anc auth login
 anc auth status

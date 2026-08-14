@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.3
+
+Dependency refresh for safer Anypoint application lifecycle management. No skill behavior or
+install-path changes.
+
+### Updated
+
+- Pinned `anypoint-connect` to `0.10.0` across bundled MCP host configuration, installer guidance,
+  and setup documentation. This release adds deployment-ID-bound application deletion, an extra
+  production acknowledgement, and post-delete verification.
+
 ## 1.0.2
 
 Dependency refresh for safer Anypoint application management. No skill behavior or install-path

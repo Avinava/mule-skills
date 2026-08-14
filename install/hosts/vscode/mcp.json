@@ -3,7 +3,7 @@
     "anypoint-connect": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@sfdxy/anypoint-connect@0.9.1", "mcp"]
+      "args": ["-y", "@sfdxy/anypoint-connect@0.10.0", "mcp"]
     },
     "mule-build": {
       "type": "stdio",

@@ -405,5 +405,5 @@ fi
 log "Done. Next:"
 log "  1. Fill in AGENTS.md from this project's actual evidence — see docs/project-setup.md."
 log "  2. Verify MCP: codex mcp list | copilot mcp list | reload VS Code"
-log "  3. Optional Anypoint access: npx -y @sfdxy/anypoint-connect@0.9.1 auth login"
+log "  3. Optional Anypoint access: npx -y @sfdxy/anypoint-connect@0.10.0 auth login"
 log ""
