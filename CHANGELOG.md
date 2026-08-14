@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.2
+
+Dependency refresh for safer Anypoint application management. No skill behavior or install-path
+changes.
+
+### Updated
+
+- Pinned `anypoint-connect` to `0.9.1` across bundled MCP host configuration, installer guidance,
+  and setup documentation. This release supports narrow application-settings and lifecycle updates,
+  corrected deployment detail handling, and history-aware rollback selection.
+
 ## 1.0.1
 
 Manifest hygiene, and validation for the packaging rules that were documented but not

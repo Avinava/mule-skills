@@ -117,7 +117,7 @@ These pins were verified on **2026-08-12**:
 
 | Package | Source | Node.js |
 | --- | --- | ---: |
-| [`@sfdxy/anypoint-connect@0.9.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.9.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=18.0.0` |
+| [`@sfdxy/anypoint-connect@0.9.1`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.9.1) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=18.0.0` |
 | [`@sfdxy/mule-build@2.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.0.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
 | [`@sfdxy/mule-lint@1.24.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.24.1) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 
