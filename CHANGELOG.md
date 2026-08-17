@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.2.0
+
+Pin refresh across all three MCP servers, each of which now publishes its own documentation site. No
+skill behavior or install-path changes.
+
+### Updated
+
+- **`mule-lint` to `1.25.0`.** Its `docs/` tree ships inside the package and is served over MCP, so the
+  release matters to an agent rather than only to a reader: a four-backtick code fence closed with three
+  had been swallowing a whole section of the rules catalog, and the rule-family table claimed 13 families
+  summing to 75 against a stated total of 82. Counts now come from the registry — 82 rules, 18 prefixes,
+  15 categories.
+- **`mule-build` to `2.1.0`.** Adds three packaged documentation resources —
+  `mule-build://docs/prerequisites`, `mule-build://docs/troubleshooting`, and `mule-build://docs/cli` —
+  so the prerequisites and failure modes that were previously undocumented are readable by an agent
+  offline. `mule-build.yaml.example` now ships too; it had been excluded from the package while the README
+  inlined a second sample that had drifted from it.
+- **`anypoint-connect` to `0.11.0`.** Ships the `LICENSE` that was listed in `files` but did not exist,
+  documents `compare_environments` (55 documented against 56 registered), and corrects `engines.node`
+  from an untested `>=18.0.0` to `>=20.0.0`. The Node requirement in
+  [docs/agent-install.md](docs/agent-install.md) follows.
+- Each server's own documentation is now linked from [docs/mcp-servers.md](docs/mcp-servers.md) and
+  [docs/index.md](docs/index.md), which previously pointed only at repository roots.
+
+`validate_pin_consistency` requires every one of the thirty-odd pin references across the plugin
+configuration, three host forms, the installer, the README, five documentation pages, and the readiness
+reference to agree with `.mcp.json`, so this bump is necessarily atomic.
+
 ## 1.1.0
 
 Runtime evidence now has an explicit access gate, and the documentation is published as a site.

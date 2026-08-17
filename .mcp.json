@@ -2,15 +2,15 @@
   "mcpServers": {
     "anypoint-connect": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/anypoint-connect@0.10.0", "mcp"]
+      "args": ["-y", "@sfdxy/anypoint-connect@0.11.0", "mcp"]
     },
     "mule-build": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-build@2.0.0", "mcp"]
+      "args": ["-y", "@sfdxy/mule-build@2.1.0", "mcp"]
     },
     "mule-lint": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-lint@1.24.1", "mcp"]
+      "args": ["-y", "@sfdxy/mule-lint@1.25.0", "mcp"]
     }
   }
 }

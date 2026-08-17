@@ -5,9 +5,9 @@ them sharper: two need no credentials, one needs an Anypoint login.
 
 | Server and source | Pin | Role | Credentials |
 | --- | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.0.0) | Validation, testing, packaging, local runtime, versioning, security checks | None |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.24.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.24.1) | Static Mule analysis and machine-readable reports | None |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.10.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.10.0) | Authorized logs, metrics, deployments, API management, Exchange, MQ, Object Store | Anypoint Platform login |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.1.0) | Validation, testing, packaging, local runtime, versioning, security checks | None |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.25.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.25.0) | Static Mule analysis and machine-readable reports | None |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.11.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.11.0) | Authorized logs, metrics, deployments, API management, Exchange, MQ, Object Store | Anypoint Platform login |
 
 Each server has its own documentation, which is the place to look for command references, tool
 catalogs, and per-host setup beyond what the skills need:
@@ -70,15 +70,15 @@ The generic form:
   "mcpServers": {
     "anypoint-connect": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/anypoint-connect@0.10.0", "mcp"]
+      "args": ["-y", "@sfdxy/anypoint-connect@0.11.0", "mcp"]
     },
     "mule-build": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-build@2.0.0", "mcp"]
+      "args": ["-y", "@sfdxy/mule-build@2.1.0", "mcp"]
     },
     "mule-lint": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-lint@1.24.1", "mcp"]
+      "args": ["-y", "@sfdxy/mule-lint@1.25.0", "mcp"]
     }
   }
 }
