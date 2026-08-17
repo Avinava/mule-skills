@@ -98,15 +98,15 @@ Print the commands and let the user run them. These change machine-local state, 
 without explicit approval.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.10.0 config init
-npx -y @sfdxy/anypoint-connect@0.10.0 auth login
-npx -y @sfdxy/anypoint-connect@0.10.0 auth status
+npx -y @sfdxy/anypoint-connect@0.11.0 config init
+npx -y @sfdxy/anypoint-connect@0.11.0 auth login
+npx -y @sfdxy/anypoint-connect@0.11.0 auth status
 ```
 
 A global install gives the shorter `anc` form and needs separate approval:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.10.0
+npm install -g @sfdxy/anypoint-connect@0.11.0
 anc auth login
 anc auth status
 ```

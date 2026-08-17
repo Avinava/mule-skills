@@ -201,7 +201,7 @@ class PluginManifestTests(unittest.TestCase):
     def test_rejects_mcp_configuration_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.24.1", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.25.0", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagree; every host must get the same pins")
 
     def test_rejects_marketplace_named_for_the_publisher(self):
@@ -272,7 +272,7 @@ class PluginManifestTests(unittest.TestCase):
         """A user installing one version while reading instructions for another."""
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "README.md", "@sfdxy/mule-lint@1.24.1", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "README.md", "@sfdxy/mule-lint@1.25.0", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagrees with .mcp.json pin")
 
     def test_rejects_documented_pin_for_a_server_that_is_not_launched(self):

@@ -40,9 +40,9 @@ Details and routing guidance are on the [Skills](skills.md) page.
 
 | Server | Pin | Credentials | Its own docs |
 | --- | --- | --- | --- |
-| `mule-build` | `@sfdxy/mule-build@2.0.0` | None | <https://avinava.github.io/mule-build/> |
-| `mule-lint` | `@sfdxy/mule-lint@1.24.1` | None | <https://avinava.github.io/mule-lint/> |
-| `anypoint-connect` | `@sfdxy/anypoint-connect@0.10.0` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
+| `mule-build` | `@sfdxy/mule-build@2.1.0` | None | <https://avinava.github.io/mule-build/> |
+| `mule-lint` | `@sfdxy/mule-lint@1.25.0` | None | <https://avinava.github.io/mule-lint/> |
+| `anypoint-connect` | `@sfdxy/anypoint-connect@0.11.0` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
 
 `anypoint-connect` idles until you authenticate. Skills that need runtime evidence probe for access
 first and offer you a choice — set it up, supply exported logs and metrics, or continue with

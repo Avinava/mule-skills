@@ -46,9 +46,9 @@ The plugin bundles credential-free launch configuration for three pinned servers
 
 | Server | Pin | Role |
 | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.0.0` | Validation, testing, packaging, local runtime, security checks |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.24.1` | Static Mule analysis and machine-readable reports |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.10.0` | Authorized Anypoint logs, metrics, deployments, Exchange, MQ, Object Store |
+| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.1.0` | Validation, testing, packaging, local runtime, security checks |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.25.0` | Static Mule analysis and machine-readable reports |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.11.0` | Authorized Anypoint logs, metrics, deployments, Exchange, MQ, Object Store |
 
 Plugin MCP servers start automatically when the plugin is enabled, so the first session after
 installing pays three `npx` cold starts. They are cached afterwards. Node.js `>=20.19.0` satisfies
