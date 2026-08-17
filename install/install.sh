@@ -403,7 +403,11 @@ if [ "$DRY_RUN" -eq 1 ]; then
 fi
 
 log "Done. Next:"
-log "  1. Fill in AGENTS.md from this project's actual evidence — see docs/project-setup.md."
+log "  1. Fill in AGENTS.md from this project's actual evidence."
+log "     https://avinava.github.io/mule-skills/project-setup/"
 log "  2. Verify MCP: codex mcp list | copilot mcp list | reload VS Code"
-log "  3. Optional Anypoint access: npx -y @sfdxy/anypoint-connect@0.10.0 auth login"
+log "  3. Optional Anypoint access, only for runtime logs, metrics, and deployments:"
+log "       npx -y @sfdxy/anypoint-connect@0.10.0 auth login"
+log "       npx -y @sfdxy/anypoint-connect@0.10.0 auth status"
+log "     https://avinava.github.io/mule-skills/anypoint-access/"
 log ""

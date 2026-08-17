@@ -24,6 +24,12 @@ jobs:
         run: python skills/mule-docs/scripts/audit_documentation.py .
       - name: Lint the installer
         run: shellcheck install/install.sh
+      - name: Build the documentation site
+        # --strict turns a broken cross-link, missing anchor, or page left out of
+        # the nav into a failure here rather than a warning in the deploy run.
+        run: |
+          pip install -r requirements-docs.txt
+          mkdocs build --strict
       - name: Validate marketplace manifest
         run: npx -y @anthropic-ai/claude-code plugin validate . --strict
       - name: Validate plugin manifest

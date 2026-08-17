@@ -268,6 +268,58 @@ class PluginManifestTests(unittest.TestCase):
             )
             self.assert_finding(root, 'remove "skills"')
 
+    def test_rejects_documented_pin_that_drifts_from_the_mcp_config(self):
+        """A user installing one version while reading instructions for another."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(root / "README.md", "@sfdxy/mule-lint@1.24.1", "@sfdxy/mule-lint@9.9.9")
+            self.assert_finding(root, "disagrees with .mcp.json pin")
+
+    def test_rejects_documented_pin_for_a_server_that_is_not_launched(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            path = root / "docs/mcp-servers.md"
+            path.write_text(
+                path.read_text(encoding="utf-8") + "\nAlso `@sfdxy/mule-ghost@1.0.0`.\n",
+                encoding="utf-8",
+            )
+            self.assert_finding(root, "which .mcp.json does not launch")
+
+    def test_rejects_documentation_page_missing_from_the_site_nav(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            (root / "docs/orphan.md").write_text("# Orphan\n", encoding="utf-8")
+            self.assert_finding(root, "docs/orphan.md: not in the mkdocs.yml nav")
+
+    def test_rejects_nav_entry_without_a_page(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(root / "mkdocs.yml", "- FAQ: faq.md", "- FAQ: absent.md")
+            self.assert_finding(root, "nav entry does not resolve: absent.md")
+
+    def test_rejects_skill_that_skips_the_anypoint_readiness_gate(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            path = root / "skills/mule-ops/SKILL.md"
+            path.write_text(
+                path.read_text(encoding="utf-8").replace("references/anypoint-readiness.md", "nowhere"),
+                encoding="utf-8",
+            )
+            self.assert_finding(root, "does not route through references/anypoint-readiness.md")
+
+    def test_rejects_readiness_reference_missing_an_access_state(self):
+        """Each state maps to a different user action, so a dropped row is a dropped fix."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            path = root / "skills/mule-ops/references/anypoint-readiness.md"
+            lines = [
+                line
+                for line in path.read_text(encoding="utf-8").splitlines(keepends=True)
+                if not line.startswith("| Not authenticated |")
+            ]
+            path.write_text("".join(lines), encoding="utf-8")
+            self.assert_finding(root, "missing access state 'Not authenticated'")
+
 
 class RepositoryValidationTests(unittest.TestCase):
     def test_help(self):

@@ -100,3 +100,7 @@ The agent-followable version of this procedure is in [agent-install.md](agent-in
 ## Next
 
 Fill in `AGENTS.md` from this project's actual evidence — see [project-setup.md](project-setup.md).
+
+For runtime logs, metrics, or deployment evidence, authenticate the one server that needs it:
+[Anypoint access](anypoint-access.md). Skills that use runtime evidence check for access themselves
+and offer alternatives, so this is optional.

@@ -60,6 +60,16 @@ Never label temporal overlap as causation by itself.
 
 ## Workflow
 
+### 0. Confirm Anypoint access
+
+Runtime evidence comes from an authenticated connector, so establish access state before the first
+collection call. Follow [Anypoint access readiness](references/anypoint-readiness.md): probe with
+`whoami` and `list_environments`, classify the result, and when the state is not `Ready` offer the
+user setup, supplied exports, or a repository-only scope with labeled gaps.
+
+Do not use a collection tool as the probe, and do not treat a tool error mid-collection as an
+environment finding. Record the resulting access state for the coverage ledger.
+
 ### 1. Collect broad signals
 
 For every in-scope application, collect independent telemetry in parallel when the tools support it:
@@ -111,6 +121,7 @@ Create a compact table before drawing conclusions:
 
 | Source | Requested window | Actual coverage | Gaps | Safe comparison window |
 | --- | --- | --- | --- | --- |
+| Anypoint access | ... | Access state from step 0 | Analysis paths it closed | ... |
 | Entry logs | ... | ... | ... | ... |
 | Dependency logs | ... | ... | ... | ... |
 | Metrics | ... | ... | ... | ... |
@@ -232,6 +243,7 @@ coverage cannot support attribution.
 
 ## Completion checklist
 
+- Confirm the access state and, when it was not `Ready`, what the assessment could not establish.
 - Confirm every in-scope source's actual coverage.
 - Confirm counts represent unique transactions or clearly label raw log-entry counts.
 - Separate observations, hypotheses, confirmed causes, and recommendations.

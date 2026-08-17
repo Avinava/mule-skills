@@ -33,7 +33,10 @@ load every sibling skill by default, and do not fail when one is absent:
 - Use `mule-development` and its post-development checklist when a changed Mule implementation or
   contract needs checks beyond the bundled review domains.
 - Use `mule-troubleshooting` when a suspected defect requires causal analysis.
-- Use `mule-ops` only for authorized runtime verification.
+- Use `mule-ops` only for authorized runtime verification, and confirm Anypoint access first with
+  `<skills-root>/mule-ops/references/anypoint-readiness.md`. A review never blocks on runtime access:
+  if it is unavailable or the user declines to set it up, complete the review from repository
+  evidence and disclose the coverage gap.
 - Use `mule-docs` when using its inventory, documentation audit, privacy checks, or Mermaid guidance.
 
 Invoke a sibling skill by name on hosts that support skill invocation; otherwise read its `SKILL.md`

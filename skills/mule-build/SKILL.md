@@ -104,6 +104,12 @@ When the user explicitly requests a release:
 6. Commit or tag only when authorized. Make an annotated tag only after the final release commit.
 7. Push, publish, or deploy only when explicitly requested.
 
+Publishing to Exchange and deploying, restarting, scaling, or rolling back a runtime go through the
+authenticated Anypoint connector. Validation, testing, and packaging do not. Before an authorized
+publish or deploy, confirm access with `<skills-root>/mule-ops/references/anypoint-readiness.md` and
+stop on any state other than `Ready` — report the state and the setup step instead of retrying the
+operation. Never treat a readiness probe as approval to deploy.
+
 Use semantic-version guidance as a starting point, not a replacement for the project's release
 policy:
 

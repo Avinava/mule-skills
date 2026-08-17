@@ -12,7 +12,7 @@ Everything here applies to all hosts, including Claude Code plugin installs.
 evidence — the inventory plus applicable `pom.xml`, `mule-artifact.json`, Mule XML, RAML/OAS,
 DataWeave, MUnit, configuration, deployment, CI, and existing documentation.
 
-Start from [`install/templates/AGENTS.md`](../install/templates/AGENTS.md), or run the inventory
+Start from [`install/templates/AGENTS.md`](https://github.com/Avinava/mule-skills/blob/main/install/templates/AGENTS.md), or run the inventory
 first to route your reading:
 
 ```bash
@@ -63,11 +63,11 @@ host-specific directives — keep them compact and do not duplicate the inventor
 
 | Host | File | Template |
 | --- | --- | --- |
-| Claude Code (plugin install) | not needed for routing; add `CLAUDE.md` only for project-specific directives | [`CLAUDE.md`](../install/templates/CLAUDE.md) |
-| Claude Code (vendored install) | `CLAUDE.md` | [`CLAUDE.md`](../install/templates/CLAUDE.md) |
-| GitHub Copilot | `.github/copilot-instructions.md` | [`copilot-instructions.md`](../install/templates/copilot-instructions.md) |
-| Gemini | `GEMINI.md` | [`GEMINI.md`](../install/templates/GEMINI.md) |
-| Codex | `AGENTS.md` only | [`AGENTS.md`](../install/templates/AGENTS.md) |
+| Claude Code (plugin install) | not needed for routing; add `CLAUDE.md` only for project-specific directives | [`CLAUDE.md`](https://github.com/Avinava/mule-skills/blob/main/install/templates/CLAUDE.md) |
+| Claude Code (vendored install) | `CLAUDE.md` | [`CLAUDE.md`](https://github.com/Avinava/mule-skills/blob/main/install/templates/CLAUDE.md) |
+| GitHub Copilot | `.github/copilot-instructions.md` | [`copilot-instructions.md`](https://github.com/Avinava/mule-skills/blob/main/install/templates/copilot-instructions.md) |
+| Gemini | `GEMINI.md` | [`GEMINI.md`](https://github.com/Avinava/mule-skills/blob/main/install/templates/GEMINI.md) |
+| Codex | `AGENTS.md` only | [`AGENTS.md`](https://github.com/Avinava/mule-skills/blob/main/install/templates/AGENTS.md) |
 
 Reconcile an existing file rather than overwriting it, and remove the project-name placeholder before
 saving. See the official
@@ -77,31 +77,16 @@ and
 
 ## Optional Anypoint access
 
-Only `anypoint-connect` needs authentication. Skip this if you only need documentation, development,
+Only `anypoint-connect` needs authentication. Skip it if you only need documentation, development,
 lint, build, or static review workflows — the other two servers work with no credentials.
 
-Check for an existing authenticated profile first, and get approval before a global install:
+Set it up when you want runtime evidence — logs, metrics, deployment history, application status.
+The commands, multi-organization profiles, verification, failure modes, and what each skill can still
+do without access are on [Anypoint access](anypoint-access.md).
 
-```bash
-npm install -g @sfdxy/anypoint-connect@0.10.0
-anc config init
-anc auth login
-anc auth status
-```
-
-With multiple organizations, use a neutral local profile identifier rather than an organization or
-customer name:
-
-```bash
-anc config init --profile org-a
-anc auth login --profile org-a
-anc config use org-a
-anc auth status
-```
-
-`anc config use` creates `.anypoint-connect.json`. It binds a machine-local profile rather than
-storing credentials, but it can reveal local organization labeling — add it to `.gitignore`, and do
-not report the selected profile or organization name.
+Check for an existing authenticated profile before installing anything, and get approval before a
+global install. Skills that need runtime evidence probe for access themselves and offer you setup,
+supplied exports, or a repository-only scope, so this step is never a prerequisite for using them.
 
 ## Reconcile `.gitignore`
 
