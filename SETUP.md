@@ -8,5 +8,7 @@ This runbook was split so each install path has its own document.
 | A Claude Code user | [docs/install-claude-code.md](docs/install-claude-code.md) |
 | A Codex, Copilot, or Gemini user | [docs/install-other-agents.md](docs/install-other-agents.md) |
 | Done installing, giving the skills project context | [docs/project-setup.md](docs/project-setup.md) |
+| Wanting runtime logs, metrics, or deployment evidence | [docs/anypoint-access.md](docs/anypoint-access.md) |
 
-Start at the [README](README.md) if you are not sure.
+The same documents are published at <https://avinava.github.io/mule-skills/>. Start at the
+[README](README.md) if you are not sure.

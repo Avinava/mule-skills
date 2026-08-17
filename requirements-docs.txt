@@ -1,0 +1,2 @@
+# Documentation site only. The skills, validator, and tests stay dependency-free.
+mkdocs-material==9.7.7

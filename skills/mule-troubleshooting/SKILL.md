@@ -60,12 +60,23 @@ Do not infer API-led layers or dependency ownership from application names alone
 
 ### 2. Collect aligned telemetry
 
+Confirm Anypoint access before the first connector call, following
+`<skills-root>/mule-ops/references/anypoint-readiness.md`. When access is not `Ready`, offer setup,
+supplied exports, or a source-only diagnosis, then continue on the chosen path rather than retrying
+collection tools.
+
 Use the `mule-ops` collection workflow when available. Otherwise obtain logs and metrics for every
 participating Mule application and the narrowest useful time window. Record actual coverage before
 comparing sources.
 
 Prefer enough history to include baseline behavior and multiple occurrences, but do not silently
 default to a fixed duration when retention or incident timing suggests another window.
+
+When the user supplies the evidence instead, request the artifacts the readiness reference lists —
+log export, error grouping, latency or memory charts, deployment history — with the application,
+environment, window, timezone, log level, and any truncation stated. Mark them as user-provided.
+They reach `Correlated` only when window and completeness are known, and absence of an entry in an
+export is not evidence of absence, so it cannot confirm a cause.
 
 ### 3. Identify primary signatures
 
@@ -258,7 +269,7 @@ If the event has not recurred or telemetry coverage is inadequate, report the re
 ## Completion checklist
 
 - Trace all participating components and error handlers.
-- Record actual telemetry coverage and timezone.
+- Record actual telemetry coverage, timezone, and the Anypoint access state when it limited scope.
 - Deduplicate multiple entries from the same transaction.
 - Distinguish the first failure from downstream symptoms and retry summaries.
 - Calculate the full timeout and concurrency budget before recommending values.

@@ -55,7 +55,9 @@ installing pays three `npx` cold starts. They are cached afterwards. Node.js `>=
 all three.
 
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate —
-see [project-setup.md](project-setup.md#optional-anypoint-access).
+see [anypoint-access.md](anypoint-access.md). Skills that need runtime evidence probe for access
+first and offer setup, supplied exports, or a repository-only scope, so an unauthenticated connector
+never blocks a session.
 
 The `mule-build` skill and the `mule-build` MCP server share a name but are different things: the
 skill is the workflow (`mule-skills:mule-build`), the server provides the tools it calls

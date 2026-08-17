@@ -1,0 +1,87 @@
+site_name: Mule Skills
+site_description: Reusable AI-agent workflows for the MuleSoft Mule 4 engineering lifecycle.
+site_url: https://avinava.github.io/mule-skills/
+site_author: Avi
+copyright: MIT licensed
+
+repo_url: https://github.com/Avinava/mule-skills
+repo_name: Avinava/mule-skills
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+site_dir: .site
+
+# With `mkdocs build --strict` in CI, these turn a broken cross-link, a missing
+# anchor, or a page left out of the nav into a failed build rather than a warning
+# nobody reads.
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+  icon:
+    logo: material/transit-connection-variant
+    repo: fontawesome/brands/github
+  features:
+    - content.action.edit
+    - content.code.copy
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.suggest
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - Install:
+      - Claude Code: install-claude-code.md
+      - Codex, Copilot, Gemini: install-other-agents.md
+      - Any agent, no shell: agent-install.md
+  - Setup:
+      - Project setup: project-setup.md
+      - Anypoint access: anypoint-access.md
+      - MCP servers: mcp-servers.md
+  - Reference:
+      - Skills: skills.md
+      - FAQ: faq.md
+      - Changelog: https://github.com/Avinava/mule-skills/blob/main/CHANGELOG.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Avinava/mule-skills
+      name: mule-skills on GitHub

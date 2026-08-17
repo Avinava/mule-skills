@@ -1,13 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "mule-skills",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Evidence-backed MuleSoft Mule 4 agent skills for documentation, development, troubleshooting, operations, review, and build.",
   "author": {
     "name": "Avi",
     "url": "https://github.com/Avinava"
   },
-  "homepage": "https://github.com/Avinava/mule-skills",
+  "homepage": "https://avinava.github.io/mule-skills/",
   "repository": "https://github.com/Avinava/mule-skills",
   "license": "MIT",
   "keywords": [

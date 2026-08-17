@@ -153,6 +153,10 @@ Create or reconcile `AGENTS.md` and any host instruction files, and reconcile `.
 following [project-setup.md](project-setup.md). That is where the judgment lives — this runbook only
 places files.
 
+Do not authenticate `anypoint-connect` as part of installation. Report that runtime evidence needs it
+and point the user at [anypoint-access.md](anypoint-access.md); login, global install, and profile
+selection all need the user's own approval.
+
 ## 7. Clean up and report
 
 ```bash

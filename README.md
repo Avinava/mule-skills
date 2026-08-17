@@ -1,9 +1,15 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Mule Skills — evidence-backed MuleSoft agent workflows" width="960" />
+  <img src="docs/assets/banner.svg" alt="Mule Skills — evidence-backed MuleSoft agent workflows" width="960" />
 </p>
 
 <p align="center">
   <strong>Reusable AI-agent workflows for the Mule 4 engineering lifecycle.</strong>
+</p>
+
+<p align="center">
+  <a href="https://avinava.github.io/mule-skills/">Documentation</a> ·
+  <a href="https://avinava.github.io/mule-skills/anypoint-access/">Anypoint access</a> ·
+  <a href="https://avinava.github.io/mule-skills/faq/">FAQ</a>
 </p>
 
 Mule Skills gives coding agents a shared way to document, build, troubleshoot, operate, and review
@@ -133,7 +139,14 @@ exact registry version used by the checked-in configuration rather than an unpin
 Node.js `>=20.19.0` satisfies all three.
 
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate;
-see [docs/project-setup.md](docs/project-setup.md#optional-anypoint-access).
+see [docs/anypoint-access.md](docs/anypoint-access.md).
+
+Skills that need runtime evidence — `mule-ops`, `mule-troubleshooting`, `mule-review`, and the
+publish and deploy actions in `mule-build` — probe for Anypoint access before their first connector
+call. When it is missing they say which state they found and offer setup, exported logs and metrics
+you supply, or a repository-only scope with the gap labeled. Nothing blocks on authentication, and a
+tool error is never reported as an environment finding. The shared workflow is
+[`skills/mule-ops/references/anypoint-readiness.md`](skills/mule-ops/references/anypoint-readiness.md).
 
 The plugin ships `.mcp.json` and starts these servers automatically when it is enabled — run `/mcp`
 to check status or disable one. For other hosts, `install/hosts/` holds the Codex, VS Code, and
@@ -158,7 +171,9 @@ mule-skills/
 │   └── templates/                  # Project-owned AGENTS, Claude, Copilot, and Gemini guidance
 ├── tools/                          # Dependency-free repository validation
 ├── tests/                          # Validator and checker tests
-├── docs/                           # Installation and project-setup guides
+├── docs/                           # Documentation site source, published with GitHub Pages
+├── mkdocs.yml                      # Site configuration and navigation
+├── requirements-docs.txt           # Site build dependency, pinned
 ├── README.md
 └── SETUP.md                        # Redirect to docs/
 ```
@@ -212,7 +227,12 @@ python3 -m unittest discover -s tests -v
 python3 tools/validate_repository.py .
 python3 skills/mule-docs/scripts/audit_documentation.py .
 claude plugin validate . --strict
+pip install -r requirements-docs.txt && mkdocs build --strict
 ```
+
+The validator enforces the invariants that documentation alone cannot: MCP pins agree everywhere,
+every page under `docs/` is reachable from the site navigation, and the skills that need authorized
+runtime evidence route through the shared readiness reference.
 
 CI runs the same checks. See [CHANGELOG.md](CHANGELOG.md) for release history, including the skill
 rename table.

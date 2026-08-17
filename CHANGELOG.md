@@ -1,5 +1,57 @@
 # Changelog
 
+## 1.1.0
+
+Runtime evidence now has an explicit access gate, and the documentation is published as a site.
+
+### Added
+
+- **An Anypoint readiness gate.** `anypoint-connect` is the only server that needs authentication,
+  and until now nothing in the skill text checked for it: `mule-ops` went straight to
+  `get_log_stats`, so an unconfigured host produced tool errors in the middle of a workflow. A
+  shared reference, `skills/mule-ops/references/anypoint-readiness.md`, defines a `whoami` and
+  `list_environments` probe, six access states, and the choices offered when the state is not
+  `Ready` — set it up, supply exported logs and metrics, or continue with repository-only evidence
+  and a labeled gap. `mule-ops`, `mule-troubleshooting`, `mule-review`, and the publish and deploy
+  actions in `mule-build` route through it.
+
+  It is a reference rather than a seventh skill on purpose. Readiness is a step inside four
+  workflows, not a task a user asks for, and a skill the agent has to select first would be one more
+  thing to miss. The states are separated because their fixes differ: telling someone to log in when
+  their host never started the server wastes the exchange.
+
+  A collection tool is explicitly not a probe. An empty log result is indistinguishable from an
+  unauthenticated one, and that ambiguity is what turned missing access into false findings.
+
+- **User-supplied evidence is a first-class path.** The reference states which artifacts to ask for
+  per gap and the metadata that makes them usable — application, environment, window, timezone, log
+  level, truncation. Exports enter as user-provided with stated coverage and never become `Observed`,
+  because absence of an entry in a filtered or truncated export is not evidence of absence.
+
+- **A documentation site**, built with MkDocs Material from `docs/` and deployed by GitHub Actions to
+  <https://avinava.github.io/mule-skills/>. New pages: a landing page, `anypoint-access.md` with the
+  full setup, verification, and failure-mode runbook, `mcp-servers.md`, `skills.md`, and `faq.md`.
+  `docs/` stays the single source and remains readable on GitHub; nothing is generated or duplicated.
+
+- **Three validator rules, one rejecting test each** (22 tests to 28):
+  - `validate_pin_consistency` — every `@sfdxy/…@version` in the README, `docs/`, `install/`, and
+    `skills/` must match `.mcp.json`. The pins appeared in eleven places across five files, so a
+    partial bump could leave a user installing one version and reading instructions for another.
+  - `validate_site_nav` — no page under `docs/` may be orphaned from the site, and no nav entry may
+    point at a missing file.
+  - `validate_anypoint_readiness` — the four gated skills must route through the shared reference,
+    and the reference must keep all six states and both probe calls.
+
+### Changed
+
+- `docs/project-setup.md` keeps a short pointer where the Anypoint runbook used to be; the six links
+  it had into `install/templates/` became absolute GitHub URLs so they resolve both on GitHub and on
+  the site.
+- `assets/banner.svg` moved to `docs/assets/banner.svg` so the README and the site share one file.
+- Both manifests point `homepage` at the site. `repository` still points at GitHub.
+- `install/install.sh` now suggests verifying with `auth status` rather than only running
+  `auth login`, and CI builds the site with `mkdocs build --strict` on every pull request.
+
 ## 1.0.3
 
 Dependency refresh for safer Anypoint application lifecycle management. No skill behavior or

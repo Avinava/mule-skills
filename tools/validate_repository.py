@@ -14,6 +14,18 @@ LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SIBLING_RE = re.compile(r"\.\./([a-z0-9][a-z0-9-]*)/")
 PLACEHOLDER_RE = re.compile(r"<skills-root>/([a-z0-9][a-z0-9-]*)/")
+PIN_RE = re.compile(r"@sfdxy(?:%2F|/)([a-z0-9-]+)@(\d+\.\d+\.\d+)")
+NAV_ENTRY_RE = re.compile(r"^\s*(?:-\s*)?(?:[^:]+:\s*)?([A-Za-z0-9._/-]+\.md)\s*$")
+READINESS_REFERENCE = "references/anypoint-readiness.md"
+READINESS_SKILLS = ("mule-build", "mule-ops", "mule-review", "mule-troubleshooting")
+ACCESS_STATES = (
+    "Ready",
+    "Not configured",
+    "Not authenticated",
+    "Environment not visible",
+    "Not permitted",
+    "Transient failure",
+)
 CLASS_NAMES = (
     "Class A — Value contracts",
     "Class B — Expression embedding",
@@ -331,6 +343,136 @@ def validate_skill_portability(root: Path) -> list[str]:
     return findings
 
 
+def mcp_pins(root: Path) -> tuple[dict[str, str], list[str]]:
+    """Map package name to pinned version from the plugin's .mcp.json."""
+    findings: list[str] = []
+    config = root / ".mcp.json"
+    try:
+        servers = json.loads(config.read_text(encoding="utf-8"))["mcpServers"]
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        return {}, [f"{config}: unreadable mcpServers: {exc}"]
+
+    pins: dict[str, str] = {}
+    for name, entry in sorted(servers.items()):
+        arguments = entry.get("args") if isinstance(entry, dict) else None
+        specifiers = [
+            match
+            for value in (arguments or [])
+            if isinstance(value, str)
+            for match in PIN_RE.finditer(value)
+        ]
+        if len(specifiers) != 1:
+            findings.append(f"{config}: server {name!r} must launch exactly one pinned @sfdxy package")
+            continue
+        package, version = specifiers[0].groups()
+        pins[package] = version
+    return pins, findings
+
+
+def validate_pin_consistency(root: Path) -> list[str]:
+    """Every documented pin must match .mcp.json.
+
+    The same version string appears in the plugin config, three host forms, the
+    installer, and the documentation. A bump that updates some of them leaves a
+    user installing one version and reading instructions for another, which is
+    the failure this repository is most likely to ship.
+    """
+    pins, findings = mcp_pins(root)
+    if not pins:
+        return findings
+
+    candidates = [root / "README.md", root / "install/install.sh"]
+    for directory in ("docs", "install", "skills"):
+        for suffix in ("*.md", "*.json", "*.toml", "*.sh", "*.yaml", "*.yml"):
+            candidates.extend((root / directory).rglob(suffix))
+
+    for path in sorted(set(candidates)):
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for match in PIN_RE.finditer(text):
+            package, version = match.groups()
+            expected = pins.get(package)
+            if expected is None:
+                findings.append(
+                    f"{path}: pins @sfdxy/{package}, which .mcp.json does not launch"
+                )
+            elif version != expected:
+                findings.append(
+                    f"{path}: @sfdxy/{package}@{version} disagrees with .mcp.json pin {expected}"
+                )
+    return findings
+
+
+def validate_site_nav(root: Path) -> list[str]:
+    """No documentation page may be orphaned from the published site."""
+    findings: list[str] = []
+    config = root / "mkdocs.yml"
+    docs_dir = root / "docs"
+    if not config.is_file():
+        return [f"{config}: missing documentation site configuration"]
+    if not docs_dir.is_dir():
+        return [f"{docs_dir}: missing docs directory"]
+
+    remainder = config.read_text(encoding="utf-8").partition("\nnav:\n")[2]
+    if not remainder:
+        return [f"{config}: missing nav section"]
+
+    # Read to the next top-level key so a later block such as `extra:` cannot
+    # masquerade as a nav entry. Scanned with a regex on purpose: the validator
+    # takes no third-party dependency, and YAML syntax is not what is checked
+    # here — `mkdocs build --strict` in CI does that.
+    navigated: set[str] = set()
+    for line in remainder.splitlines():
+        if line.strip() and not line[0].isspace():
+            break
+        match = NAV_ENTRY_RE.match(line)
+        if match:
+            navigated.add(match.group(1))
+
+    for target in sorted(navigated):
+        if not (docs_dir / target).is_file():
+            findings.append(f"{config}: nav entry does not resolve: {target}")
+
+    for path in sorted(docs_dir.rglob("*.md")):
+        relative = path.relative_to(docs_dir).as_posix()
+        if relative not in navigated:
+            findings.append(f"docs/{relative}: not in the {config.name} nav")
+    return findings
+
+
+def validate_anypoint_readiness(root: Path) -> list[str]:
+    """Skills that need authorized runtime access must route through one gate.
+
+    Without this, a skill can quietly go back to calling a collection tool first
+    and reporting a tool error as an environment finding.
+    """
+    findings: list[str] = []
+    reference = root / "skills/mule-ops" / READINESS_REFERENCE
+    if not reference.is_file():
+        return [f"{reference}: missing shared Anypoint readiness reference"]
+
+    text = reference.read_text(encoding="utf-8")
+    for state in ACCESS_STATES:
+        if f"| {state} |" not in text:
+            findings.append(f"{reference}: missing access state {state!r}")
+    for required in ("mcp_anypoint-connect_whoami", "mcp_anypoint-connect_list_environments"):
+        if required not in text:
+            findings.append(f"{reference}: missing probe call {required!r}")
+
+    for name in READINESS_SKILLS:
+        skill_path = root / "skills" / name / "SKILL.md"
+        if not skill_path.is_file():
+            findings.append(f"{skill_path}: missing SKILL.md")
+            continue
+        if READINESS_REFERENCE not in skill_path.read_text(encoding="utf-8"):
+            findings.append(
+                f"{skill_path}: needs authorized Anypoint evidence but does not route through "
+                f"{READINESS_REFERENCE}"
+            )
+    return findings
+
+
 def validate_repository(root: Path) -> list[str]:
     findings: list[str] = []
     findings.extend(validate_skills(root))
@@ -339,6 +481,9 @@ def validate_repository(root: Path) -> list[str]:
     findings.extend(validate_plugin_manifests(root))
     findings.extend(validate_skill_portability(root))
     findings.extend(validate_mcp_configs(root))
+    findings.extend(validate_pin_consistency(root))
+    findings.extend(validate_site_nav(root))
+    findings.extend(validate_anypoint_readiness(root))
     return findings
 
 
