@@ -9,6 +9,15 @@ them sharper: two need no credentials, one needs an Anypoint login.
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.24.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.24.1) | Static Mule analysis and machine-readable reports | None |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.10.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.10.0) | Authorized logs, metrics, deployments, API management, Exchange, MQ, Object Store | Anypoint Platform login |
 
+Each server has its own documentation, which is the place to look for command references, tool
+catalogs, and per-host setup beyond what the skills need:
+
+| Server | Documentation |
+| --- | --- |
+| `mule-build` | <https://avinava.github.io/mule-build/> |
+| `mule-lint` | <https://avinava.github.io/mule-lint/> |
+| `anypoint-connect` | <https://avinava.github.io/anypoint-connect/> |
+
 Package links resolve to the exact registry version the checked-in configuration uses rather than an
 unpinned latest release. Node.js `>=20.19.0` satisfies all three.
 
