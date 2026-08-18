@@ -1,0 +1,67 @@
+name: Propose ecosystem pin update
+
+on:
+  repository_dispatch:
+    types: [tool_release]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package key (mule-lint, mule-build, or anypoint-connect)
+        required: true
+        type: string
+      version:
+        description: Exact stable semantic version
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ecosystem-update-${{ github.event.client_payload.package || inputs.package }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
+      VERSION: ${{ github.event.client_payload.version || inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Update the allowlisted pin and generated files
+        run: python tools/update_ecosystem.py "$PACKAGE" "$VERSION"
+      - name: Verify the released package exists
+        run: |
+          package_key="${PACKAGE#@sfdxy/}"
+          published=$(npm view "@sfdxy/${package_key}@${VERSION}" version)
+          test "$published" = "$VERSION"
+      - name: Validate the proposal
+        run: |
+          python tools/generate_ecosystem.py --check
+          python -m unittest discover -s tests -v
+          python tools/validate_repository.py .
+      - name: Open a pull request
+        run: |
+          if git diff --quiet; then
+            echo "The ecosystem already contains $PACKAGE@$VERSION"
+            exit 0
+          fi
+          safe_package="${PACKAGE#@sfdxy/}"
+          branch="automation/ecosystem-${safe_package}-${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add ecosystem.json .mcp.json install docs skills README.md
+          git commit -m "chore(ecosystem): update ${safe_package} to ${VERSION}"
+          git push --force-with-lease origin "$branch"
+          gh pr create \
+            --title "chore(ecosystem): update ${safe_package} to ${VERSION}" \
+            --body "Automated exact-pin update from a tool release. Generated host configuration and documentation were validated; maintainer review is still required." \
+            --base main \
+            --head "$branch"

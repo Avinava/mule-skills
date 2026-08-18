@@ -19,6 +19,7 @@ local build, lint, or authorized Anypoint evidence is available.
 | Using a host with no plugin support and no shell | [Agent-driven install](agent-install.md) |
 | Installed, and giving the skills project context | [Project setup](project-setup.md) |
 | Wanting runtime logs, metrics, or deployment evidence | [Anypoint access](anypoint-access.md) |
+| Choosing packages or checking supported versions | [Ecosystem](ecosystem.md) |
 
 Installing places files. [Project setup](project-setup.md) is the part that needs judgment, and it
 matters for every install path.
@@ -41,8 +42,8 @@ Details and routing guidance are on the [Skills](skills.md) page.
 | Server | Pin | Credentials | Its own docs |
 | --- | --- | --- | --- |
 | `mule-build` | `@sfdxy/mule-build@2.1.0` | None | <https://avinava.github.io/mule-build/> |
-| `mule-lint` | `@sfdxy/mule-lint@1.25.0` | None | <https://avinava.github.io/mule-lint/> |
-| `anypoint-connect` | `@sfdxy/anypoint-connect@0.11.0` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
+| `mule-lint` | `@sfdxy/mule-lint@1.26.0` | None | <https://avinava.github.io/mule-lint/> |
+| `anypoint-connect` | `@sfdxy/anypoint-connect@0.11.1` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
 
 `anypoint-connect` idles until you authenticate. Skills that need runtime evidence probe for access
 first and offer you a choice — set it up, supply exported logs and metrics, or continue with

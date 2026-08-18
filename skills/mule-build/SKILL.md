@@ -35,6 +35,10 @@ credentials into reusable commands or output.
 
 ## 3. Validate the source
 
+Before choosing a lint profile, follow the shared
+[mule-lint standards protocol](../mule-development/references/mule-lint-standards.md). The build
+workflow executes the project gate; it does not redefine which Mule practices or rules are canonical.
+
 Run the project's configured checks before packaging. Prefer, when available:
 
 1. XML, DataWeave, RAML/OAS, and configuration validation;

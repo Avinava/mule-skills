@@ -19,7 +19,9 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Validate repository structure
-        run: python tools/validate_repository.py .
+        run: |
+          python tools/generate_ecosystem.py --check
+          python tools/validate_repository.py .
       - name: Audit reusable documentation
         run: python skills/mule-docs/scripts/audit_documentation.py .
       - name: Lint the installer

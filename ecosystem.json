@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": "1.3.0",
+  "packages": {
+    "anypoint-connect": {
+      "npm": "@sfdxy/anypoint-connect",
+      "version": "0.11.1",
+      "role": "Authorized Anypoint Platform evidence and lifecycle operations",
+      "credentials": "Anypoint Platform login",
+      "repository": "https://github.com/Avinava/anypoint-connect",
+      "documentation": "https://avinava.github.io/anypoint-connect/"
+    },
+    "mule-build": {
+      "npm": "@sfdxy/mule-build",
+      "version": "2.1.0",
+      "role": "Validate, test, package, run locally, and release Mule applications",
+      "credentials": "None",
+      "repository": "https://github.com/Avinava/mule-build",
+      "documentation": "https://avinava.github.io/mule-build/"
+    },
+    "mule-lint": {
+      "npm": "@sfdxy/mule-lint",
+      "version": "1.26.0",
+      "role": "Canonical standards, static analysis, rule profiles, and agent-readable guidance",
+      "credentials": "None",
+      "repository": "https://github.com/Avinava/mule-lint",
+      "documentation": "https://avinava.github.io/mule-lint/"
+    }
+  }
+}
