@@ -201,7 +201,7 @@ class PluginManifestTests(unittest.TestCase):
     def test_rejects_mcp_configuration_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.25.0", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.26.0", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagree; every host must get the same pins")
 
     def test_rejects_marketplace_named_for_the_publisher(self):
@@ -272,7 +272,17 @@ class PluginManifestTests(unittest.TestCase):
         """A user installing one version while reading instructions for another."""
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "README.md", "@sfdxy/mule-lint@1.25.0", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "README.md", "@sfdxy/mule-lint@1.26.0", "@sfdxy/mule-lint@9.9.9")
+            self.assert_finding(root, "disagrees with .mcp.json pin")
+
+    def test_rejects_ecosystem_manifest_pin_drift(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / "ecosystem.json",
+                '"version": "1.26.0"',
+                '"version": "9.9.9"',
+            )
             self.assert_finding(root, "disagrees with .mcp.json pin")
 
     def test_rejects_documented_pin_for_a_server_that_is_not_launched(self):
@@ -284,6 +294,16 @@ class PluginManifestTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assert_finding(root, "which .mcp.json does not launch")
+
+    def test_rejects_registry_link_version_drift(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / "README.md",
+                "@sfdxy%2Fanypoint-connect/0.11.1",
+                "@sfdxy%2Fanypoint-connect/9.9.9",
+            )
+            self.assert_finding(root, "registry link for @sfdxy/anypoint-connect@9.9.9")
 
     def test_rejects_documentation_page_missing_from_the_site_nav(self):
         with tempfile.TemporaryDirectory() as temporary:

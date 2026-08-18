@@ -15,6 +15,7 @@ NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SIBLING_RE = re.compile(r"\.\./([a-z0-9][a-z0-9-]*)/")
 PLACEHOLDER_RE = re.compile(r"<skills-root>/([a-z0-9][a-z0-9-]*)/")
 PIN_RE = re.compile(r"@sfdxy(?:%2F|/)([a-z0-9-]+)@(\d+\.\d+\.\d+)")
+REGISTRY_PIN_RE = re.compile(r"@sfdxy%2F([a-z0-9-]+)/(\d+\.\d+\.\d+)")
 NAV_ENTRY_RE = re.compile(r"^\s*(?:-\s*)?(?:[^:]+:\s*)?([A-Za-z0-9._/-]+\.md)\s*$")
 READINESS_REFERENCE = "references/anypoint-readiness.md"
 READINESS_SKILLS = ("mule-build", "mule-ops", "mule-review", "mule-troubleshooting")
@@ -401,6 +402,72 @@ def validate_pin_consistency(root: Path) -> list[str]:
                 findings.append(
                     f"{path}: @sfdxy/{package}@{version} disagrees with .mcp.json pin {expected}"
                 )
+        for match in REGISTRY_PIN_RE.finditer(text):
+            package, version = match.groups()
+            expected = pins.get(package)
+            if expected is None:
+                findings.append(
+                    f"{path}: links @sfdxy/{package}, which .mcp.json does not launch"
+                )
+            elif version != expected:
+                findings.append(
+                    f"{path}: registry link for @sfdxy/{package}@{version} disagrees with "
+                    f".mcp.json pin {expected}"
+                )
+    return findings
+
+
+def validate_ecosystem_manifest(root: Path) -> list[str]:
+    """The ecosystem manifest owns package pins and the plugin bundle version."""
+    findings: list[str] = []
+    path = root / "ecosystem.json"
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"{path}: unreadable ecosystem manifest: {exc}"]
+
+    if manifest.get("schemaVersion") != 1:
+        findings.append(f"{path}: schemaVersion must be 1")
+    packages = manifest.get("packages")
+    if not isinstance(packages, dict):
+        return findings + [f"{path}: packages must be an object"]
+
+    expected_names = {"anypoint-connect", "mule-build", "mule-lint"}
+    if set(packages) != expected_names:
+        findings.append(f"{path}: packages must be exactly {', '.join(sorted(expected_names))}")
+
+    pins, pin_findings = mcp_pins(root)
+    findings.extend(pin_findings)
+    semver = re.compile(r"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$")
+    for name, package in sorted(packages.items()):
+        if not isinstance(package, dict):
+            findings.append(f"{path}: packages.{name} must be an object")
+            continue
+        version = package.get("version")
+        npm = package.get("npm")
+        if not isinstance(version, str) or not semver.fullmatch(version):
+            findings.append(f"{path}: packages.{name}.version must be exact stable semver")
+        if npm != f"@sfdxy/{name}":
+            findings.append(f"{path}: packages.{name}.npm must be @sfdxy/{name}")
+        if pins.get(name) != version:
+            findings.append(
+                f"{path}: packages.{name} pin {version!r} disagrees with .mcp.json "
+                f"pin {pins.get(name)!r}"
+            )
+        for field in ("role", "credentials", "repository", "documentation"):
+            if not package.get(field):
+                findings.append(f"{path}: packages.{name}.{field} must be non-empty")
+
+    plugin_path = root / ".claude-plugin/plugin.json"
+    try:
+        plugin_version = json.loads(plugin_path.read_text(encoding="utf-8")).get("version")
+    except (OSError, json.JSONDecodeError):
+        plugin_version = None
+    if manifest.get("bundleVersion") != plugin_version:
+        findings.append(
+            f"{path}: bundleVersion {manifest.get('bundleVersion')!r} disagrees with "
+            f"plugin version {plugin_version!r}"
+        )
     return findings
 
 
@@ -481,6 +548,7 @@ def validate_repository(root: Path) -> list[str]:
     findings.extend(validate_plugin_manifests(root))
     findings.extend(validate_skill_portability(root))
     findings.extend(validate_mcp_configs(root))
+    findings.extend(validate_ecosystem_manifest(root))
     findings.extend(validate_pin_consistency(root))
     findings.extend(validate_site_nav(root))
     findings.extend(validate_anypoint_readiness(root))

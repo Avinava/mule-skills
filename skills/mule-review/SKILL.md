@@ -27,6 +27,11 @@ Read these files directly from this skill folder for every review:
 2. [Finding policy](references/finding-policy.md) for severity, confidence, deduplication, report
    structure, and readiness verdicts.
 
+Also follow the shared
+[mule-lint standards protocol](../mule-development/references/mule-lint-standards.md). Use its
+structured classifications and rule mappings to support relevant findings, while keeping
+project-specific evidence—not generic guidance—as the basis for reporting a defect.
+
 Route to sibling Mule skills only when their specialized workflow is material to the review. Do not
 load every sibling skill by default, and do not fail when one is absent:
 

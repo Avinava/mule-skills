@@ -67,6 +67,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Ecosystem: ecosystem.md
   - Install:
       - Claude Code: install-claude-code.md
       - Codex, Copilot, Gemini: install-other-agents.md

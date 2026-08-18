@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.3.0
+
+Standards and ecosystem management now have explicit ownership and automation.
+
+### Added
+
+- `ecosystem.json` is the canonical exact-version manifest. A deterministic generator owns Claude,
+  generic MCP, VS Code, and Codex host configuration plus the published ecosystem page.
+- The ecosystem hub documents repository boundaries, supported package pins, credentials, and the
+  independent-release workflow.
+- Development, review, and build skills share one protocol for reading mule-lint's structured
+  standards, rule mappings, profiles, and focused guides without copying their content.
+- Tool release dispatches can update an allowlisted package pin, validate the repository, and open a
+  pull request. Dependency events never auto-merge or publish this plugin.
+
+### Updated
+
+- `mule-lint` is pinned to `1.26.0`, adding canonical standards resources and stable rule profiles.
+- `anypoint-connect` is pinned to `0.11.1`, refreshing vulnerable production dependency resolutions
+  and adding a production audit to its release gate.
+
 ## 1.2.0
 
 Pin refresh across all three MCP servers, each of which now publishes its own documentation site. No

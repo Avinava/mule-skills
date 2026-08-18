@@ -49,15 +49,15 @@ Run these yourself. An agent following these skills will print them rather than 
 they change machine-local state.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.11.0 config init
-npx -y @sfdxy/anypoint-connect@0.11.0 auth login
-npx -y @sfdxy/anypoint-connect@0.11.0 auth status
+npx -y @sfdxy/anypoint-connect@0.11.1 config init
+npx -y @sfdxy/anypoint-connect@0.11.1 auth login
+npx -y @sfdxy/anypoint-connect@0.11.1 auth status
 ```
 
 A global install gives you the shorter `anc` command:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.11.0
+npm install -g @sfdxy/anypoint-connect@0.11.1
 anc config init
 anc auth login
 anc auth status

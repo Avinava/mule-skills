@@ -11,6 +11,10 @@ adapt and verify, not project-independent guarantees.
 
 ## Load the required guidance
 
+Read [the mule-lint standards protocol](references/mule-lint-standards.md), then load only the
+standards, rules, and focused guides applicable to the change. mule-lint is the cross-project
+standards authority; this skill owns the implementation workflow and project-specific reasoning.
+
 Use [Invariant classes and cross-cutting gates](references/invariant-classes.md) as the canonical
 mechanism reference. Read only the sections relevant to the changed path, plus every applicable
 cross-cutting gate:
