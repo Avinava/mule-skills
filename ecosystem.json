@@ -12,7 +12,7 @@
     },
     "mule-build": {
       "npm": "@sfdxy/mule-build",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "role": "Validate, test, package, run locally, and release Mule applications",
       "credentials": "None",
       "repository": "https://github.com/Avinava/mule-build",

@@ -12,7 +12,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/mule-build@2.1.0",
+        "@sfdxy/mule-build@2.2.0",
         "mcp"
       ]
     },

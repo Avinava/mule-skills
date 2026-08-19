@@ -46,7 +46,7 @@ The plugin bundles credential-free launch configuration for three pinned servers
 
 | Server | Pin | Role |
 | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.1.0` | Validation, testing, packaging, local runtime, security checks |
+| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.2.0` | Validation, testing, packaging, local runtime, security checks |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.26.0` | Canonical Mule standards, static analysis, and machine-readable guidance |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.11.1` | Authorized Anypoint logs, metrics, deployments, Exchange, MQ, Object Store |
 
