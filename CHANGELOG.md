@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.4.0
+
+MUnit authoring and test execution now have explicit, coordinated ownership.
+
+### Added
+
+- `mule-testing` creates and repairs behavior-focused MUnit tests using caller-faithful events,
+  boundary mocks, observable outcomes, error and state evidence, and a behavior ledger instead of a
+  universal coverage percentage.
+- Its dependency-free inventory reports executable and ignored tests, mocks, assertion and
+  verification structure, fixture paths, and clearly labeled heuristic flow mappings without
+  emitting selector values or fixture contents.
+- `mule-build` is pinned to `2.2.0`, adding typed, CLI, and MCP test execution with focused suite,
+  test, and tag selection plus separate MUnit test metrics and report paths.
+- `mule-lint` is pinned to `1.27.0`, adding the canonical behavior-focused testing standard and
+  correcting `EXP-003` to detect executable MUnit tests rather than configured coverage output.
+
+### Changed
+
+- `mule-development` owns production source, `mule-testing` owns test authoring and repair, and
+  `mule-build` owns execution and delivery mechanics; sibling routing and host templates now state
+  those boundaries.
+- The installer discovers every valid skill directory dynamically, so adding a skill cannot leave
+  vendored installs incomplete.
+- The general Mule inventory now scans only canonical `src/main/mule` and `src/test/munit` roots and
+  ignores IDE, generated, symlinked, and backup trees.
+
 ## 1.3.0
 
 Standards and ecosystem management now have explicit ownership and automation.

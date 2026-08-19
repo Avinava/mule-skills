@@ -12,7 +12,8 @@ When a task matches one of these workflows, follow its instructions:
 
 | Task | Skill |
 | --- | --- |
-| Mule source, DataWeave, connector, or MUnit changes | `mule-development` |
+| Mule production source, DataWeave, connector, or contract changes | `mule-development` |
+| MUnit authoring, repair, fixtures, mocks, and assertions | `mule-testing` |
 | Incident diagnosis and root-cause analysis | `mule-troubleshooting` |
 | Runtime health and operations | `mule-ops` |
 | Documentation creation and targeted refreshes | `mule-docs` |

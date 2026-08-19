@@ -24,12 +24,13 @@ local build, lint, or authorized Anypoint evidence is available.
 Installing places files. [Project setup](project-setup.md) is the part that needs judgment, and it
 matters for every install path.
 
-## The six skills
+## The seven skills
 
 | Skill | Use it for | Default result |
 | --- | --- | --- |
 | `mule-docs` | Documentation, architecture, APIs, flows, onboarding, operations | Evidence-backed Markdown and Mermaid, plus labeled gaps |
-| `mule-development` | Mule XML, DataWeave, connectors, error handling, queues, batch, MUnit | Implemented change with proportionate validation |
+| `mule-development` | Mule production XML, DataWeave, connectors, error handling, queues, batch, contracts | Implemented change with proportionate validation |
+| `mule-testing` | Behavior-focused MUnit authoring, repair, fixtures, mocks, and assertions | Faithful tests with focused and full validation evidence |
 | `mule-troubleshooting` | Incidents, timeouts, connection failures, concurrency, memory | Root-cause assessment or fix plan, no source change unless asked |
 | `mule-ops` | Runtime health, deployments, logs, metrics, recurring checks | Evidence-backed operational assessment |
 | `mule-review` | Working changes, commits, branches, PRs, release readiness | Prioritized findings and fix options |
@@ -41,8 +42,8 @@ Details and routing guidance are on the [Skills](skills.md) page.
 
 | Server | Pin | Credentials | Its own docs |
 | --- | --- | --- | --- |
-| `mule-build` | `@sfdxy/mule-build@2.1.0` | None | <https://avinava.github.io/mule-build/> |
-| `mule-lint` | `@sfdxy/mule-lint@1.26.0` | None | <https://avinava.github.io/mule-lint/> |
+| `mule-build` | `@sfdxy/mule-build@2.2.0` | None | <https://avinava.github.io/mule-build/> |
+| `mule-lint` | `@sfdxy/mule-lint@1.27.0` | None | <https://avinava.github.io/mule-lint/> |
 | `anypoint-connect` | `@sfdxy/anypoint-connect@0.11.1` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
 
 `anypoint-connect` idles until you authenticate. Skills that need runtime evidence probe for access

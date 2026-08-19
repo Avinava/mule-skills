@@ -8,6 +8,9 @@ description: Validate, test, and package a MuleSoft Mule 4 application using its
 Build the current Mule 4 application using its repository instructions and configured build tools.
 Default to a validation and package operation. Do not turn a build request into a release.
 
+This skill owns test execution, reports, packaging, and release mechanics. Route MUnit authoring,
+repair, fixtures, mocks, and assertions to `mule-testing` when that skill is installed.
+
 ## 1. Establish scope
 
 Distinguish these modes:

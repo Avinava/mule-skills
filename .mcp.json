@@ -12,7 +12,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/mule-build@2.1.0",
+        "@sfdxy/mule-build@2.2.0",
         "mcp"
       ]
     },
@@ -20,7 +20,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/mule-lint@1.26.0",
+        "@sfdxy/mule-lint@1.27.0",
         "mcp"
       ]
     }

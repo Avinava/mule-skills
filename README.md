@@ -12,7 +12,7 @@
   <a href="https://avinava.github.io/mule-skills/faq/">FAQ</a>
 </p>
 
-Mule Skills gives coding agents a shared way to document, build, troubleshoot, operate, and review
+Mule Skills gives coding agents a shared way to document, develop, test, build, troubleshoot, operate, and review
 MuleSoft projects. The workflows start from current-project evidence, keep business context separate
 from implemented behavior, and avoid carrying identity or tuning assumptions between projects.
 
@@ -21,7 +21,7 @@ local build, lint, or authorized Anypoint evidence is available.
 
 ## Install
 
-Pick the path that matches your agent. All three install the same six skills.
+Pick the path that matches your agent. All three install the same seven skills.
 
 ### Claude Code — plugin
 
@@ -63,7 +63,8 @@ Then give the agent context about your project by following
 | Skill | Use it for | Default result |
 | --- | --- | --- |
 | [`mule-docs`](skills/mule-docs/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
-| [`mule-development`](skills/mule-development/) | Mule XML, DataWeave, connectors, error handling, queues, batch, configuration, and MUnit changes | Implemented source change with proportionate validation |
+| [`mule-development`](skills/mule-development/) | Mule production XML, DataWeave, connectors, error handling, queues, batch, configuration, and contracts | Implemented source change with proportionate validation |
+| [`mule-testing`](skills/mule-testing/) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration | Faithful tests with focused and full validation evidence |
 | [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
 | [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Evidence-backed operational assessment |
 | [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
@@ -75,6 +76,7 @@ Then give the agent context about your project by following
 | --- | --- | --- |
 | Explain or refresh the project | `mule-docs` | Optional business-context questions when source cannot establish purpose or ownership |
 | Implement a change | `mule-development` | Documentation refresh, then change review |
+| Add or repair MUnit tests | `mule-testing` | `mule-build` for focused and full execution; development if a product defect is exposed |
 | Diagnose a symptom | `mule-troubleshooting` | `mule-ops` for authorized runtime evidence; development only when a fix is requested |
 | Assess current runtime health | `mule-ops` | `mule-troubleshooting` when a specific causal question emerges |
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
@@ -86,7 +88,7 @@ then continues with verified technical evidence if the user skips.
 
 ## Agent support
 
-The six skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
+The seven skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
 reads them from `.agents/skills/`, with instruction files telling the agent how to route.
 
 | Host | Skill discovery | Repository instructions | MCP configuration | Verification |
@@ -131,8 +133,8 @@ Credential-free launch configuration for three pinned MCP servers:
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.11.1`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.11.1) | Authorized Anypoint logs, metrics, deployments, API management, Exchange, MQ, and Object Store evidence |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.1.0) | Mule validation, testing, packaging, local runtime, versioning, and security checks |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.26.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.26.0) | Canonical Mule standards, static analysis, rule profiles, and machine-readable guidance |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | Mule validation, testing, packaging, local runtime, versioning, and security checks |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.27.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.27.0) | Canonical Mule standards, static analysis, rule profiles, and machine-readable guidance |
 
 Source links come from each published package's repository metadata. Package links resolve to the
 exact registry version used by the checked-in configuration rather than an unpinned latest release.
@@ -158,9 +160,10 @@ generic JSON forms, and the installer merges only the entries your config lacks.
 mule-skills/
 ├── .claude-plugin/                 # Plugin and marketplace manifests
 ├── .mcp.json                       # Pinned MCP servers shipped with the plugin
-├── skills/                         # The six reusable skills — host-neutral
+├── skills/                         # The seven reusable skills — host-neutral
 │   ├── mule-docs/                  # Documentation workflow, references, and audit tools
 │   ├── mule-development/           # Implementation workflow and post-change checklist
+│   ├── mule-testing/               # Behavior-focused MUnit authoring and repair
 │   ├── mule-troubleshooting/       # Root-cause analysis workflow
 │   ├── mule-ops/                   # Runtime health workflow
 │   ├── mule-review/                # Change, project, and release-readiness review
@@ -194,6 +197,9 @@ Use mule-docs to refresh architecture and operations documentation. Ask optional
 with choices where the repository cannot establish important context.
 
 Use mule-development to implement this Mule change and complete the post-development checklist.
+
+Use mule-testing to add faithful MUnit coverage for this behavior, then run the focused and required
+full tests without weakening assertions or mocks.
 
 Use mule-troubleshooting to find the root cause of the timeouts in this flow, then stop before
 changing anything.

@@ -43,6 +43,8 @@ load every sibling skill by default, and do not fail when one is absent:
   if it is unavailable or the user declines to set it up, complete the review from repository
   evidence and disclose the coverage gap.
 - Use `mule-docs` when using its inventory, documentation audit, privacy checks, or Mermaid guidance.
+- Use `mule-testing` for its read-only MUnit inventory and behavior model when test fidelity or
+  missing behavioral evidence is material. Keep the review itself read-only.
 
 Invoke a sibling skill by name on hosts that support skill invocation; otherwise read its `SKILL.md`
 from `<skills-root>/<name>/SKILL.md`.
@@ -114,6 +116,14 @@ The inventory's project classification is one signal, not a veto: reconcile it w
 and the requested boundary. Then inspect relevant source directly. Build a working ledger of material claims and their
 repository-relative paths, symbols, flows, endpoints, property keys, tests, or runtime signals.
 Record contradictions instead of silently choosing one source.
+
+When MUnit evidence is material and `mule-testing` is installed, also run its value-safe inventory:
+
+```bash
+python3 <skills-root>/mule-testing/scripts/inventory_munit.py <project-root> --pretty
+```
+
+Treat inferred flow mappings as heuristic and verify them against the suite and production source.
 
 ### 3. Offer optional business context
 

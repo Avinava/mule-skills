@@ -5,8 +5,8 @@ them sharper: two need no credentials, one needs an Anypoint login.
 
 | Server and source | Pin | Role | Credentials |
 | --- | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.1.0) | Validation, testing, packaging, local runtime, versioning, security checks | None |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.26.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.26.0) | Canonical Mule standards, static analysis, and machine-readable guidance | None |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | Validation, testing, packaging, local runtime, versioning, security checks | None |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.27.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.27.0) | Canonical Mule standards, static analysis, and machine-readable guidance | None |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.11.1`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.11.1) | Authorized logs, metrics, deployments, API management, Exchange, MQ, Object Store | Anypoint Platform login |
 
 Each server has its own documentation, which is the place to look for command references, tool
@@ -27,6 +27,7 @@ unpinned latest release. Node.js `>=20.19.0` satisfies all three.
 | --- | --- | --- | --- |
 | `mule-docs` | Inventory support | Optional | No |
 | `mule-development` | Validation and tests after a change | Static analysis of changed files | No |
+| `mule-testing` | Primary test execution and reports | Testing standards and guidance | No |
 | `mule-troubleshooting` | Reproduction and validation | Optional | Telemetry for the incident window |
 | `mule-ops` | No | No | Primary evidence source |
 | `mule-review` | Validation during review | Static analysis | Optional runtime verification only |
@@ -74,11 +75,11 @@ The generic form:
     },
     "mule-build": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-build@2.1.0", "mcp"]
+      "args": ["-y", "@sfdxy/mule-build@2.2.0", "mcp"]
     },
     "mule-lint": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-lint@1.26.0", "mcp"]
+      "args": ["-y", "@sfdxy/mule-lint@1.27.0", "mcp"]
     }
   }
 }

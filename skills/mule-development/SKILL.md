@@ -1,6 +1,6 @@
 ---
 name: mule-development
-description: Create or modify MuleSoft Mule 4 flows, DataWeave, error handling, connectors, queues, batch jobs, configuration, and MUnit tests using evidence-based project conventions and post-change validation. Use when implementing Mule application source or contract changes. Inspect runtime and connector versions before applying version-sensitive guidance, preserve existing contracts unless the user requests a breaking change, and route review-only work to the mule-review skill.
+description: Create or modify MuleSoft Mule 4 production flows, DataWeave, error handling, connectors, queues, batch jobs, configuration, and contracts using evidence-based project conventions and post-change validation. Use when implementing Mule application source or contract changes. Inspect runtime and connector versions before applying version-sensitive guidance, preserve existing contracts unless the user requests a breaking change, route MUnit authoring and repair to mule-testing, and route review-only work to mule-review.
 ---
 
 # MuleSoft Development
@@ -62,6 +62,10 @@ Prioritize findings and validation by credible impact and evidence, not by class
 defect can be release-blocking when it risks incorrect results, duplicates, or data loss.
 
 ## Workflow
+
+Use `mule-testing` for test authoring, repair, fixtures, mocks, assertions, and test-only build
+configuration when it is installed. This skill still owns production-source behavior and coordinates
+the focused tests required to validate a source change.
 
 ### 1. Establish the change boundary
 
