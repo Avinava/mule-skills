@@ -4,8 +4,8 @@ args = ["-y", "@sfdxy/anypoint-connect@0.11.1", "mcp"]
 
 [mcp_servers.mule-build]
 command = "npx"
-args = ["-y", "@sfdxy/mule-build@2.1.0", "mcp"]
+args = ["-y", "@sfdxy/mule-build@2.2.0", "mcp"]
 
 [mcp_servers.mule-lint]
 command = "npx"
-args = ["-y", "@sfdxy/mule-lint@1.26.0", "mcp"]
+args = ["-y", "@sfdxy/mule-lint@1.27.0", "mcp"]

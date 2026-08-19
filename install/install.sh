@@ -17,7 +17,6 @@ set -euo pipefail
 
 REPO_URL="${MULE_SKILLS_REPO:-https://github.com/Avinava/mule-skills.git}"
 REPO_REF="${MULE_SKILLS_REF:-main}"
-SKILL_NAMES="mule-build mule-development mule-docs mule-ops mule-review mule-troubleshooting"
 LEGACY_SKILL_NAMES="document-mulesoft-project review-mulesoft-project"
 
 TARGET="$PWD"
@@ -102,6 +101,9 @@ if [ -z "$SRC" ]; then
 fi
 
 [ -d "$SRC/skills" ] || die "no skills/ directory found in $SRC"
+SKILL_NAMES="$(find "$SRC/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -print \
+  | sed 's#/SKILL.md$##; s#.*/##' | sort)"
+[ -n "$SKILL_NAMES" ] || die "no discoverable skills found in $SRC/skills"
 
 VERSION="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' \
   "$SRC/.claude-plugin/plugin.json" 2>/dev/null || echo "unknown")"

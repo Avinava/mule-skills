@@ -101,7 +101,9 @@ Use only commands verified in this repository:
 | Deploy | <!-- Workflow/tool --> | <!-- Environment inputs, no values --> |
 
 Do not assume configuration is deployed separately, tests should be skipped, or a build implies a
-release. Use the `mule-build` skill for validation, packaging, and explicitly requested release actions. Use the repository's release policy.
+release. Use `mule-testing` for MUnit authoring and repair, and `mule-build` for test execution,
+validation, packaging, and explicitly requested release actions. Use the repository's release
+policy.
 
 ## Operational checks
 
@@ -118,6 +120,8 @@ diagnosis is required.
 
 - Use the `mule-development` skill and complete its post-development checklist for source changes (Classes A–E: value contracts, expression embedding, contract authority, failure
   disposition, state/idempotency; plus applicable cross-cutting gates).
+- Use `mule-testing` for behavior-focused MUnit tests, faithful events and fixtures, boundary mocks,
+  observable assertions, and test-only build configuration.
 - Validate query inputs and select every field consumed downstream.
 - Keep batch records and queue messages minimal and serializable; pin media types for the next
   consumer.

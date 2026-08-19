@@ -18,14 +18,20 @@ IGNORED_DIRECTORIES = {
     ".git",
     ".idea",
     ".m2",
+    ".mule",
+    ".settings",
+    ".tooling-project",
     ".vscode",
     "__MACOSX",
+    "backup",
+    "backups",
     "coverage",
     "dist",
     "generated-sources",
     "node_modules",
     "target",
 }
+MUNIT_NS = "http://www.mulesoft.org/schema/mule/munit"
 SENSITIVE_SUFFIXES = {
     ".cer",
     ".crt",
@@ -88,13 +94,27 @@ def relative(root: Path, path: Path) -> str:
     return path.relative_to(root).as_posix()
 
 
+def ignored_directory(name: str) -> bool:
+    lowered = name.lower()
+    return (
+        name in IGNORED_DIRECTORIES
+        or lowered.endswith((".bak", "-backup", "_backup"))
+        or lowered.startswith("backup-")
+    )
+
+
+def is_under(root: Path, path: Path, *parts: str) -> bool:
+    relative_parts = path.relative_to(root).parts
+    return relative_parts[: len(parts)] == parts
+
+
 def walk_files(root: Path) -> Iterable[Path]:
     for directory, names, filenames in os.walk(root, topdown=True, followlinks=False):
         current = Path(directory)
         names[:] = sorted(
             name
             for name in names
-            if name not in IGNORED_DIRECTORIES
+            if not ignored_directory(name)
             and not (current / name).is_symlink()
             and is_within(root, (current / name).resolve(strict=False))
         )
@@ -358,7 +378,7 @@ def scan_munit(path: Path, root: Path, warnings: list[str]) -> dict[str, Any]:
         {
             element.attrib.get("name", "<unnamed>")
             for element in xml_root.iter()
-            if local_name(element.tag) == "test"
+            if namespace_uri(element.tag) == MUNIT_NS and local_name(element.tag) == "test"
         }
     )
     return {"source": source, "tests": tests}
@@ -410,6 +430,7 @@ def is_deployment_file(path: Path, root: Path) -> bool:
 
 
 def build_inventory(root: Path) -> dict[str, Any]:
+    root = root.resolve()
     warnings: list[str] = []
     files = list(walk_files(root))
     pom_path = root / "pom.xml"
@@ -422,15 +443,12 @@ def build_inventory(root: Path) -> dict[str, Any]:
     mule_xml_files = [
         path
         for path in files
-        if path.suffix.lower() == ".xml"
-        and "src" in path.parts
-        and "main" in path.parts
-        and "mule" in path.parts
+        if path.suffix.lower() == ".xml" and is_under(root, path, "src", "main", "mule")
     ]
     munit_files = [
         path
         for path in files
-        if path.suffix.lower() == ".xml" and "src" in path.parts and "test" in path.parts and "munit" in path.parts
+        if path.suffix.lower() == ".xml" and is_under(root, path, "src", "test", "munit")
     ]
 
     connector_sets: dict[str, dict[str, set[str]]] = defaultdict(

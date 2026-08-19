@@ -59,6 +59,17 @@ running the command.
 Use the inventory to route deeper inspection. Verify important behavior in the actual source files;
 the inventory is an index, not a substitute for reading code.
 
+For test documentation, use the value-safe `mule-testing` inventory when that sibling skill is
+installed:
+
+```bash
+python3 <skills-root>/mule-testing/scripts/inventory_munit.py <project-root> --pretty
+```
+
+It adds executable/ignored counts, test structures, selector attribute names, fixture paths, and
+heuristic flow mappings without exposing selector values or fixture contents. Verify material claims
+in the suite source.
+
 Inspect, when present:
 
 - `pom.xml` and `mule-artifact.json`

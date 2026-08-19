@@ -58,6 +58,11 @@ error handlers, API contract, MUnit tests, deployment files, and current documen
 
 Do not infer API-led layers or dependency ownership from application names alone.
 
+When an isolated reproduction or failing MUnit suite is material, use `mule-testing` to inventory
+and classify the test evidence. A correct failing test can support a product hypothesis; a mock
+mismatch, unfaithful event, or build failure cannot. Keep diagnosis read-only unless the user also
+requests implementation.
+
 ### 2. Collect aligned telemetry
 
 Confirm Anypoint access before the first connector call, following

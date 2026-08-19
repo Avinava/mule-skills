@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule Testing"
+  short_description: "Create and repair behavior-focused MUnit tests"
+  default_prompt: "Use $mule-testing to add or repair behavior-focused MUnit tests for this Mule project."

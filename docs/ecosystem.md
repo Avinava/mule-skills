@@ -1,14 +1,14 @@
 # Ecosystem
 
 This is the canonical compatibility and ownership map for the Mule agent toolkit. The current
-bundle is `mule-skills@1.3.0`; its MCP dependencies are pinned exactly so an
+bundle is `mule-skills@1.4.0`; its MCP dependencies are pinned exactly so an
 installation is reproducible.
 
 | Project | Exact package | Owns | Credentials | Reference |
 | ------- | ------------- | ---- | ----------- | --------- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.11.1` | Authorized Anypoint Platform evidence and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
-| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.1.0` | Validate, test, package, run locally, and release Mule applications | None | [Docs](https://avinava.github.io/mule-build/) |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.26.0` | Canonical standards, static analysis, rule profiles, and agent-readable guidance | None | [Docs](https://avinava.github.io/mule-lint/) |
+| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.2.0` | Validate, test, package, run locally, and release Mule applications | None | [Docs](https://avinava.github.io/mule-build/) |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.27.0` | Canonical standards, static analysis, rule profiles, and agent-readable guidance | None | [Docs](https://avinava.github.io/mule-lint/) |
 
 ## Ownership boundaries
 

@@ -72,21 +72,24 @@ git clone --depth 1 https://github.com/Avinava/mule-skills.git "$MULE_SKILLS_TMP
 mkdir -p .agents/skills
 ```
 
-Copy all six skills:
+Copy all seven skills:
 
 | Skill | Contents |
 | --- | --- |
 | `mule-docs` | `SKILL.md`, metadata, references, inventory script, documentation audit |
 | `mule-development` | `SKILL.md`, metadata, invariant classes, checklist, embedded-expression checker |
+| `mule-testing` | `SKILL.md`, metadata, behavior model, value-safe MUnit inventory |
 | `mule-troubleshooting` | `SKILL.md`, metadata |
 | `mule-ops` | `SKILL.md`, metadata |
 | `mule-review` | `SKILL.md`, metadata, review domains, finding policy |
 | `mule-build` | `SKILL.md`, metadata |
 
 ```bash
-for skill in mule-build mule-development mule-docs mule-ops mule-review mule-troubleshooting; do
+for skill_dir in "$MULE_SKILLS_TMP"/mule-skills/skills/*; do
+  test -f "$skill_dir/SKILL.md" || continue
+  skill="$(basename "$skill_dir")"
   rm -rf ".agents/skills/$skill"
-  cp -R "$MULE_SKILLS_TMP/mule-skills/skills/$skill" .agents/skills/
+  cp -R "$skill_dir" .agents/skills/
 done
 ```
 
@@ -113,13 +116,13 @@ the existing file first and add only the server keys it lacks.
 
 If the destination already defines a server with the same name, leave it alone and tell the user.
 
-These pins were verified on **2026-08-18**:
+These pins were verified on **2026-08-19**:
 
 | Package | Source | Node.js |
 | --- | --- | ---: |
 | [`@sfdxy/anypoint-connect@0.11.1`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.11.1) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=20.0.0` |
-| [`@sfdxy/mule-build@2.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.1.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
-| [`@sfdxy/mule-lint@1.26.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.26.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
+| [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
+| [`@sfdxy/mule-lint@1.27.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.27.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 
 Use Node.js `>=20.19.0` to satisfy all three. Do not change a pin without reviewing the linked
 source repository and its release notes.
@@ -127,17 +130,21 @@ source repository and its release notes.
 ## 5. Verify what landed
 
 ```bash
-for skill in mule-build mule-development mule-docs mule-ops mule-review mule-troubleshooting; do
+for skill_dir in "$MULE_SKILLS_TMP"/mule-skills/skills/*; do
+  test -f "$skill_dir/SKILL.md" || continue
+  skill="$(basename "$skill_dir")"
   test -f ".agents/skills/$skill/SKILL.md" || echo "MISSING: $skill"
 done
 test -f .agents/skills/mule-docs/scripts/inventory_mule_project.py
 test -f .agents/skills/mule-development/scripts/check_embedded_expressions.py
+test -f .agents/skills/mule-testing/scripts/inventory_munit.py
 ```
 
 Run the bundled tools against this project to prove they work:
 
 ```bash
 python3 .agents/skills/mule-docs/scripts/inventory_mule_project.py . --pretty
+python3 .agents/skills/mule-testing/scripts/inventory_munit.py . --pretty
 python3 .agents/skills/mule-development/scripts/check_embedded_expressions.py .
 ```
 

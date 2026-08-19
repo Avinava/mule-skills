@@ -9,7 +9,8 @@ current source are authoritative over reusable examples.
 
 | Task | Skill |
 | --- | --- |
-| Mule source, DataWeave, connector, or MUnit changes | `mule-development` |
+| Mule production source, DataWeave, connector, or contract changes | `mule-development` |
+| MUnit authoring, repair, fixtures, mocks, and assertions | `mule-testing` |
 | Incident diagnosis and root-cause analysis | `mule-troubleshooting` |
 | Runtime health and operations | `mule-ops` |
 | Documentation creation and targeted refreshes | `mule-docs` |
@@ -20,6 +21,9 @@ current source are authoritative over reusable examples.
 
 Use `mule-development` for Mule source changes and complete its post-development checklist. Preserve
 contracts, delivery semantics, error outcomes, privacy boundaries, and project conventions.
+
+Use `mule-testing` for behavior-focused MUnit authoring and repair. Keep `mule-build` responsible for
+test execution and reports.
 
 ## Troubleshooting and operations
 
