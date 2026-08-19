@@ -21,7 +21,7 @@ local build, lint, or authorized Anypoint evidence is available.
 
 ## Install
 
-Pick the path that matches your agent. All three install the same seven skills.
+Pick the path that matches your agent. All three install the same eight skills.
 
 ### Claude Code — plugin
 
@@ -62,8 +62,9 @@ Then give the agent context about your project by following
 
 | Skill | Use it for | Default result |
 | --- | --- | --- |
+| [`mule-api-design`](skills/mule-api-design/) | HTTP API workshops, URI/method/data/error design, RAML/OAS authoring, contract assessment, and safe Design Center workflows | Consumer-centered contract, decision ledger, and validation evidence |
 | [`mule-docs`](skills/mule-docs/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
-| [`mule-development`](skills/mule-development/) | Mule production XML, DataWeave, connectors, error handling, queues, batch, configuration, and contracts | Implemented source change with proportionate validation |
+| [`mule-development`](skills/mule-development/) | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch, and configuration | Implemented source change with proportionate validation |
 | [`mule-testing`](skills/mule-testing/) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration | Faithful tests with focused and full validation evidence |
 | [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
 | [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Evidence-backed operational assessment |
@@ -74,6 +75,7 @@ Then give the agent context about your project by following
 
 | Request | Start with | Add when needed |
 | --- | --- | --- |
+| Design or assess an HTTP API contract | `mule-api-design` | `mule-development` for APIKit implementation after the contract is approved |
 | Explain or refresh the project | `mule-docs` | Optional business-context questions when source cannot establish purpose or ownership |
 | Implement a change | `mule-development` | Documentation refresh, then change review |
 | Add or repair MUnit tests | `mule-testing` | `mule-build` for focused and full execution; development if a product defect is exposed |
@@ -88,7 +90,7 @@ then continues with verified technical evidence if the user skips.
 
 ## Agent support
 
-The seven skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
+The eight skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
 reads them from `.agents/skills/`, with instruction files telling the agent how to route.
 
 | Host | Skill discovery | Repository instructions | MCP configuration | Verification |
@@ -132,9 +134,9 @@ Credential-free launch configuration for three pinned MCP servers:
 
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.11.1`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.11.1) | Authorized Anypoint logs, metrics, deployments, API management, Exchange, MQ, and Object Store evidence |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.12.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.12.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
 | [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | Mule validation, testing, packaging, local runtime, versioning, and security checks |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.27.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.27.0) | Canonical Mule standards, static analysis, rule profiles, and machine-readable guidance |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.28.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.28.0) | Canonical Mule standards, static analysis, and RAML/OAS contract validation |
 
 Source links come from each published package's repository metadata. Package links resolve to the
 exact registry version used by the checked-in configuration rather than an unpinned latest release.
@@ -143,8 +145,8 @@ Node.js `>=20.19.0` satisfies all three.
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate;
 see [docs/anypoint-access.md](docs/anypoint-access.md).
 
-Skills that need runtime evidence — `mule-ops`, `mule-troubleshooting`, `mule-review`, and the
-publish and deploy actions in `mule-build` — probe for Anypoint access before their first connector
+Skills that need authorized platform evidence — `mule-api-design`, `mule-ops`, `mule-troubleshooting`,
+`mule-review`, and publish/deploy actions in `mule-build` — probe the requested Anypoint capability before their first connector
 call. When it is missing they say which state they found and offer setup, exported logs and metrics
 you supply, or a repository-only scope with the gap labeled. Nothing blocks on authentication, and a
 tool error is never reported as an environment finding. The shared workflow is
@@ -160,7 +162,8 @@ generic JSON forms, and the installer merges only the entries your config lacks.
 mule-skills/
 ├── .claude-plugin/                 # Plugin and marketplace manifests
 ├── .mcp.json                       # Pinned MCP servers shipped with the plugin
-├── skills/                         # The seven reusable skills — host-neutral
+├── skills/                         # The eight reusable skills — host-neutral
+│   ├── mule-api-design/            # HTTP design, RAML/OAS contracts, and safe Design Center workflow
 │   ├── mule-docs/                  # Documentation workflow, references, and audit tools
 │   ├── mule-development/           # Implementation workflow and post-change checklist
 │   ├── mule-testing/               # Behavior-focused MUnit authoring and repair
@@ -195,6 +198,8 @@ fixed path, so the same file works under a plugin install and a vendored install
 ```text
 Use mule-docs to refresh architecture and operations documentation. Ask optional business questions
 with choices where the repository cannot establish important context.
+
+Use mule-api-design to turn these consumer requirements into a RAML or OAS contract and validate it.
 
 Use mule-development to implement this Mule change and complete the post-development checklist.
 

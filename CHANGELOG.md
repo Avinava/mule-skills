@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.0 — API Design
+
+- Added `mule-api-design` for guided HTTP API design, RAML 1.0 and OpenAPI 3.0 authoring, contract assessment, and safe Design Center/Exchange workflows.
+- Added consumer-centered URI, method, data, error, compatibility, idempotency, pagination, and concurrency guidance grounded in HTTP and specification sources.
+- Routed contract authoring away from Mule implementation work while preserving APIKit implementation ownership in `mule-development`.
+- Added capability-specific Anypoint readiness for Design Center, Exchange, and centralized API Governance.
+- Staged `anypoint-connect@0.12.0` and `mule-lint@1.28.0` pins for preview-bound remote workflows and local AMF contract validation.
+
 ## 1.4.0
 
 MUnit authoring and test execution now have explicit, coordinated ownership.

@@ -118,6 +118,8 @@ diagnosis is required.
 
 ## Development guardrails
 
+- Use `mule-api-design` for consumer-facing HTTP design and RAML/OAS authoring. Keep one contract
+  source of truth, validate it locally, and separately approve Design Center sync and publication.
 - Use the `mule-development` skill and complete its post-development checklist for source changes (Classes A–E: value contracts, expression embedding, contract authority, failure
   disposition, state/idempotency; plus applicable cross-cutting gates).
 - Use `mule-testing` for behavior-focused MUnit tests, faithful events and fixtures, boundary mocks,

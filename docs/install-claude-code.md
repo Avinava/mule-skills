@@ -23,12 +23,13 @@ That writes to `.claude/settings.json`, so everyone who clones the repository ge
 
 ## What you get
 
-Six skills, namespaced under the plugin:
+Eight skills, namespaced under the plugin:
 
 | Skill | Use it for |
 | --- | --- |
+| `mule-api-design` | HTTP API workshops, RAML/OAS contracts, assessment, Design Center workflow |
 | `mule-docs` | Documentation, architecture, APIs, flows, onboarding, targeted refreshes |
-| `mule-development` | Mule production XML, DataWeave, connectors, error handling, queues, batch, contracts |
+| `mule-development` | Mule production XML, DataWeave, APIKit implementation, connectors, queues, batch |
 | `mule-testing` | MUnit authoring, repair, fixtures, mocks, assertions, test-only configuration |
 | `mule-troubleshooting` | Incidents, timeouts, connection failures, concurrency, memory |
 | `mule-ops` | Runtime health, deployments, logs, metrics, recurring checks |
@@ -48,15 +49,15 @@ The plugin bundles credential-free launch configuration for three pinned servers
 | Server | Pin | Role |
 | --- | --- | --- |
 | [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.2.0` | Validation, testing, packaging, local runtime, security checks |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.27.0` | Canonical Mule standards, static analysis, and machine-readable guidance |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.11.1` | Authorized Anypoint logs, metrics, deployments, Exchange, MQ, Object Store |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.28.0` | Canonical Mule standards, static analysis, RAML/OAS validation |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.12.0` | Authorized Design Center, Exchange, Governance, runtime evidence, mutations |
 
 Plugin MCP servers start automatically when the plugin is enabled, so the first session after
 installing pays three `npx` cold starts. They are cached afterwards. Node.js `>=20.19.0` satisfies
 all three.
 
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate —
-see [anypoint-access.md](anypoint-access.md). Skills that need runtime evidence probe for access
+see [anypoint-access.md](anypoint-access.md). Skills that need Anypoint evidence probe the requested capability
 first and offer setup, supplied exports, or a repository-only scope, so an unauthenticated connector
 never blocks a session.
 

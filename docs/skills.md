@@ -1,13 +1,14 @@
 # Skills
 
-Seven skills, shared and host-neutral. Claude Code loads them from the plugin; every other host reads
+Eight skills, shared and host-neutral. Claude Code loads them from the plugin; every other host reads
 them from `.agents/skills/`. Each has a `SKILL.md` the agent selects from its description, so
 describing the task is usually enough.
 
 | Skill | Use it for | Default result |
 | --- | --- | --- |
+| [`mule-api-design`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-api-design) | HTTP API workshops, URI/method/data/error design, RAML/OAS authoring, contract assessment, safe Design Center workflows | Consumer-centered contract, decision ledger, and validation evidence |
 | [`mule-docs`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-docs) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
-| [`mule-development`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-development) | Mule production XML, DataWeave, connectors, error handling, queues, batch, configuration, and contracts | Implemented source change with proportionate validation |
+| [`mule-development`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-development) | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch, and configuration | Implemented source change with proportionate validation |
 | [`mule-testing`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-testing) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration | Faithful tests with focused and full validation evidence |
 | [`mule-troubleshooting`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-troubleshooting) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
 | [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Runtime health, deployments, logs, metrics, recurring checks, multi-application correlation | Evidence-backed operational assessment |
@@ -18,6 +19,7 @@ describing the task is usually enough.
 
 | Request | Start with | Add when needed |
 | --- | --- | --- |
+| Design or assess an HTTP API contract | `mule-api-design` | Development for Mule/APIKit implementation after approval |
 | Explain or refresh the project | `mule-docs` | Optional business-context questions when source cannot establish purpose or ownership |
 | Implement a change | `mule-development` | Documentation refresh, then change review |
 | Add or repair MUnit tests | `mule-testing` | `mule-build` for execution; development if a product defect is exposed |
@@ -39,7 +41,7 @@ then continues with verified technical evidence if you skip.
 
 ## Runtime evidence is gated, not assumed
 
-`mule-ops`, `mule-troubleshooting`, `mule-review`, and the publish and deploy actions in `mule-build`
+`mule-api-design`, `mule-ops`, `mule-troubleshooting`, `mule-review`, and publish/deploy actions in `mule-build`
 confirm Anypoint access before their first connector call, and offer setup, supplied exports, or a
 repository-only scope when it is missing. See [Anypoint access](anypoint-access.md).
 
@@ -48,6 +50,8 @@ repository-only scope when it is missing. See [Anypoint access](anypoint-access.
 ```text
 Use mule-docs to refresh architecture and operations documentation. Ask optional business questions
 with choices where the repository cannot establish important context.
+
+Use mule-api-design to turn these requirements into a consumer-centered RAML or OAS contract.
 
 Use mule-development to implement this Mule change and complete the post-development checklist.
 

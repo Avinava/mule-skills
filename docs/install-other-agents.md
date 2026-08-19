@@ -46,7 +46,7 @@ The script is idempotent. Skills are replaced on every run; MCP entries, instruc
 
 ```text
 your-mule-project/
-├── .agents/skills/                  # the six mule-* skills
+├── .agents/skills/                  # the eight mule-* skills
 ├── .mcp.json                        # Claude Code, Copilot CLI, Gemini
 ├── .vscode/mcp.json                 # VS Code and Copilot Chat
 ├── .codex/config.toml               # Codex
@@ -84,7 +84,7 @@ access through repository settings.
 
 ## Manual install
 
-If you cannot run the script, clone this repository and copy the six directories under `skills/`
+If you cannot run the script, clone this repository and copy the eight directories under `skills/`
 into `.agents/skills/`, then merge the matching file from `install/hosts/` into your host's MCP
 config and copy the instruction templates from `install/templates/`.
 
@@ -102,5 +102,5 @@ The agent-followable version of this procedure is in [agent-install.md](agent-in
 Fill in `AGENTS.md` from this project's actual evidence — see [project-setup.md](project-setup.md).
 
 For runtime logs, metrics, or deployment evidence, authenticate the one server that needs it:
-[Anypoint access](anypoint-access.md). Skills that use runtime evidence check for access themselves
+[Anypoint access](anypoint-access.md). Skills that use runtime or design-platform evidence check access themselves
 and offer alternatives, so this is optional.

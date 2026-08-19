@@ -1,12 +1,12 @@
 # Anypoint access readiness
 
-`anypoint-connect` is the only MCP server in this toolkit that needs authentication. Until it is
-configured and authenticated, every runtime-evidence tool fails, and a failed collection call cannot
-tell missing access apart from an empty window. Establish access state first, then either collect
-telemetry, work from evidence the user supplies, or reduce scope and say so.
+`anypoint-connect` is the only MCP server in this toolkit that needs authentication. Establish the
+requested capability rather than assuming that one successful call proves access to every Anypoint
+service. A failed collection call cannot tell missing access apart from an empty result.
 
-This reference is owned by `mule-ops` and is shared with `mule-troubleshooting`, `mule-review`, and
-`mule-build`. Read it from `<skills-root>/mule-ops/references/anypoint-readiness.md`.
+This reference is owned by `mule-ops` and shared with `mule-api-design`, `mule-troubleshooting`,
+`mule-review`, and `mule-build`. Read it from
+`<skills-root>/mule-ops/references/anypoint-readiness.md`.
 
 ## Contents
 
@@ -28,6 +28,7 @@ environment change.
 | Work | Probe first |
 | --- | --- |
 | Runtime health, incident telemetry, deployment or audit history, queue, Object Store, or API-manager evidence | Yes |
+| Design Center, Exchange, centralized API Governance, or API publication | Yes, using the design capability probe |
 | Explicitly requested publish, deploy, rollback, restart, scale, or settings change | Yes |
 | Repository-only analysis, documentation, development, lint, local validation, test, or packaging | No |
 
@@ -43,11 +44,18 @@ mcp_anypoint-connect_whoami()
 mcp_anypoint-connect_list_environments()
 ```
 
-`whoami` confirms that authentication works and returns the organization context the other tools
-need. `list_environments` confirms that the requested environment is actually visible to the
-authenticated identity. Call `mcp_anypoint-connect_get_entitlements()` only when a capability
-question remains, such as whether monitoring, queue, or Object Store evidence exists for this
-subscription at all.
+`whoami` confirms authentication and organization context. Select the second probe by capability:
+
+| Capability | Second probe | Ready means |
+| --- | --- | --- |
+| Runtime/deployment/telemetry | `mcp_anypoint-connect_list_environments()` | The requested runtime environment is visible |
+| Design Center authoring | `list_design_center_projects` | Project inventory is readable, even when empty |
+| Exchange discovery | `search_exchange` with a neutral narrow query | Exchange responds within the authorized scope |
+| Centralized API Governance | `explain_api_governance_plan` for user-approved neutral coordinates | Governance responds or returns a legitimate empty plan |
+
+Do not call `list_environments` as a prerequisite for Design Center: runtime environment visibility
+is unrelated to API design-project access. Call `mcp_anypoint-connect_get_entitlements()` only when
+a runtime capability question remains, such as monitoring, queue, or Object Store availability.
 
 Never use a collection tool as the probe. An empty `get_log_stats` result is indistinguishable from
 an unauthenticated one, and a permission error on a narrow query says nothing about the rest of the
@@ -57,7 +65,7 @@ environment.
 
 | State | Signal | What it means |
 | --- | --- | --- |
-| Ready | `whoami` returns an identity and the requested environment appears in `list_environments` | Collect telemetry as the workflow directs |
+| Ready | `whoami` succeeds and the capability-specific probe succeeds | Use only the proven capability |
 | Not configured | The host exposes no `anypoint-connect` tools, or the server is disabled or failed to start | MCP configuration is missing for this host; authentication is not the problem |
 | Not authenticated | Tools exist but report missing, invalid, or expired credentials | A login or token refresh is needed |
 | Environment not visible | Authentication succeeds but the requested environment is absent from the list | Wrong organization or profile, a business-group boundary, or a misspelled environment |
@@ -98,15 +106,15 @@ Print the commands and let the user run them. These change machine-local state, 
 without explicit approval.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.11.1 config init
-npx -y @sfdxy/anypoint-connect@0.11.1 auth login
-npx -y @sfdxy/anypoint-connect@0.11.1 auth status
+npx -y @sfdxy/anypoint-connect@0.12.0 config init
+npx -y @sfdxy/anypoint-connect@0.12.0 auth login
+npx -y @sfdxy/anypoint-connect@0.12.0 auth status
 ```
 
 A global install gives the shorter `anc` form and needs separate approval:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.11.1
+npm install -g @sfdxy/anypoint-connect@0.12.0
 anc auth login
 anc auth status
 ```

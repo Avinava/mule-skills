@@ -9,7 +9,8 @@ current source are authoritative over reusable examples.
 
 | Task | Skill |
 | --- | --- |
-| Mule production source, DataWeave, connector, or contract changes | `mule-development` |
+| HTTP API design, URL/method/data decisions, RAML/OAS contract authoring | `mule-api-design` |
+| Mule production source, DataWeave, APIKit implementation, or connector changes | `mule-development` |
 | MUnit authoring, repair, fixtures, mocks, and assertions | `mule-testing` |
 | Incident diagnosis and root-cause analysis | `mule-troubleshooting` |
 | Runtime health and operations | `mule-ops` |
@@ -18,6 +19,9 @@ current source are authoritative over reusable examples.
 | Validation, packaging, or an explicitly requested release | `mule-build` |
 
 ## Development
+
+Use `mule-api-design` for consumer-facing HTTP design and RAML/OAS authoring. Approve Design Center
+sync and Exchange publication separately.
 
 Use `mule-development` for Mule source changes and complete its post-development checklist. Preserve
 contracts, delivery semantics, error outcomes, privacy boundaries, and project conventions.

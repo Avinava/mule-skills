@@ -1,6 +1,6 @@
 ---
 name: mule-development
-description: Create or modify MuleSoft Mule 4 production flows, DataWeave, error handling, connectors, queues, batch jobs, configuration, and contracts using evidence-based project conventions and post-change validation. Use when implementing Mule application source or contract changes. Inspect runtime and connector versions before applying version-sensitive guidance, preserve existing contracts unless the user requests a breaking change, route MUnit authoring and repair to mule-testing, and route review-only work to mule-review.
+description: Create or modify MuleSoft Mule 4 production flows, DataWeave, APIKit routing, error handling, connectors, queues, batch jobs, and configuration using evidence-based project conventions and post-change validation. Use when implementing Mule application behavior or aligning implementation to an existing contract. Route HTTP API design and RAML/OAS contract authoring to mule-api-design, MUnit authoring and repair to mule-testing, and review-only work to mule-review.
 ---
 
 # MuleSoft Development
@@ -66,6 +66,9 @@ defect can be release-blocking when it risks incorrect results, duplicates, or d
 Use `mule-testing` for test authoring, repair, fixtures, mocks, assertions, and test-only build
 configuration when it is installed. This skill still owns production-source behavior and coordinates
 the focused tests required to validate a source change.
+
+Use `mule-api-design` for HTTP resource/method design and RAML/OAS contract authoring. This skill owns
+the Mule/APIKit implementation changes required to realize an approved contract.
 
 ### 1. Establish the change boundary
 
