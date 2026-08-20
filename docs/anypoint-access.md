@@ -3,20 +3,19 @@
 `anypoint-connect` is the only one of the three MCP servers that needs authentication. `mule-build`
 and `mule-lint` work with no credentials.
 
-Set this up if you want an agent to read runtime evidence: logs, error groupings, metrics, memory,
-deployment and audit history, application status, API-manager state, Exchange assets, queues, or
-Object Store contents. Skip it if you only need documentation, development, lint, build, packaging,
-or static review — those never touch it.
+Set this up for runtime evidence or requested design-platform work: Design Center, Exchange,
+centralized API Governance, logs, metrics, deployments, API Manager, queues, or Object Store. Skip it
+for local contract design/validation, documentation, development, lint, build, packaging, or static review.
 
 ## What happens when it is not set up
 
-The skills do not fail silently and do not stall. `mule-ops`, `mule-troubleshooting`, `mule-review`,
-and the publish and deploy actions in `mule-build` probe for access before their first connector
+The skills do not fail silently and do not stall. `mule-api-design`, `mule-ops`,
+`mule-troubleshooting`, `mule-review`, and publish/deploy actions in `mule-build` probe the required capability before their first connector
 call, then tell you which state they found and offer a choice.
 
 ```mermaid
 flowchart TD
-    Start[Runtime evidence needed] --> Probe["Probe: whoami, list_environments"]
+    Start[Anypoint capability needed] --> Probe["Probe: whoami, then capability-specific read"]
     Probe -->|Ready| Collect[Collect telemetry]
     Probe -->|Not ready| Offer["State the reason, offer choices"]
     Offer --> SetUp[Set it up now, then re-probe]
@@ -38,6 +37,7 @@ Two consequences worth knowing:
 
 | Skill | With access | Without access |
 | --- | --- | --- |
+| `mule-api-design` | Design Center/Exchange/Governance reads and separately approved writes | Local design, authoring, and AMF validation continue normally |
 | `mule-ops` | Full runtime health assessment | Repository and configuration review, or analysis of exports you supply |
 | `mule-troubleshooting` | Telemetry-confirmed root cause | Source-based hypotheses with the discriminating checks named |
 | `mule-review` | Optional runtime verification of a finding | Complete review with the runtime gap disclosed |
@@ -49,15 +49,15 @@ Run these yourself. An agent following these skills will print them rather than 
 they change machine-local state.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.11.1 config init
-npx -y @sfdxy/anypoint-connect@0.11.1 auth login
-npx -y @sfdxy/anypoint-connect@0.11.1 auth status
+npx -y @sfdxy/anypoint-connect@0.12.0 config init
+npx -y @sfdxy/anypoint-connect@0.12.0 auth login
+npx -y @sfdxy/anypoint-connect@0.12.0 auth status
 ```
 
 A global install gives you the shorter `anc` command:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.11.1
+npm install -g @sfdxy/anypoint-connect@0.12.0
 anc config init
 anc auth login
 anc auth status
@@ -96,8 +96,9 @@ authenticated. Check them separately, because the fixes are different.
 | Authenticated | `anc auth status` | `anc auth login` |
 | Visible to the agent | Ask the agent to confirm Anypoint access | See the failure modes below |
 
-Asking the agent to confirm access runs `whoami` and `list_environments`, which is exactly what the
-skills probe with. A healthy result names an identity and lists the environments you expect.
+Runtime readiness uses `whoami` and `list_environments`. Design readiness uses `whoami` and
+`list_design_center_projects`; it does not require runtime environment visibility. The skills redact
+identity and organization details from their report.
 
 ## Failure modes
 

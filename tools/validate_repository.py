@@ -18,7 +18,13 @@ PIN_RE = re.compile(r"@sfdxy(?:%2F|/)([a-z0-9-]+)@(\d+\.\d+\.\d+)")
 REGISTRY_PIN_RE = re.compile(r"@sfdxy%2F([a-z0-9-]+)/(\d+\.\d+\.\d+)")
 NAV_ENTRY_RE = re.compile(r"^\s*(?:-\s*)?(?:[^:]+:\s*)?([A-Za-z0-9._/-]+\.md)\s*$")
 READINESS_REFERENCE = "references/anypoint-readiness.md"
-READINESS_SKILLS = ("mule-build", "mule-ops", "mule-review", "mule-troubleshooting")
+READINESS_SKILLS = (
+    "mule-api-design",
+    "mule-build",
+    "mule-ops",
+    "mule-review",
+    "mule-troubleshooting",
+)
 ACCESS_STATES = (
     "Ready",
     "Not configured",
@@ -523,7 +529,11 @@ def validate_anypoint_readiness(root: Path) -> list[str]:
     for state in ACCESS_STATES:
         if f"| {state} |" not in text:
             findings.append(f"{reference}: missing access state {state!r}")
-    for required in ("mcp_anypoint-connect_whoami", "mcp_anypoint-connect_list_environments"):
+    for required in (
+        "mcp_anypoint-connect_whoami",
+        "mcp_anypoint-connect_list_environments",
+        "list_design_center_projects",
+    ):
         if required not in text:
             findings.append(f"{reference}: missing probe call {required!r}")
 

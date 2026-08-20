@@ -72,10 +72,11 @@ git clone --depth 1 https://github.com/Avinava/mule-skills.git "$MULE_SKILLS_TMP
 mkdir -p .agents/skills
 ```
 
-Copy all seven skills:
+Copy all eight skills:
 
 | Skill | Contents |
 | --- | --- |
+| `mule-api-design` | `SKILL.md`, metadata, and focused HTTP, RAML, OAS, data, pattern, and Anypoint references |
 | `mule-docs` | `SKILL.md`, metadata, references, inventory script, documentation audit |
 | `mule-development` | `SKILL.md`, metadata, invariant classes, checklist, embedded-expression checker |
 | `mule-testing` | `SKILL.md`, metadata, behavior model, value-safe MUnit inventory |
@@ -120,9 +121,9 @@ These pins were verified on **2026-08-19**:
 
 | Package | Source | Node.js |
 | --- | --- | ---: |
-| [`@sfdxy/anypoint-connect@0.11.1`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.11.1) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=20.0.0` |
+| [`@sfdxy/anypoint-connect@0.12.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.12.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=20.0.0` |
 | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
-| [`@sfdxy/mule-lint@1.27.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.27.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
+| [`@sfdxy/mule-lint@1.28.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.28.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 
 Use Node.js `>=20.19.0` to satisfy all three. Do not change a pin without reviewing the linked
 source repository and its release notes.

@@ -202,7 +202,7 @@ class PluginManifestTests(unittest.TestCase):
     def test_rejects_mcp_configuration_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.27.0", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.28.0", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagree; every host must get the same pins")
 
     def test_rejects_marketplace_named_for_the_publisher(self):
@@ -273,7 +273,7 @@ class PluginManifestTests(unittest.TestCase):
         """A user installing one version while reading instructions for another."""
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "README.md", "@sfdxy/mule-lint@1.27.0", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "README.md", "@sfdxy/mule-lint@1.28.0", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagrees with .mcp.json pin")
 
     def test_rejects_ecosystem_manifest_pin_drift(self):
@@ -281,7 +281,7 @@ class PluginManifestTests(unittest.TestCase):
             root = self.copy_repository(temporary)
             self.edit(
                 root / "ecosystem.json",
-                '"version": "1.27.0"',
+                '"version": "1.28.0"',
                 '"version": "9.9.9"',
             )
             self.assert_finding(root, "disagrees with .mcp.json pin")
@@ -301,7 +301,7 @@ class PluginManifestTests(unittest.TestCase):
             root = self.copy_repository(temporary)
             self.edit(
                 root / "README.md",
-                "@sfdxy%2Fanypoint-connect/0.11.1",
+                "@sfdxy%2Fanypoint-connect/0.12.0",
                 "@sfdxy%2Fanypoint-connect/9.9.9",
             )
             self.assert_finding(root, "registry link for @sfdxy/anypoint-connect@9.9.9")
@@ -343,6 +343,27 @@ class PluginManifestTests(unittest.TestCase):
 
 
 class RepositoryValidationTests(unittest.TestCase):
+    def test_api_design_skill_has_contract_and_mutation_boundaries(self):
+        skill = (ROOT / "skills/mule-api-design/SKILL.md").read_text(encoding="utf-8")
+        anypoint = (ROOT / "skills/mule-api-design/references/anypoint-design.md").read_text(
+            encoding="utf-8"
+        )
+        for required in (
+            "Guided design workshop",
+            "Contract-only assessment",
+            "mule-lint api validate",
+            "Project creation, file sync, and publication are three",
+            "Never place a client",
+        ):
+            self.assertIn(required, skill)
+        for required in (
+            "list_design_center_projects",
+            "preview_design_center_sync",
+            "preview_exchange_publication",
+            "Do not require `list_environments`",
+        ):
+            self.assertIn(required, anypoint)
+
     def test_installer_discovers_new_skills_from_the_source_tree(self):
         with tempfile.TemporaryDirectory() as temporary:
             target = Path(temporary) / "project"

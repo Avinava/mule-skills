@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule API Design"
+  short_description: "Design reliable RAML and OAS HTTP APIs"
+  default_prompt: "Use $mule-api-design to turn these requirements into a consumer-centered RAML or OAS contract with documented design decisions."

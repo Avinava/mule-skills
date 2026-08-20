@@ -12,7 +12,8 @@ When a task matches one of these workflows, follow its instructions:
 
 | Task | Skill |
 | --- | --- |
-| Mule production source, DataWeave, connector, or contract changes | `mule-development` |
+| HTTP API design, URL/method/data decisions, RAML/OAS contract authoring | `mule-api-design` |
+| Mule production source, DataWeave, APIKit implementation, or connector changes | `mule-development` |
 | MUnit authoring, repair, fixtures, mocks, and assertions | `mule-testing` |
 | Incident diagnosis and root-cause analysis | `mule-troubleshooting` |
 | Runtime health and operations | `mule-ops` |
