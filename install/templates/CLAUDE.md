@@ -37,7 +37,9 @@ hypotheses, confirmed causes, and unresolved gaps.
 ## Build
 
 Use `mule-build`, or the project's configured Mule build tools. Treat versioning, changelog updates,
-tags, deployment, and test skipping as explicit release choices rather than automatic build steps.
+local runtime changes, commits, tags, pushing, and test skipping as explicit choices rather than
+automatic build steps. Route separately approved Exchange publishing and Anypoint deployment through
+`mule-ops` and the authenticated Anypoint connector.
 
 ## Review
 

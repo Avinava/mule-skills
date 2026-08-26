@@ -51,6 +51,9 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
 
+extra_css:
+  - stylesheets/extra.css
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -67,17 +70,20 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Ecosystem: ecosystem.md
-  - Install:
+  - Start here:
+      - One Mule project: getting-started.md
       - Claude Code: install-claude-code.md
       - Codex, Copilot, Gemini: install-other-agents.md
-      - Any agent, no shell: agent-install.md
-  - Setup:
+      - Agent installation runbook: agent-install.md
+  - Use the skills:
       - Project setup: project-setup.md
-      - Anypoint access: anypoint-access.md
+      - Workflow examples: workflows.md
+      - Skill catalog: skills.md
+  - Tools and access:
+      - Ecosystem and versions: ecosystem.md
       - MCP servers: mcp-servers.md
-  - Reference:
-      - Skills: skills.md
+      - Anypoint access: anypoint-access.md
+  - Help:
       - FAQ: faq.md
       - Changelog: https://github.com/Avinava/mule-skills/blob/main/CHANGELOG.md
 

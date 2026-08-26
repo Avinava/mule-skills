@@ -1,6 +1,6 @@
 # Install for Codex, Copilot, Gemini, and other agents
 
-Hosts without a plugin system read skills from the repository. `install/install.sh` vendors the six
+Hosts without a plugin system read skills from the repository. `install/install.sh` vendors the eight
 skills into `.agents/skills/`, merges MCP configuration for the hosts you use, and adds instruction
 files — without overwriting anything you already have.
 

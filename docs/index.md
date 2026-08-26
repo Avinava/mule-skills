@@ -1,19 +1,82 @@
-# Mule Skills
+<div class="hero" markdown>
 
-<img src="assets/banner.svg" alt="Mule Skills — evidence-backed MuleSoft agent workflows" width="960" />
+![Mule Skills](assets/banner.svg){ width="760" }
 
-Mule Skills gives coding agents a shared way to document, build, troubleshoot, operate, and review
-MuleSoft Mule 4 projects. The workflows start from current-project evidence, keep business context
-separate from implemented behavior, and avoid carrying identity or tuning assumptions between
-projects.
+# Give your coding agent a MuleSoft engineering playbook
 
-The skills work as instruction-only workflows. They can also use three pinned MCP servers when
-local build, lint, or authorized Anypoint evidence is available.
+Mule Skills helps Codex, Claude, Copilot, Gemini, Cursor, and similar agents work with Mule 4
+projects using the same lifecycle your team already knows: design, develop, test, package, review,
+operate, and troubleshoot.
 
-## Tell your agent to install it
+[Install in a Mule project](getting-started.md){ .md-button .md-button--primary }
+[See the workflows](workflows.md){ .md-button }
 
-Paste this into Codex, Claude Code, GitHub Copilot, Gemini, Cursor, or another coding agent while
-the Mule project is open:
+</div>
+
+No agent replaces Anypoint Studio, Maven, MUnit, or your review process. The skills tell the agent
+how to inspect current-project evidence, choose the right tool, validate proportionately, and stop
+before a mutation that needs your approval.
+
+<div class="path-grid" markdown>
+
+<div class="path-card" markdown>
+
+### MuleSoft developer
+
+Describe the change in Mule terms. The agent routes between API design, Mule XML/DataWeave,
+documentation, MUnit, build, and review.
+
+[Start with one project](getting-started.md)
+
+</div>
+
+<div class="path-card" markdown>
+
+### Test or release engineer
+
+Use behavior-focused MUnit guidance, repeatable build gates, artifact evidence, and a separate
+approval boundary for Anypoint publishing or deployment.
+
+[Follow a workflow](workflows.md)
+
+</div>
+
+<div class="path-card" markdown>
+
+### Platform or support engineer
+
+Analyze runtime health and incidents from authorized Anypoint evidence or supplied exports without
+turning missing telemetry into a confident conclusion.
+
+[Understand Anypoint access](anypoint-access.md)
+
+</div>
+
+</div>
+
+## The Mule lifecycle, with clear ownership
+
+```mermaid
+flowchart LR
+    D[Design<br/>mule-api-design] --> I[Implement<br/>mule-development]
+    I --> T[Test<br/>mule-testing]
+    T --> B[Check and package<br/>mule-build + mule-lint]
+    B --> R[Review<br/>mule-review]
+    R --> A[Publish or deploy<br/>mule-ops + anypoint-connect]
+    A --> O[Operate<br/>mule-ops]
+    O --> X[Troubleshoot<br/>mule-troubleshooting]
+    Docs[mule-docs] -. refreshes evidence .-> D
+    Docs -.-> I
+    Docs -.-> O
+```
+
+`mule-build` owns local checks, MUnit execution, packaging, local runtime work, and version/tag
+preparation. `anypoint-connect`, used through operational workflows, owns explicitly approved
+Exchange publishing and Anypoint runtime changes. [See the complete ownership map](ecosystem.md).
+
+## Paste one instruction
+
+Open your Mule repository in the agent and paste:
 
 ```text
 Fetch and follow https://raw.githubusercontent.com/Avinava/mule-skills/main/docs/agent-install.md
@@ -22,68 +85,33 @@ configuration, preview the changes, preserve customized files, run the validatio
 commit or authenticate to Anypoint unless I approve it.
 ```
 
-The same runbook handles new installs and upgrades. It routes Claude Code to the plugin and uses the
-repository installer or a careful manual merge for other hosts.
+The agent inspects first, detects an existing install, previews file and MCP changes, avoids
+duplicate configuration, installs all eight skills, validates the result, and leaves commit and
+authentication decisions with you. [Walk through the result](getting-started.md).
 
-## Start here
+## What gets installed
 
-| You are | Go to |
-| --- | --- |
-| A Claude Code user | [Install for Claude Code](install-claude-code.md) |
-| A Codex, Copilot, or Gemini user | [Install for other agents](install-other-agents.md) |
-| Using a host with no plugin support and no shell | [Agent-driven install](agent-install.md) |
-| Installed, and giving the skills project context | [Project setup](project-setup.md) |
-| Wanting runtime logs, metrics, or deployment evidence | [Anypoint access](anypoint-access.md) |
-| Choosing packages or checking supported versions | [Ecosystem](ecosystem.md) |
-
-Installing places files. [Project setup](project-setup.md) is the part that needs judgment, and it
-matters for every install path.
-
-## The eight skills
-
-| Skill | Use it for | Default result |
+| Layer | Purpose | Credentials |
 | --- | --- | --- |
-| `mule-api-design` | HTTP API design workshops, RAML/OAS authoring, contract assessment, Design Center guidance | Consumer-centered contract and validation evidence |
-| `mule-docs` | Documentation, architecture, APIs, flows, onboarding, operations | Evidence-backed Markdown and Mermaid, plus labeled gaps |
-| `mule-development` | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch | Implemented change with proportionate validation |
-| `mule-testing` | Behavior-focused MUnit authoring, repair, fixtures, mocks, and assertions | Faithful tests with focused and full validation evidence |
-| `mule-troubleshooting` | Incidents, timeouts, connection failures, concurrency, memory | Root-cause assessment or fix plan, no source change unless asked |
-| `mule-ops` | Runtime health, deployments, logs, metrics, recurring checks | Evidence-backed operational assessment |
-| `mule-review` | Working changes, commits, branches, PRs, release readiness | Prioritized findings and fix options |
-| `mule-build` | Validation, tests, packaging, explicitly requested release actions | Deployable artifact and validation summary |
+| Eight `mule-*` skills | Decide how to design, implement, test, document, build, review, operate, and diagnose | None |
+| `mule-lint@1.29.1` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
+| `mule-build@2.3.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
+| `anypoint-connect@0.13.0` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
 
-Details and routing guidance are on the [Skills](skills.md) page.
+Use Node.js `>=22.0.0` for the MCP servers; Node.js 24 LTS is recommended. The skills
+themselves are instructions and remain useful when an MCP server is unavailable—the missing tool
+becomes a visible validation gap.
 
-## The three MCP servers
+## Safety you can predict
 
-| Server | Pin | Credentials | Its own docs |
-| --- | --- | --- | --- |
-| `mule-build` | `@sfdxy/mule-build@2.2.0` | None | <https://avinava.github.io/mule-build/> |
-| `mule-lint` | `@sfdxy/mule-lint@1.29.1` | None | <https://avinava.github.io/mule-lint/> |
-| `anypoint-connect` | `@sfdxy/anypoint-connect@0.13.0` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
+| Request | Default behavior |
+| --- | --- |
+| Review or diagnose | Read-only findings; no source or PR changes |
+| Develop or repair tests | Implement only the requested scope and run focused plus proportionate checks |
+| Build | Validate, run MUnit, and package; no version, tag, publish, or deploy |
+| Release preparation | Preview/check first; version, commit, tag, or push only when explicitly requested |
+| Publish, deploy, restart, scale, or rollback | Separate Anypoint scope, readiness probe, and explicit approval |
 
-`anypoint-connect` idles until you authenticate. Skills that need runtime or design-platform evidence probe for access
-first and offer you a choice — set it up, supply exported logs and metrics, or continue with
-repository-only analysis and labeled gaps. See [Anypoint access](anypoint-access.md) and
-[MCP servers](mcp-servers.md).
-
-## Requirements
-
-- Node.js `>=22.0.0` for the MCP servers; Node.js 24 LTS is recommended
-- Python 3 for the bundled inventory, audit, and check scripts
-- A Mule 4 repository to work in
-
-## Operating principles
-
-- **Evidence before assumption:** separate verified source or telemetry, user-provided context,
-  inference, recommendations, and unresolved gaps.
-- **Current project only:** never transplant identity, topology, endpoints, payloads, schedules,
-  volumes, incident fingerprints, or numeric tuning from another project.
-- **Privacy by default:** never expose credentials, secret values, tenant identifiers, private
-  hosts, personal data, or raw production payloads.
-- **Proportionate validation:** focused checks for local changes, the full gate for release
-  readiness.
-- **Explicit mutations:** review and diagnosis are read-only; commits, comments, tags, deployments,
-  and releases need authorization.
-- **Honest uncertainty:** missing access or evidence stays visible instead of becoming a confident
-  claim.
+Project facts stay in the Mule repository's `AGENTS.md`; reusable skill files stay neutral. Private
+hosts, tenant identifiers, credentials, payloads, and customer fingerprints do not belong in either
+the reusable bundle or examples.

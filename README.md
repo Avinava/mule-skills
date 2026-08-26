@@ -73,7 +73,7 @@ Then give the agent context about your project by following
 | [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
 | [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Evidence-backed operational assessment |
 | [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
-| [`mule-build`](skills/mule-build/) | Validation, tests, packaging, and explicitly requested release actions | Deployable artifact and validation summary |
+| [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags | Deployable artifact and validation summary |
 
 ### Choosing the right skill
 
@@ -86,7 +86,7 @@ Then give the agent context about your project by following
 | Diagnose a symptom | `mule-troubleshooting` | `mule-ops` for authorized runtime evidence; development only when a fix is requested |
 | Assess current runtime health | `mule-ops` | `mule-troubleshooting` when a specific causal question emerges |
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
-| Prepare a release | `mule-build` | Release-readiness review before commit, tag, publish, or deploy |
+| Prepare a release | `mule-build` | `mule-review` before commit/tag; `mule-ops` for separately approved publish/deploy |
 
 Documentation and review questions are optional and non-blocking. When business information would
 materially improve the result, the skill offers concise choices plus `Other` and `Not sure / Skip`,
@@ -139,7 +139,7 @@ Credential-free launch configuration for three pinned MCP servers:
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.13.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.13.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | Mule validation, testing, packaging, local runtime, versioning, and security checks |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.3.0) | Mule validation, testing, packaging, local runtime, versioning, tagging, and security checks |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.29.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.29.1) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
 
 Source links come from each published package's repository metadata. Package links resolve to the
@@ -150,8 +150,8 @@ Node.js `>=22.0.0` satisfies all three. Node.js 24 LTS is recommended for a new 
 see [docs/anypoint-access.md](docs/anypoint-access.md).
 
 Skills that need authorized platform evidence — `mule-api-design`, `mule-ops`, `mule-troubleshooting`,
-`mule-review`, and publish/deploy actions in `mule-build` — probe the requested Anypoint capability before their first connector
-call. When it is missing they say which state they found and offer setup, exported logs and metrics
+and `mule-review` — probe the requested Anypoint capability before their first connector call. When
+it is missing they say which state they found and offer setup, exported logs and metrics
 you supply, or a repository-only scope with the gap labeled. Nothing blocks on authentication, and a
 tool error is never reported as an environment finding. The shared workflow is
 [`skills/mule-ops/references/anypoint-readiness.md`](skills/mule-ops/references/anypoint-readiness.md).
@@ -174,7 +174,7 @@ mule-skills/
 │   ├── mule-troubleshooting/       # Root-cause analysis workflow
 │   ├── mule-ops/                   # Runtime health workflow
 │   ├── mule-review/                # Change, project, and release-readiness review
-│   └── mule-build/                 # Validate, package, and explicit release workflow
+│   └── mule-build/                 # Validate, package, run, version, and tag locally
 ├── install/
 │   ├── install.sh                  # Vendored install for non-plugin hosts
 │   ├── hosts/                      # Codex, VS Code, and generic JSON MCP configurations

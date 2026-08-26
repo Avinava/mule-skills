@@ -10,7 +10,7 @@ for local contract design/validation, documentation, development, lint, build, p
 ## What happens when it is not set up
 
 The skills do not fail silently and do not stall. `mule-api-design`, `mule-ops`,
-`mule-troubleshooting`, `mule-review`, and publish/deploy actions in `mule-build` probe the required capability before their first connector
+`mule-troubleshooting` and `mule-review` probe the required capability before their first connector
 call, then tell you which state they found and offer a choice.
 
 ```mermaid
@@ -41,7 +41,6 @@ Two consequences worth knowing:
 | `mule-ops` | Full runtime health assessment | Repository and configuration review, or analysis of exports you supply |
 | `mule-troubleshooting` | Telemetry-confirmed root cause | Source-based hypotheses with the discriminating checks named |
 | `mule-review` | Optional runtime verification of a finding | Complete review with the runtime gap disclosed |
-| `mule-build` | Authorized publish and deploy | Validate, test, and package as normal |
 
 ## Set it up
 

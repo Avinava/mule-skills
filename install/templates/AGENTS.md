@@ -89,7 +89,7 @@ Record only invariants actually used by this project. Prefer mechanism language 
 | --- | --- | --- | --- |
 | <!-- Rule --> | <!-- Evidence --> | <!-- Paths --> | <!-- Test/check --> |
 
-## Build, test, and deploy
+## Build, test, and release boundaries
 
 Use only commands verified in this repository:
 
@@ -98,12 +98,13 @@ Use only commands verified in this repository:
 | Validate | <!-- Command --> | <!-- Scope --> |
 | Test | <!-- Command --> | <!-- Expected suites --> |
 | Package | <!-- Command --> | <!-- Artifact path pattern --> |
-| Deploy | <!-- Workflow/tool --> | <!-- Environment inputs, no values --> |
+| Publish or deploy | <!-- Anypoint workflow/tool --> | <!-- Separate approval and environment inputs, no values --> |
 
 Do not assume configuration is deployed separately, tests should be skipped, or a build implies a
-release. Use `mule-testing` for MUnit authoring and repair, and `mule-build` for test execution,
-validation, packaging, and explicitly requested release actions. Use the repository's release
-policy.
+release. Use `mule-testing` for MUnit authoring and repair, and `mule-build` for local test execution,
+validation, packaging, local runtime work, versioning, and tags. Route separately approved Exchange
+publishing or Anypoint deployment through `mule-ops` and the authenticated Anypoint connector. Use
+the repository's release policy.
 
 ## Operational checks
 

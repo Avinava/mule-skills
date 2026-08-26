@@ -13,7 +13,7 @@ describing the task is usually enough.
 | [`mule-troubleshooting`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-troubleshooting) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
 | [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Runtime health, deployments, logs, metrics, recurring checks, multi-application correlation | Evidence-backed operational assessment |
 | [`mule-review`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-review) | Working changes, commits, branches, PRs, whole projects, release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
-| [`mule-build`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-build) | Validation, tests, packaging, and explicitly requested release actions | Deployable artifact and validation summary |
+| [`mule-build`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-build) | Local validation, tests, packaging, runtime work, versioning, and tags | Deployable artifact and validation summary |
 
 ## Choosing the right skill
 
@@ -26,7 +26,7 @@ describing the task is usually enough.
 | Diagnose a symptom | `mule-troubleshooting` | `mule-ops` for authorized runtime evidence; development only when a fix is requested |
 | Assess current runtime health | `mule-ops` | `mule-troubleshooting` when a specific causal question emerges |
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
-| Prepare a release | `mule-build` | Release-readiness review before commit, tag, publish, or deploy |
+| Prepare a release | `mule-build` | Release-readiness review before commit/tag; `mule-ops` for separately approved publish/deploy |
 
 ## What they read
 
@@ -41,8 +41,8 @@ then continues with verified technical evidence if you skip.
 
 ## Runtime evidence is gated, not assumed
 
-`mule-api-design`, `mule-ops`, `mule-troubleshooting`, `mule-review`, and publish/deploy actions in `mule-build`
-confirm Anypoint access before their first connector call, and offer setup, supplied exports, or a
+`mule-api-design`, `mule-ops`, `mule-troubleshooting`, and `mule-review` confirm Anypoint access
+before their first connector call, and offer setup, supplied exports, or a
 repository-only scope when it is missing. See [Anypoint access](anypoint-access.md).
 
 ## Example prompts
