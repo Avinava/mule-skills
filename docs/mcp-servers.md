@@ -6,8 +6,8 @@ them sharper: two need no credentials, one needs an Anypoint login.
 | Server and source | Pin | Role | Credentials |
 | --- | --- | --- | --- |
 | [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | Validation, testing, packaging, local runtime, versioning, security checks | None |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.28.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.28.0) | Canonical Mule standards, static analysis, and RAML/OAS validation | None |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.12.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.12.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and mutations | Anypoint Platform login |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.29.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.29.0) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS validation | None |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.13.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.13.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and mutations | Anypoint Platform login |
 
 Each server has its own documentation, which is the place to look for command references, tool
 catalogs, and per-host setup beyond what the skills need:
@@ -19,7 +19,7 @@ catalogs, and per-host setup beyond what the skills need:
 | `anypoint-connect` | <https://avinava.github.io/anypoint-connect/> |
 
 Package links resolve to the exact registry version the checked-in configuration uses rather than an
-unpinned latest release. Node.js `>=20.19.0` satisfies all three.
+unpinned latest release. Node.js `>=22.0.0` satisfies all three; Node.js 24 LTS is recommended.
 
 ## Which skill uses which server
 
@@ -73,7 +73,7 @@ The generic form:
   "mcpServers": {
     "anypoint-connect": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/anypoint-connect@0.12.0", "mcp"]
+      "args": ["-y", "@sfdxy/anypoint-connect@0.13.0", "mcp"]
     },
     "mule-build": {
       "command": "npx",
@@ -81,7 +81,7 @@ The generic form:
     },
     "mule-lint": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-lint@1.28.0", "mcp"]
+      "args": ["-y", "@sfdxy/mule-lint@1.29.0", "mcp"]
     }
   }
 }

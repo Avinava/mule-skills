@@ -5,9 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
+
+
+NODE_REQUIREMENT_RE = re.compile(r"^>=(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
 
 def load_manifest(root: Path) -> dict[str, Any]:
@@ -15,6 +19,18 @@ def load_manifest(root: Path) -> dict[str, Any]:
     if manifest.get("schemaVersion") != 1 or not isinstance(manifest.get("packages"), dict):
         raise ValueError("ecosystem.json must use schemaVersion 1 and contain packages")
     return manifest
+
+
+def parse_node_requirement(value: str) -> tuple[int, int, int]:
+    match = NODE_REQUIREMENT_RE.fullmatch(value)
+    if not match:
+        raise ValueError(f"unsupported Node.js requirement {value!r}; expected >=X.Y.Z")
+    return tuple(int(part) for part in match.groups())
+
+
+def shared_node_requirement(packages: dict[str, dict[str, str]]) -> str:
+    floor = max(parse_node_requirement(package["node"]) for package in packages.values())
+    return ">=" + ".".join(str(part) for part in floor)
 
 
 def server_entry(package: dict[str, str], *, vscode: bool = False) -> dict[str, object]:
@@ -41,11 +57,12 @@ def render_toml(packages: dict[str, dict[str, str]]) -> str:
 
 def render_docs(manifest: dict[str, Any]) -> str:
     packages = manifest["packages"]
+    shared_node = shared_node_requirement(packages)
     rows = []
     for name, package in packages.items():
         rows.append(
             f'| [`{name}`]({package["repository"]}) | `{package["npm"]}@{package["version"]}` '
-            f'| {package["role"]} | {package["credentials"]} | '
+            f'| `{package["node"]}` | {package["role"]} | {package["credentials"]} | '
             f'[Docs]({package["documentation"]}) |'
         )
     table = "\n".join(rows)
@@ -55,9 +72,12 @@ This is the canonical compatibility and ownership map for the Mule agent toolkit
 bundle is `mule-skills@{manifest["bundleVersion"]}`; its MCP dependencies are pinned exactly so an
 installation is reproducible.
 
-| Project | Exact package | Owns | Credentials | Reference |
-| ------- | ------------- | ---- | ----------- | --------- |
+| Project | Exact package | Node.js | Owns | Credentials | Reference |
+| ------- | ------------- | ------- | ---- | ----------- | --------- |
 {table}
+
+Node.js `{shared_node}` satisfies the complete bundle. Node.js 24 LTS is recommended for a new
+installation.
 
 ## Ownership boundaries
 
@@ -101,7 +121,7 @@ python3 tools/generate_ecosystem.py --check
 To prepare a pin update locally:
 
 ```bash
-python3 tools/update_ecosystem.py mule-lint 1.26.0
+python3 tools/update_ecosystem.py mule-lint 1.29.0 --node '>=20.0.0'
 ```
 
 Release a new `mule-skills` minor version when skills, compatibility policy, host configuration, or

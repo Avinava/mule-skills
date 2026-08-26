@@ -9,7 +9,12 @@ import re
 import sys
 from pathlib import Path
 
-from generate_ecosystem import generated_files, load_manifest
+from generate_ecosystem import (
+    NODE_REQUIREMENT_RE,
+    generated_files,
+    load_manifest,
+    shared_node_requirement,
+)
 
 
 SEMVER_RE = re.compile(r"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$")
@@ -19,12 +24,19 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("package", help="manifest key or @sfdxy package name")
     parser.add_argument("version", help="exact stable semantic version")
+    parser.add_argument(
+        "--node",
+        required=True,
+        help="published package Node.js requirement in the supported >=X.Y.Z form",
+    )
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     args = parser.parse_args()
     root = args.root.resolve()
 
     if not SEMVER_RE.fullmatch(args.version):
         parser.error("version must be an exact stable semantic version such as 1.26.0")
+    if not NODE_REQUIREMENT_RE.fullmatch(args.node):
+        parser.error("--node must use the supported >=X.Y.Z form, such as >=22.0.0")
 
     manifest = load_manifest(root)
     packages = manifest["packages"]
@@ -34,7 +46,11 @@ def main() -> int:
 
     package = packages[requested]
     old_version = package["version"]
+    old_node = package["node"]
+    old_shared_node = shared_node_requirement(packages)
     package["version"] = args.version
+    package["node"] = args.node
+    new_shared_node = shared_node_requirement(packages)
     (root / "ecosystem.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
     # Pin references in prose, skills, and installer guidance remain useful to readers. Keep them
@@ -53,6 +69,29 @@ def main() -> int:
             f"@sfdxy%2F{requested}/{old_version}",
             f"@sfdxy%2F{requested}/{args.version}",
         )
+        # docs/agent-install.md lists the package-specific engine range next to the exact pin.
+        package_row = re.compile(
+            rf"({re.escape(package['npm'])}@{re.escape(args.version)}.*?\| `)"
+            rf"{re.escape(old_node)}(` \|)"
+        )
+        updated = package_row.sub(rf"\g<1>{args.node}\g<2>", updated)
+        shared_claims = (
+            (
+                f"Node.js `{old_shared_node}` satisfies all three",
+                f"Node.js `{new_shared_node}` satisfies all three",
+            ),
+            (
+                f"Use Node.js `{old_shared_node}` to satisfy all three",
+                f"Use Node.js `{new_shared_node}` to satisfy all three",
+            ),
+            (f"all three need `{old_shared_node}`", f"all three need `{new_shared_node}`"),
+            (
+                f"Node.js `{old_shared_node}` for the MCP servers",
+                f"Node.js `{new_shared_node}` for the MCP servers",
+            ),
+        )
+        for old_claim, new_claim in shared_claims:
+            updated = updated.replace(old_claim, new_claim)
         if updated != text:
             path.write_text(updated, encoding="utf-8")
 
@@ -60,7 +99,10 @@ def main() -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
 
-    print(f'{package["npm"]}: {old_version} -> {args.version}')
+    print(
+        f'{package["npm"]}: {old_version} -> {args.version}; '
+        f'Node.js {old_node} -> {args.node}'
+    )
     return 0
 
 

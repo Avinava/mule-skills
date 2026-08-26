@@ -117,16 +117,16 @@ the existing file first and add only the server keys it lacks.
 
 If the destination already defines a server with the same name, leave it alone and tell the user.
 
-These pins were verified on **2026-08-19**:
+These pins were verified on **2026-08-26**:
 
 | Package | Source | Node.js |
 | --- | --- | ---: |
-| [`@sfdxy/anypoint-connect@0.12.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.12.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=20.0.0` |
+| [`@sfdxy/anypoint-connect@0.13.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.13.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=22.0.0` |
 | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
-| [`@sfdxy/mule-lint@1.28.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.28.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
+| [`@sfdxy/mule-lint@1.29.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.29.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 
-Use Node.js `>=20.19.0` to satisfy all three. Do not change a pin without reviewing the linked
-source repository and its release notes.
+Use Node.js `>=22.0.0` to satisfy all three; Node.js 24 LTS is recommended. Do not change a pin
+without reviewing the linked source repository and its release notes.
 
 ## 5. Verify what landed
 

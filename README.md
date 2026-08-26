@@ -21,9 +21,23 @@ local build, lint, or authorized Anypoint evidence is available.
 
 ## Install
 
-Pick the path that matches your agent. All three install the same eight skills.
+### Fastest path — tell your AI agent
 
-### Claude Code — plugin
+**Codex / Claude Code / GitHub Copilot / Gemini / Cursor:**
+
+```text
+Fetch and follow https://raw.githubusercontent.com/Avinava/mule-skills/main/docs/agent-install.md
+to install or update Mule Skills in this Mule repository. Detect the agent host and existing
+configuration, preview the changes, preserve customized files, run the validation, and do not
+commit or authenticate to Anypoint unless I approve it.
+```
+
+That is enough. The runbook detects whether this is a new install or upgrade, selects the right
+host configuration, previews changes, installs all eight skills, and verifies what landed.
+
+### Direct install options
+
+#### Claude Code — plugin
 
 ```text
 /plugin marketplace add Avinava/mule-skills
@@ -33,7 +47,7 @@ Pick the path that matches your agent. All three install the same eight skills.
 That's it. Skills and MCP servers come with the plugin; nothing is copied into your project. Details
 in [docs/install-claude-code.md](docs/install-claude-code.md).
 
-### Codex, Copilot, Gemini — script
+#### Codex, Copilot, Gemini — script
 
 From the root of your Mule project:
 
@@ -44,16 +58,6 @@ curl -fsSL https://raw.githubusercontent.com/Avinava/mule-skills/main/install/in
 It detects your hosts, vendors the skills into `.agents/skills/`, and merges MCP configuration
 without overwriting what is already there. Add `--dry-run` to preview. Options and host reference in
 [docs/install-other-agents.md](docs/install-other-agents.md).
-
-### Any agent — paste this prompt
-
-Works anywhere, including hosts with no plugin support and no shell:
-
-```text
-Follow https://github.com/Avinava/mule-skills/blob/main/docs/agent-install.md to install or
-reconcile the MuleSoft skills for this repository. Preserve existing changes, configure only the
-agent hosts I use, and show me the validation results before committing.
-```
 
 Then give the agent context about your project by following
 [docs/project-setup.md](docs/project-setup.md) — that step matters for every install path.
@@ -134,13 +138,13 @@ Credential-free launch configuration for three pinned MCP servers:
 
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.12.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.12.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.13.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.13.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
 | [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.2.0) | Mule validation, testing, packaging, local runtime, versioning, and security checks |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.28.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.28.0) | Canonical Mule standards, static analysis, and RAML/OAS contract validation |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.29.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.29.0) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
 
 Source links come from each published package's repository metadata. Package links resolve to the
 exact registry version used by the checked-in configuration rather than an unpinned latest release.
-Node.js `>=20.19.0` satisfies all three.
+Node.js `>=22.0.0` satisfies all three. Node.js 24 LTS is recommended for a new installation.
 
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate;
 see [docs/anypoint-access.md](docs/anypoint-access.md).

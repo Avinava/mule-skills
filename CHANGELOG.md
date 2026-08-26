@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.6.0 — Compatible onboarding
+
+The bundle now aligns its installation story with the current `mule-lint` and
+`anypoint-connect` releases.
+
+### Updated
+
+- Pinned `mule-lint@1.29.0`, including its MuleSoft-first documentation, sample project, clearer
+  HTML report, XML formatting guidance, and existing RAML/OpenAPI validation workflow.
+- Pinned `anypoint-connect@0.13.0`, including its secure browser callback, masked credential
+  setup, task-oriented examples, and corrected Authorization Code onboarding.
+- Raised the shared MCP runtime requirement to Node.js 22 or newer and recommend Node.js 24 LTS.
+  Each package's exact minimum is now recorded in `ecosystem.json` and checked against the shared
+  guidance.
+
+### Changed
+
+- The README and documentation home now lead with one host-neutral prompt that users can paste into
+  Codex, Claude Code, GitHub Copilot, Gemini, Cursor, or another coding agent. The existing install
+  runbook still owns inspection, preview, host selection, safe merging, and validation.
+- Anypoint setup now states the exact Connected App flow and scopes, keeps detailed credential
+  administration in `anypoint-connect`, and makes clear that Client ID and Secret alone are not
+  headless CI authentication.
+- Ecosystem update automation now waits for npm registry propagation, captures the released
+  package's Node.js requirement, and proposes version and runtime compatibility together.
+
+### Quality
+
+- Repository validation rejects invalid package Node.js requirements, an understated shared Node.js
+  floor, or per-package runtime guidance that drifts from the compatibility manifest.
+
 ## 1.5.0 — API Design
 
 - Added `mule-api-design` for guided HTTP API design, RAML 1.0 and OpenAPI 3.0 authoring, contract assessment, and safe Design Center/Exchange workflows.

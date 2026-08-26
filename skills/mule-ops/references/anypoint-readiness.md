@@ -105,16 +105,22 @@ the missing coverage is visible in the result.
 Print the commands and let the user run them. These change machine-local state, so do not run them
 without explicit approval.
 
+The current connector requires Node.js 22 or newer and a user Authorization Code login. Its
+Connected App requests `full offline_access`; Client ID and Secret alone are not supported headless
+CI authentication. Never ask the user to reveal either value. `config init` masks the secret, and
+the detailed administrator setup belongs to
+<https://avinava.github.io/anypoint-connect/credentials/>.
+
 ```bash
-npx -y @sfdxy/anypoint-connect@0.12.0 config init
-npx -y @sfdxy/anypoint-connect@0.12.0 auth login
-npx -y @sfdxy/anypoint-connect@0.12.0 auth status
+npx -y @sfdxy/anypoint-connect@0.13.0 config init
+npx -y @sfdxy/anypoint-connect@0.13.0 auth login
+npx -y @sfdxy/anypoint-connect@0.13.0 auth status
 ```
 
 A global install gives the shorter `anc` form and needs separate approval:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.12.0
+npm install -g @sfdxy/anypoint-connect@0.13.0
 anc auth login
 anc auth status
 ```

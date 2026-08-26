@@ -16,6 +16,7 @@ SIBLING_RE = re.compile(r"\.\./([a-z0-9][a-z0-9-]*)/")
 PLACEHOLDER_RE = re.compile(r"<skills-root>/([a-z0-9][a-z0-9-]*)/")
 PIN_RE = re.compile(r"@sfdxy(?:%2F|/)([a-z0-9-]+)@(\d+\.\d+\.\d+)")
 REGISTRY_PIN_RE = re.compile(r"@sfdxy%2F([a-z0-9-]+)/(\d+\.\d+\.\d+)")
+NODE_REQUIREMENT_RE = re.compile(r"^>=(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 NAV_ENTRY_RE = re.compile(r"^\s*(?:-\s*)?(?:[^:]+:\s*)?([A-Za-z0-9._/-]+\.md)\s*$")
 READINESS_REFERENCE = "references/anypoint-readiness.md"
 READINESS_SKILLS = (
@@ -40,6 +41,15 @@ CLASS_NAMES = (
     "Class D — Failure disposition",
     "Class E — State and idempotency",
 )
+
+SHARED_NODE_CLAIMS = {
+    "README.md": "Node.js `{requirement}` satisfies all three",
+    "docs/index.md": "Node.js `{requirement}` for the MCP servers",
+    "docs/faq.md": "all three need `{requirement}`",
+    "docs/install-claude-code.md": "Node.js `{requirement}` satisfies all three",
+    "docs/mcp-servers.md": "Node.js `{requirement}` satisfies all three",
+    "docs/agent-install.md": "Use Node.js `{requirement}` to satisfy all three",
+}
 
 
 def parse_frontmatter(path: Path) -> tuple[dict[str, str], list[str]]:
@@ -460,6 +470,13 @@ def validate_ecosystem_manifest(root: Path) -> list[str]:
                 f"{path}: packages.{name} pin {version!r} disagrees with .mcp.json "
                 f"pin {pins.get(name)!r}"
             )
+        node_requirement = package.get("node")
+        if not isinstance(node_requirement, str) or not NODE_REQUIREMENT_RE.fullmatch(
+            node_requirement
+        ):
+            findings.append(
+                f"{path}: packages.{name}.node must use the supported >=X.Y.Z form"
+            )
         for field in ("role", "credentials", "repository", "documentation"):
             if not package.get(field):
                 findings.append(f"{path}: packages.{name}.{field} must be non-empty")
@@ -474,6 +491,50 @@ def validate_ecosystem_manifest(root: Path) -> list[str]:
             f"{path}: bundleVersion {manifest.get('bundleVersion')!r} disagrees with "
             f"plugin version {plugin_version!r}"
         )
+    return findings
+
+
+def validate_node_compatibility(root: Path) -> list[str]:
+    """The bundle requirement must cover every pinned server's published engine floor."""
+    findings: list[str] = []
+    path = root / "ecosystem.json"
+    try:
+        packages = json.loads(path.read_text(encoding="utf-8"))["packages"]
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        return [f"{path}: cannot validate Node.js compatibility: {exc}"]
+
+    parsed: dict[str, tuple[int, int, int]] = {}
+    for name, package in sorted(packages.items()):
+        requirement = package.get("node") if isinstance(package, dict) else None
+        match = NODE_REQUIREMENT_RE.fullmatch(requirement or "")
+        if match:
+            parsed[name] = tuple(int(part) for part in match.groups())
+    if len(parsed) != len(packages) or not parsed:
+        return findings
+
+    floor = max(parsed.values())
+    shared = ">=" + ".".join(str(part) for part in floor)
+    for relative_path, template in SHARED_NODE_CLAIMS.items():
+        doc_path = root / relative_path
+        if not doc_path.is_file() or template.format(requirement=shared) not in doc_path.read_text(
+            encoding="utf-8"
+        ):
+            findings.append(
+                f"{relative_path}: shared Node.js requirement must be {shared}"
+            )
+
+    agent_install = (root / "docs/agent-install.md").read_text(encoding="utf-8")
+    for name, package in sorted(packages.items()):
+        expected = f'{package["npm"]}@{package["version"]}'
+        matching_rows = [
+            line
+            for line in agent_install.splitlines()
+            if expected in line and line.startswith("|")
+        ]
+        if len(matching_rows) != 1 or f'`{package["node"]}`' not in matching_rows[0]:
+            findings.append(
+                f"docs/agent-install.md: {name} Node.js requirement must be {package['node']}"
+            )
     return findings
 
 
@@ -559,6 +620,7 @@ def validate_repository(root: Path) -> list[str]:
     findings.extend(validate_skill_portability(root))
     findings.extend(validate_mcp_configs(root))
     findings.extend(validate_ecosystem_manifest(root))
+    findings.extend(validate_node_compatibility(root))
     findings.extend(validate_pin_consistency(root))
     findings.extend(validate_site_nav(root))
     findings.extend(validate_anypoint_readiness(root))

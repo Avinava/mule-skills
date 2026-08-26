@@ -34,13 +34,38 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Update the allowlisted pin and generated files
-        run: python tools/update_ecosystem.py "$PACKAGE" "$VERSION"
-      - name: Verify the released package exists
+      - name: Wait for the released package
+        id: registry
+        shell: bash
         run: |
           package_key="${PACKAGE#@sfdxy/}"
-          published=$(npm view "@sfdxy/${package_key}@${VERSION}" version)
+          package_spec="@sfdxy/${package_key}@${VERSION}"
+          published=""
+          node_requirement=""
+          for attempt in 1 2 3 4 5 6; do
+            published="$(npm view "$package_spec" version 2>/dev/null || true)"
+            node_requirement="$(npm view "$package_spec" engines.node 2>/dev/null || true)"
+            if [ "$published" = "$VERSION" ] && [ -n "$node_requirement" ]; then
+              break
+            fi
+            if [ "$attempt" -eq 6 ]; then
+              echo "::error::$package_spec metadata was not visible after 6 registry checks"
+              exit 1
+            fi
+            echo "$package_spec metadata is not visible yet; retrying in 10 seconds ($attempt/6)"
+            sleep 10
+          done
           test "$published" = "$VERSION"
+          node_pattern='^>=[0-9]+\.[0-9]+\.[0-9]+$'
+          if [[ ! "$node_requirement" =~ $node_pattern ]]; then
+            echo "::error::$package_spec has unsupported engines.node: $node_requirement"
+            exit 1
+          fi
+          echo "node_requirement=$node_requirement" >> "$GITHUB_OUTPUT"
+      - name: Update the allowlisted pin and generated files
+        run: >-
+          python tools/update_ecosystem.py "$PACKAGE" "$VERSION"
+          --node "${{ steps.registry.outputs.node_requirement }}"
       - name: Validate the proposal
         run: |
           python tools/generate_ecosystem.py --check

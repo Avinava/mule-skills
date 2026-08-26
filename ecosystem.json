@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "1.5.0",
+  "bundleVersion": "1.6.0",
   "packages": {
     "anypoint-connect": {
       "npm": "@sfdxy/anypoint-connect",
-      "version": "0.12.0",
+      "version": "0.13.0",
+      "node": ">=22.0.0",
       "role": "Authorized Anypoint evidence, Design Center workflows, and lifecycle operations",
       "credentials": "Anypoint Platform login",
       "repository": "https://github.com/Avinava/anypoint-connect",
@@ -13,6 +14,7 @@
     "mule-build": {
       "npm": "@sfdxy/mule-build",
       "version": "2.2.0",
+      "node": ">=20.19.0",
       "role": "Validate, test, package, run locally, and release Mule applications",
       "credentials": "None",
       "repository": "https://github.com/Avinava/mule-build",
@@ -20,8 +22,9 @@
     },
     "mule-lint": {
       "npm": "@sfdxy/mule-lint",
-      "version": "1.28.0",
-      "role": "Canonical standards, Mule static analysis, and RAML/OAS contract validation",
+      "version": "1.29.0",
+      "node": ">=20.0.0",
+      "role": "Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation",
       "credentials": "None",
       "repository": "https://github.com/Avinava/mule-lint",
       "documentation": "https://avinava.github.io/mule-lint/"

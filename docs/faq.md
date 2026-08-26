@@ -27,7 +27,7 @@ evidence-backed context — see [project setup](project-setup.md).
 
 ## MCP servers
 
-**A server does not connect.** Check Node.js: all three need `>=20.19.0`. Then verify the host sees
+**A server does not connect.** Check Node.js: all three need `>=22.0.0`. Then verify the host sees
 it — `/mcp`, `codex mcp list`, `copilot mcp list`, or the host's MCP view. VS Code needs a window
 reload after its configuration changes.
 

@@ -48,16 +48,27 @@ Two consequences worth knowing:
 Run these yourself. An agent following these skills will print them rather than run them, because
 they change machine-local state.
 
+Use Node.js 22 or newer; Node.js 24 LTS is recommended. You also need an Anypoint Connected App
+configured as **App acts on behalf of a user** with the **Authorization Code** grant, redirect URI
+`http://localhost:3000/api/callback`, and the `full offline_access` scopes. If you cannot create the
+app, send those exact settings to your Anypoint organization administrator. The
+[anypoint-connect credential guide](https://avinava.github.io/anypoint-connect/credentials/) owns
+the complete administrator handoff, storage, rotation, and troubleshooting instructions.
+
+The Client ID and Secret identify the Connected App but do not grant platform access by themselves.
+The user still authorizes access in a browser, and a new headless CI runner cannot authenticate with
+only those two values.
+
 ```bash
-npx -y @sfdxy/anypoint-connect@0.12.0 config init
-npx -y @sfdxy/anypoint-connect@0.12.0 auth login
-npx -y @sfdxy/anypoint-connect@0.12.0 auth status
+npx -y @sfdxy/anypoint-connect@0.13.0 config init
+npx -y @sfdxy/anypoint-connect@0.13.0 auth login
+npx -y @sfdxy/anypoint-connect@0.13.0 auth status
 ```
 
 A global install gives you the shorter `anc` command:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.12.0
+npm install -g @sfdxy/anypoint-connect@0.13.0
 anc config init
 anc auth login
 anc auth status
@@ -65,6 +76,9 @@ anc auth status
 
 Use the same pin the MCP configuration uses. A CLI on one version and an MCP server on another is a
 confusing way to debug a login problem.
+
+`config init` masks the Client Secret. Enter it at that prompt rather than placing it in a command,
+project file, issue, or chat. `auth login` opens the browser-based authorization flow.
 
 ### Multiple organizations
 

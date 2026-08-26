@@ -10,6 +10,21 @@ projects.
 The skills work as instruction-only workflows. They can also use three pinned MCP servers when
 local build, lint, or authorized Anypoint evidence is available.
 
+## Tell your agent to install it
+
+Paste this into Codex, Claude Code, GitHub Copilot, Gemini, Cursor, or another coding agent while
+the Mule project is open:
+
+```text
+Fetch and follow https://raw.githubusercontent.com/Avinava/mule-skills/main/docs/agent-install.md
+to install or update Mule Skills in this Mule repository. Detect the agent host and existing
+configuration, preview the changes, preserve customized files, run the validation, and do not
+commit or authenticate to Anypoint unless I approve it.
+```
+
+The same runbook handles new installs and upgrades. It routes Claude Code to the plugin and uses the
+repository installer or a careful manual merge for other hosts.
+
 ## Start here
 
 | You are | Go to |
@@ -44,8 +59,8 @@ Details and routing guidance are on the [Skills](skills.md) page.
 | Server | Pin | Credentials | Its own docs |
 | --- | --- | --- | --- |
 | `mule-build` | `@sfdxy/mule-build@2.2.0` | None | <https://avinava.github.io/mule-build/> |
-| `mule-lint` | `@sfdxy/mule-lint@1.28.0` | None | <https://avinava.github.io/mule-lint/> |
-| `anypoint-connect` | `@sfdxy/anypoint-connect@0.12.0` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
+| `mule-lint` | `@sfdxy/mule-lint@1.29.0` | None | <https://avinava.github.io/mule-lint/> |
+| `anypoint-connect` | `@sfdxy/anypoint-connect@0.13.0` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
 
 `anypoint-connect` idles until you authenticate. Skills that need runtime or design-platform evidence probe for access
 first and offer you a choice — set it up, supply exported logs and metrics, or continue with
@@ -54,7 +69,7 @@ repository-only analysis and labeled gaps. See [Anypoint access](anypoint-access
 
 ## Requirements
 
-- Node.js `>=20.19.0` for the MCP servers
+- Node.js `>=22.0.0` for the MCP servers; Node.js 24 LTS is recommended
 - Python 3 for the bundled inventory, audit, and check scripts
 - A Mule 4 repository to work in
 

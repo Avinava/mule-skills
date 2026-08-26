@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CHECKER = ROOT / "skills/mule-development/scripts/check_embedded_expressions.py"
 VALIDATOR = ROOT / "tools/validate_repository.py"
 INSTALLER = ROOT / "install/install.sh"
+UPDATER = ROOT / "tools/update_ecosystem.py"
 
 
 def load_module(path: Path, name: str):
@@ -202,7 +203,7 @@ class PluginManifestTests(unittest.TestCase):
     def test_rejects_mcp_configuration_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.28.0", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.29.0", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagree; every host must get the same pins")
 
     def test_rejects_marketplace_named_for_the_publisher(self):
@@ -273,7 +274,7 @@ class PluginManifestTests(unittest.TestCase):
         """A user installing one version while reading instructions for another."""
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "README.md", "@sfdxy/mule-lint@1.28.0", "@sfdxy/mule-lint@9.9.9")
+            self.edit(root / "README.md", "@sfdxy/mule-lint@1.29.0", "@sfdxy/mule-lint@9.9.9")
             self.assert_finding(root, "disagrees with .mcp.json pin")
 
     def test_rejects_ecosystem_manifest_pin_drift(self):
@@ -281,10 +282,57 @@ class PluginManifestTests(unittest.TestCase):
             root = self.copy_repository(temporary)
             self.edit(
                 root / "ecosystem.json",
-                '"version": "1.28.0"',
+                '"version": "1.29.0"',
                 '"version": "9.9.9"',
             )
             self.assert_finding(root, "disagrees with .mcp.json pin")
+
+    def test_rejects_invalid_package_node_requirement(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(root / "ecosystem.json", '"node": ">=22.0.0"', '"node": "22"')
+            self.assert_finding(root, "node must use the supported >=X.Y.Z form")
+
+    def test_rejects_understated_shared_node_requirement(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / "README.md",
+                "Node.js `>=22.0.0` satisfies all three",
+                "Node.js `>=20.19.0` satisfies all three",
+            )
+            self.assert_finding(root, "shared Node.js requirement must be >=22.0.0")
+
+    def test_rejects_package_node_guidance_drift(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            self.edit(
+                root / "docs/agent-install.md",
+                "| `>=22.0.0` |",
+                "| `>=20.0.0` |",
+            )
+            self.assert_finding(root, "anypoint-connect Node.js requirement must be >=22.0.0")
+
+    def test_ecosystem_update_keeps_version_and_node_guidance_atomic(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / UPDATER.relative_to(ROOT)),
+                    "anypoint-connect",
+                    "0.13.1",
+                    "--node",
+                    ">=24.0.0",
+                    "--root",
+                    str(root),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual([], validator.validate_repository(root))
 
     def test_rejects_documented_pin_for_a_server_that_is_not_launched(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -301,7 +349,7 @@ class PluginManifestTests(unittest.TestCase):
             root = self.copy_repository(temporary)
             self.edit(
                 root / "README.md",
-                "@sfdxy%2Fanypoint-connect/0.12.0",
+                "@sfdxy%2Fanypoint-connect/0.13.0",
                 "@sfdxy%2Fanypoint-connect/9.9.9",
             )
             self.assert_finding(root, "registry link for @sfdxy/anypoint-connect@9.9.9")
@@ -343,6 +391,15 @@ class PluginManifestTests(unittest.TestCase):
 
 
 class RepositoryValidationTests(unittest.TestCase):
+    def test_readme_has_host_neutral_agent_install_handoff(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "https://raw.githubusercontent.com/Avinava/mule-skills/main/docs/agent-install.md",
+            readme,
+        )
+        for host in ("Codex", "Claude Code", "GitHub Copilot", "Gemini"):
+            self.assertIn(host, readme)
+
     def test_api_design_skill_has_contract_and_mutation_boundaries(self):
         skill = (ROOT / "skills/mule-api-design/SKILL.md").read_text(encoding="utf-8")
         anypoint = (ROOT / "skills/mule-api-design/references/anypoint-design.md").read_text(

@@ -49,12 +49,12 @@ The plugin bundles credential-free launch configuration for three pinned servers
 | Server | Pin | Role |
 | --- | --- | --- |
 | [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.2.0` | Validation, testing, packaging, local runtime, security checks |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.28.0` | Canonical Mule standards, static analysis, RAML/OAS validation |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.12.0` | Authorized Design Center, Exchange, Governance, runtime evidence, mutations |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.29.0` | Canonical Mule standards, static analysis, XML formatting, RAML/OAS validation |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.13.0` | Authorized Design Center, Exchange, Governance, runtime evidence, mutations |
 
 Plugin MCP servers start automatically when the plugin is enabled, so the first session after
-installing pays three `npx` cold starts. They are cached afterwards. Node.js `>=20.19.0` satisfies
-all three.
+installing pays three `npx` cold starts. They are cached afterwards.
+Node.js `>=22.0.0` satisfies all three; Node.js 24 LTS is recommended.
 
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate —
 see [anypoint-access.md](anypoint-access.md). Skills that need Anypoint evidence probe the requested capability
