@@ -81,12 +81,20 @@ jobs:
           branch="automation/ecosystem-${safe_package}-${VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            git fetch origin "refs/heads/$branch:refs/remotes/origin/$branch"
+          fi
           git checkout -b "$branch"
           git add ecosystem.json .mcp.json install docs skills README.md
           git commit -m "chore(ecosystem): update ${safe_package} to ${VERSION}"
-          git push --force-with-lease origin "$branch"
-          gh pr create \
-            --title "chore(ecosystem): update ${safe_package} to ${VERSION}" \
-            --body "Automated exact-pin update from a tool release. Generated host configuration and documentation were validated; maintainer review is still required." \
-            --base main \
-            --head "$branch"
+          git push --force-with-lease origin "HEAD:refs/heads/$branch"
+          existing_pr="$(gh pr list --state open --head "$branch" --json url --jq '.[0].url')"
+          if [ -n "$existing_pr" ]; then
+            echo "Updated existing pull request: $existing_pr"
+          else
+            gh pr create \
+              --title "chore(ecosystem): update ${safe_package} to ${VERSION}" \
+              --body "Automated exact-pin update from a tool release. Generated host configuration and documentation were validated; maintainer review is still required." \
+              --base main \
+              --head "$branch"
+          fi

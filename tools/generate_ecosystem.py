@@ -83,18 +83,19 @@ installation.
 
 - **mule-lint owns engineering standards.** Best-practice guides, source classifications,
   executable lint rules, rule profiles, and their MCP resources are maintained together there.
-- **mule-build owns local delivery mechanics.** It validates, tests, packages, runs, publishes, and
-  releases without redefining source-quality standards.
+- **mule-build owns local delivery mechanics.** It validates, tests, packages, runs locally, and
+  prepares versioned and tagged artifacts without redefining source-quality standards.
 - **anypoint-connect owns authorized platform evidence and mutations.** It exposes the current
-  Anypoint state; it does not encode project conventions.
+  Anypoint state and performs explicitly approved Exchange publishing or runtime deployment; it does
+  not encode project conventions.
 - **mule-skills owns composition.** Skills decide which evidence and tools a workflow needs, while
   referring to mule-lint standards instead of copying them.
 
 ```mermaid
 flowchart TD
     Skills["mule-skills<br/>workflow and compatibility hub"] --> Lint["mule-lint<br/>standards and static analysis"]
-    Skills --> Build["mule-build<br/>validation and delivery"]
-    Skills --> Connect["anypoint-connect<br/>authorized runtime evidence"]
+    Skills --> Build["mule-build<br/>check, test, package, version, tag"]
+    Skills --> Connect["anypoint-connect<br/>publish, deploy, runtime evidence"]
     Lint --> Project["Mule project"]
     Build --> Project
     Connect --> Platform["Anypoint Platform"]

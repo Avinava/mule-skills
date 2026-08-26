@@ -1,6 +1,6 @@
 ---
 name: mule-build
-description: Validate, test, and package a MuleSoft Mule 4 application using its established repository commands and configured build tools, and perform release actions only when the user explicitly requests them. Use for build, validation, static analysis, MUnit test runs, packaging a deployable artifact, and release preparation covering version bumps, changelog entries, tags, publishing, and deployment. Default to validate-and-package; treat versioning, publishing, deploying, pushing, and skipping tests as explicit user choices rather than automatic build steps.
+description: Validate, test, package, and locally run a MuleSoft Mule 4 application using its established repository commands and configured build tools, and prepare versions, commits, and tags only when explicitly requested. Use for local build validation, static analysis, MUnit execution, deployable artifacts, local runtime work, and versioned release preparation. Do not use for Exchange publishing or Anypoint deployment; route those authorized platform actions to mule-ops and the Anypoint connector. Default to validate-and-package; treat versioning, local runtime changes, commits, tags, pushing, and skipping tests as explicit choices.
 ---
 
 # Build Mule Application
@@ -8,8 +8,10 @@ description: Validate, test, and package a MuleSoft Mule 4 application using its
 Build the current Mule 4 application using its repository instructions and configured build tools.
 Default to a validation and package operation. Do not turn a build request into a release.
 
-This skill owns test execution, reports, packaging, and release mechanics. Route MUnit authoring,
-repair, fixtures, mocks, and assertions to `mule-testing` when that skill is installed.
+This skill owns local validation, test execution, reports, packaging, local runtime actions, and
+version/commit/tag preparation. Route MUnit authoring, repair, fixtures, mocks, and assertions to
+`mule-testing` when that skill is installed. Route Exchange publishing and Anypoint deployment to
+`mule-ops` and the authenticated Anypoint connector.
 
 ## 1. Establish scope
 
@@ -19,10 +21,11 @@ Distinguish these modes:
 | --- | --- |
 | Validate | Static checks and tests only |
 | Package | Validate, test, and create a deployable artifact |
-| Release | Explicit version, changelog, tag, and optional publish/deploy workflow |
+| Release preparation | Explicit version, changelog, commit, tag, and optional push |
 
 If the user says only `build`, use **Package**. Version bumps, changelog edits, commits, tags,
-publishing, deployment, and pushing require explicit user scope.
+local runtime changes and pushing require explicit user scope. Publishing and deployment are
+separate Anypoint operations owned by `mule-ops`.
 
 ## 2. Inspect before changing anything
 
@@ -95,7 +98,7 @@ Before running, show or record:
 If the build fails, report the first actionable failure and relevant context. Do not mask a failed
 test by rerunning with tests skipped unless the user approves that diagnostic step.
 
-## 6. Release actions, only when requested
+## 6. Release preparation, only when requested
 
 When the user explicitly requests a release:
 
@@ -109,13 +112,14 @@ When the user explicitly requests a release:
    is installed. Do not continue on `Not ready` or `Unresolved`; complete or explicitly accept every
    condition before continuing from `Ready with conditions`.
 6. Commit or tag only when authorized. Make an annotated tag only after the final release commit.
-7. Push, publish, or deploy only when explicitly requested.
+7. Push only when explicitly requested.
 
-Publishing to Exchange and deploying, restarting, scaling, or rolling back a runtime go through the
-authenticated Anypoint connector. Validation, testing, and packaging do not. Before an authorized
-publish or deploy, confirm access with `<skills-root>/mule-ops/references/anypoint-readiness.md` and
-stop on any state other than `Ready` — report the state and the setup step instead of retrying the
-operation. Never treat a readiness probe as approval to deploy.
+If the user also requests publishing to Exchange or deploying, restarting, scaling, or rolling back
+a runtime, hand that work to `mule-ops` and the authenticated Anypoint connector after local release
+preparation is complete. The operational handoff follows
+`<skills-root>/mule-ops/references/anypoint-readiness.md`; mule-build does not probe or mutate the
+platform itself. Those platform mutations are a separate scope and approval. Never treat a readiness
+probe or a successful package as approval to publish or deploy.
 
 Use semantic-version guidance as a starting point, not a replacement for the project's release
 policy:

@@ -14,7 +14,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/mule-build@2.2.0",
+        "@sfdxy/mule-build@2.3.0",
         "mcp"
       ]
     },

@@ -1,13 +1,13 @@
 # Ecosystem
 
 This is the canonical compatibility and ownership map for the Mule agent toolkit. The current
-bundle is `mule-skills@1.6.1`; its MCP dependencies are pinned exactly so an
+bundle is `mule-skills@1.6.2`; its MCP dependencies are pinned exactly so an
 installation is reproducible.
 
 | Project | Exact package | Node.js | Owns | Credentials | Reference |
 | ------- | ------------- | ------- | ---- | ----------- | --------- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.13.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
-| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.2.0` | `>=20.19.0` | Validate, test, package, run locally, and release Mule applications | None | [Docs](https://avinava.github.io/mule-build/) |
+| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.3.0` | `>=20.19.0` | Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts | None | [Docs](https://avinava.github.io/mule-build/) |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.29.1` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
 
 Node.js `>=22.0.0` satisfies the complete bundle. Node.js 24 LTS is recommended for a new
@@ -17,18 +17,19 @@ installation.
 
 - **mule-lint owns engineering standards.** Best-practice guides, source classifications,
   executable lint rules, rule profiles, and their MCP resources are maintained together there.
-- **mule-build owns local delivery mechanics.** It validates, tests, packages, runs, publishes, and
-  releases without redefining source-quality standards.
+- **mule-build owns local delivery mechanics.** It validates, tests, packages, runs locally, and
+  prepares versioned and tagged artifacts without redefining source-quality standards.
 - **anypoint-connect owns authorized platform evidence and mutations.** It exposes the current
-  Anypoint state; it does not encode project conventions.
+  Anypoint state and performs explicitly approved Exchange publishing or runtime deployment; it does
+  not encode project conventions.
 - **mule-skills owns composition.** Skills decide which evidence and tools a workflow needs, while
   referring to mule-lint standards instead of copying them.
 
 ```mermaid
 flowchart TD
     Skills["mule-skills<br/>workflow and compatibility hub"] --> Lint["mule-lint<br/>standards and static analysis"]
-    Skills --> Build["mule-build<br/>validation and delivery"]
-    Skills --> Connect["anypoint-connect<br/>authorized runtime evidence"]
+    Skills --> Build["mule-build<br/>check, test, package, version, tag"]
+    Skills --> Connect["anypoint-connect<br/>publish, deploy, runtime evidence"]
     Lint --> Project["Mule project"]
     Build --> Project
     Connect --> Platform["Anypoint Platform"]

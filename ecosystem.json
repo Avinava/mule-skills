@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "1.6.1",
+  "bundleVersion": "1.6.2",
   "packages": {
     "anypoint-connect": {
       "npm": "@sfdxy/anypoint-connect",
@@ -13,9 +13,9 @@
     },
     "mule-build": {
       "npm": "@sfdxy/mule-build",
-      "version": "2.2.0",
+      "version": "2.3.0",
       "node": ">=20.19.0",
-      "role": "Validate, test, package, run locally, and release Mule applications",
+      "role": "Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts",
       "credentials": "None",
       "repository": "https://github.com/Avinava/mule-build",
       "documentation": "https://avinava.github.io/mule-build/"

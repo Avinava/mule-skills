@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.6.2 — MuleSoft-first workflows
+
+### Updated
+
+- Pinned `mule-build@2.3.0`, including its MuleSoft-first installation path, build-clean Orders API
+  sample, agent runbook, actionable doctor output, MUnit 3 metrics, and clearer package/release
+  previews.
+- Rebuilt the documentation home around MuleSoft developer, test/release, and platform/support paths,
+  with a first-project guide, end-to-end workflow examples, clearer safety tables, and a responsive
+  visual system.
+- Clarified ecosystem ownership: `mule-build` owns local validation, MUnit, packaging, local runtime,
+  version, commit, and tag preparation; `anypoint-connect` through operational workflows owns
+  separately approved Exchange publishing and Anypoint deployment.
+- Narrowed the `mule-build` skill description and workflow to that local boundary while preserving
+  explicit handoff for requested platform actions.
+
+### Fixed
+
+- Corrected the non-plugin install guide from six to eight vendored skills and aligned the generated
+  ecosystem page, host MCP configuration, templates, README, and agent runbook with the current pins.
+
 ## 1.6.1 — Durable ecosystem updates
 
 ### Updated

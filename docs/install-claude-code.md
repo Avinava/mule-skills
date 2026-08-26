@@ -34,7 +34,7 @@ Eight skills, namespaced under the plugin:
 | `mule-troubleshooting` | Incidents, timeouts, connection failures, concurrency, memory |
 | `mule-ops` | Runtime health, deployments, logs, metrics, recurring checks |
 | `mule-review` | Working changes, commits, branches, PRs, release readiness |
-| `mule-build` | Validation, tests, packaging, explicitly requested release actions |
+| `mule-build` | Local validation, tests, packaging, runtime work, versioning, and tags |
 
 Claude selects them from their descriptions, so you can just describe the task. Plugin skills are
 namespaced, so they appear as `mule-skills:mule-review`, `mule-skills:mule-docs`, and so on — use
@@ -48,7 +48,7 @@ The plugin bundles credential-free launch configuration for three pinned servers
 
 | Server | Pin | Role |
 | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.2.0` | Validation, testing, packaging, local runtime, security checks |
+| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.3.0` | Validation, testing, packaging, local runtime, versioning, tagging, security checks |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.29.1` | Canonical Mule standards, static analysis, XML formatting, RAML/OAS validation |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.13.0` | Authorized Design Center, Exchange, Governance, runtime evidence, mutations |
 
