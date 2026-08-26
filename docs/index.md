@@ -59,7 +59,7 @@ Details and routing guidance are on the [Skills](skills.md) page.
 | Server | Pin | Credentials | Its own docs |
 | --- | --- | --- | --- |
 | `mule-build` | `@sfdxy/mule-build@2.2.0` | None | <https://avinava.github.io/mule-build/> |
-| `mule-lint` | `@sfdxy/mule-lint@1.29.0` | None | <https://avinava.github.io/mule-lint/> |
+| `mule-lint` | `@sfdxy/mule-lint@1.29.1` | None | <https://avinava.github.io/mule-lint/> |
 | `anypoint-connect` | `@sfdxy/anypoint-connect@0.13.0` | Anypoint Platform login | <https://avinava.github.io/anypoint-connect/> |
 
 `anypoint-connect` idles until you authenticate. Skills that need runtime or design-platform evidence probe for access

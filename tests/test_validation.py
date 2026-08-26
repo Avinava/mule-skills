@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import shutil
 import subprocess
 import sys
@@ -143,6 +144,18 @@ class PluginManifestTests(unittest.TestCase):
         self.assertIn(old, text)
         path.write_text(text.replace(old, new), encoding="utf-8")
 
+    def ecosystem_package(self, root: Path, name: str) -> dict[str, str]:
+        manifest = json.loads((root / "ecosystem.json").read_text(encoding="utf-8"))
+        return manifest["packages"][name]
+
+    def shared_node_requirement(self, root: Path) -> str:
+        manifest = json.loads((root / "ecosystem.json").read_text(encoding="utf-8"))
+        floors = [
+            tuple(int(part) for part in package["node"].removeprefix(">=").split("."))
+            for package in manifest["packages"].values()
+        ]
+        return ">=" + ".".join(str(part) for part in max(floors))
+
     def test_baseline_repository_is_clean(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
@@ -203,7 +216,12 @@ class PluginManifestTests(unittest.TestCase):
     def test_rejects_mcp_configuration_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "install/hosts/mcp.json", "@sfdxy/mule-lint@1.29.0", "@sfdxy/mule-lint@9.9.9")
+            package = self.ecosystem_package(root, "mule-lint")
+            self.edit(
+                root / "install/hosts/mcp.json",
+                f'{package["npm"]}@{package["version"]}',
+                f'{package["npm"]}@9.9.9',
+            )
             self.assert_finding(root, "disagree; every host must get the same pins")
 
     def test_rejects_marketplace_named_for_the_publisher(self):
@@ -274,15 +292,21 @@ class PluginManifestTests(unittest.TestCase):
         """A user installing one version while reading instructions for another."""
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "README.md", "@sfdxy/mule-lint@1.29.0", "@sfdxy/mule-lint@9.9.9")
+            package = self.ecosystem_package(root, "mule-lint")
+            self.edit(
+                root / "README.md",
+                f'{package["npm"]}@{package["version"]}',
+                f'{package["npm"]}@9.9.9',
+            )
             self.assert_finding(root, "disagrees with .mcp.json pin")
 
     def test_rejects_ecosystem_manifest_pin_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
+            version = self.ecosystem_package(root, "mule-lint")["version"]
             self.edit(
                 root / "ecosystem.json",
-                '"version": "1.29.0"',
+                f'"version": "{version}"',
                 '"version": "9.9.9"',
             )
             self.assert_finding(root, "disagrees with .mcp.json pin")
@@ -290,40 +314,48 @@ class PluginManifestTests(unittest.TestCase):
     def test_rejects_invalid_package_node_requirement(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
-            self.edit(root / "ecosystem.json", '"node": ">=22.0.0"', '"node": "22"')
+            node = self.ecosystem_package(root, "anypoint-connect")["node"]
+            self.edit(root / "ecosystem.json", f'"node": "{node}"', '"node": "invalid"')
             self.assert_finding(root, "node must use the supported >=X.Y.Z form")
 
     def test_rejects_understated_shared_node_requirement(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
+            shared_node = self.shared_node_requirement(root)
             self.edit(
                 root / "README.md",
-                "Node.js `>=22.0.0` satisfies all three",
-                "Node.js `>=20.19.0` satisfies all three",
+                f"Node.js `{shared_node}` satisfies all three",
+                "Node.js `>=0.0.0` satisfies all three",
             )
-            self.assert_finding(root, "shared Node.js requirement must be >=22.0.0")
+            self.assert_finding(root, f"shared Node.js requirement must be {shared_node}")
 
     def test_rejects_package_node_guidance_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
+            node = self.ecosystem_package(root, "anypoint-connect")["node"]
             self.edit(
                 root / "docs/agent-install.md",
-                "| `>=22.0.0` |",
-                "| `>=20.0.0` |",
+                f"| `{node}` |",
+                "| `>=0.0.0` |",
             )
-            self.assert_finding(root, "anypoint-connect Node.js requirement must be >=22.0.0")
+            self.assert_finding(root, f"anypoint-connect Node.js requirement must be {node}")
 
     def test_ecosystem_update_keeps_version_and_node_guidance_atomic(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
+            package = self.ecosystem_package(root, "anypoint-connect")
+            major, minor, patch = (int(part) for part in package["version"].split("."))
+            next_version = f"{major}.{minor}.{patch + 1}"
+            node_major = int(package["node"].removeprefix(">=").split(".")[0]) + 1
+            next_node = f">={node_major}.0.0"
             result = subprocess.run(
                 [
                     sys.executable,
                     str(root / UPDATER.relative_to(ROOT)),
                     "anypoint-connect",
-                    "0.13.1",
+                    next_version,
                     "--node",
-                    ">=24.0.0",
+                    next_node,
                     "--root",
                     str(root),
                 ],
@@ -347,9 +379,10 @@ class PluginManifestTests(unittest.TestCase):
     def test_rejects_registry_link_version_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
+            package = self.ecosystem_package(root, "anypoint-connect")
             self.edit(
                 root / "README.md",
-                "@sfdxy%2Fanypoint-connect/0.13.0",
+                f'@sfdxy%2Fanypoint-connect/{package["version"]}',
                 "@sfdxy%2Fanypoint-connect/9.9.9",
             )
             self.assert_finding(root, "registry link for @sfdxy/anypoint-connect@9.9.9")

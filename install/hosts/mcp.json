@@ -20,7 +20,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/mule-lint@1.29.0",
+        "@sfdxy/mule-lint@1.29.1",
         "mcp"
       ]
     }

@@ -121,7 +121,8 @@ python3 tools/generate_ecosystem.py --check
 To prepare a pin update locally:
 
 ```bash
-python3 tools/update_ecosystem.py mule-lint 1.29.0 --node '>=20.0.0'
+python3 tools/update_ecosystem.py mule-lint {packages["mule-lint"]["version"]} \
+  --node '{packages["mule-lint"]["node"]}'
 ```
 
 Release a new `mule-skills` minor version when skills, compatibility policy, host configuration, or

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.6.1 — Durable ecosystem updates
+
+### Updated
+
+- Pinned `mule-lint@1.29.1`, which adds a host-neutral agent setup runbook and copyable setup prompt
+  for Codex, Claude Code, GitHub Copilot, Gemini, Cursor, and similar coding agents.
+
+### Fixed
+
+- Ecosystem validation tests now derive package versions and Node.js requirements from
+  `ecosystem.json`. A real dependency release can update generated configuration and documentation
+  without tests failing because they still expect the previous pin.
+
 ## 1.6.0 — Compatible onboarding
 
 The bundle now aligns its installation story with the current `mule-lint` and
