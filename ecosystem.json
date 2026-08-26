@@ -13,7 +13,7 @@
     },
     "mule-build": {
       "npm": "@sfdxy/mule-build",
-      "version": "2.2.0",
+      "version": "2.3.0",
       "node": ">=20.19.0",
       "role": "Validate, test, package, run locally, and release Mule applications",
       "credentials": "None",
