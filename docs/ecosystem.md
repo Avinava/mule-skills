@@ -1,7 +1,7 @@
 # Ecosystem
 
 This is the canonical compatibility and ownership map for the Mule agent toolkit. The current
-bundle is `mule-skills@1.6.2`; its MCP dependencies are pinned exactly so an
+bundle is `mule-skills@1.7.0`; its MCP dependencies are pinned exactly so an
 installation is reproducible.
 
 | Project | Exact package | Node.js | Owns | Credentials | Reference |

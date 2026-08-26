@@ -2,6 +2,8 @@
 
 The skills compose around a task. You describe the desired Mule outcome; the agent selects the
 smallest useful workflow and adds another skill only when the task crosses a real ownership boundary.
+For captured results from pinned sample projects, including a blocked MUnit gate, see
+[Mule Skills in action](see-it-in-action.md). This page focuses on reusable workflow shapes.
 
 ## Design and implement an API change
 
@@ -52,13 +54,14 @@ report the exact artifact. Do not skip tests or perform release actions.
 
 `mule-build` uses repository commands first and the pinned `mule-build@2.3.0` tool when configured.
 The normal sequence is read-only readiness, static/security checks, MUnit, package, then artifact
-verification. A package result should make these visible:
+verification. A package result should make these visible. This is a handoff template, not captured
+output from a bundled sample:
 
 ```text
 Mode: package
-Validation: passed
-MUnit: 18 run, 0 failed, 1 skipped
-Artifact: target/orders-system-api-1.4.2.jar
+Validation: <passed, failed, or blocked with the exact gate>
+MUnit: <run, failed, errors, and skipped totals>
+Artifact: <exact path, or none when packaging failed>
 Changed by workflow: target/ only
 Release actions: none
 ```

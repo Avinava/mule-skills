@@ -9,7 +9,7 @@ projects using the same lifecycle your team already knows: design, develop, test
 operate, and troubleshoot.
 
 [Install in a Mule project](getting-started.md){ .md-button .md-button--primary }
-[See the workflows](workflows.md){ .md-button }
+[See it in action](see-it-in-action.md){ .md-button }
 
 </div>
 
@@ -26,7 +26,7 @@ before a mutation that needs your approval.
 Describe the change in Mule terms. The agent routes between API design, Mule XML/DataWeave,
 documentation, MUnit, build, and review.
 
-[Start with one project](getting-started.md)
+[See a developer change](see-it-in-action.md)
 
 </div>
 

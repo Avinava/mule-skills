@@ -69,7 +69,8 @@ Validate and package this Mule application. Show the checks, MUnit totals, and a
 version, tag, publish, or deploy anything.
 ```
 
-The [workflow examples](workflows.md) show what should happen next and where approval boundaries sit.
+The [evidence-backed journeys](see-it-in-action.md) show what a developer actually receives. The
+[workflow examples](workflows.md) explain the reusable paths and approval boundaries.
 
 ## When Anypoint access appears
 

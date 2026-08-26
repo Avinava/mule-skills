@@ -4,16 +4,20 @@ Eight skills, shared and host-neutral. Claude Code loads them from the plugin; e
 them from `.agents/skills/`. Each has a `SKILL.md` the agent selects from its description, so
 describing the task is usually enough.
 
-| Skill | Use it for | Default result |
-| --- | --- | --- |
-| [`mule-api-design`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-api-design) | HTTP API workshops, URI/method/data/error design, RAML/OAS authoring, contract assessment, safe Design Center workflows | Consumer-centered contract, decision ledger, and validation evidence |
-| [`mule-docs`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-docs) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
-| [`mule-development`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-development) | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch, and configuration | Implemented source change with proportionate validation |
-| [`mule-testing`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-testing) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration | Faithful tests with focused and full validation evidence |
-| [`mule-troubleshooting`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-troubleshooting) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
-| [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Runtime health, deployments, logs, metrics, recurring checks, multi-application correlation | Evidence-backed operational assessment |
-| [`mule-review`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-review) | Working changes, commits, branches, PRs, whole projects, release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
-| [`mule-build`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-build) | Local validation, tests, packaging, runtime work, versioning, and tags | Deployable artifact and validation summary |
+| Skill | Primary job | Default effect | What you receive |
+| --- | --- | --- | --- |
+| [`mule-api-design`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-api-design) | Shape or assess an HTTP API contract | Read-only workshop or assessment; writes local RAML/OAS only when authoring is requested; Design Center mutations are separate | Decision ledger, operation model, contract or findings, and validation evidence |
+| [`mule-docs`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-docs) | Explain the current Mule project for a named audience | Writes only the requested documentation scope | Evidence-backed Markdown/Mermaid, source map, and clearly labeled gaps |
+| [`mule-development`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-development) | Implement Mule XML, DataWeave, APIKit, connector, or configuration behavior | Changes production source/configuration inside the requested scope | Implemented behavior, changed-file summary, validation evidence, and remaining gaps |
+| [`mule-testing`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-testing) | Author or repair behavior-focused MUnit coverage | Changes tests, fixtures, mocks, and test-only configuration | Test intent, focused/full results, and any unproven behavior |
+| [`mule-troubleshooting`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-troubleshooting) | Diagnose incidents and failures | Read-only diagnosis by default | Root-cause assessment or ranked hypotheses, confidence, evidence gaps, and fix plan |
+| [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Assess runtime health and deployment evidence | Read-only telemetry analysis by default | Health assessment, evidence coverage, risks, and recommended actions |
+| [`mule-review`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-review) | Review changes, repositories, PRs, or release readiness | Read-only; no implementation, comment, or PR-state change unless requested | Prioritized findings, fix options, coverage limits, and a readiness verdict when applicable |
+| [`mule-build`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-build) | Run local readiness, security, MUnit, packaging, and release-preparation gates | Creates `target/` artifacts during packaging; source/Git changes require an explicit version or release request | Exact checks, test totals, artifact or failure evidence, and release actions performed |
+
+See [Mule Skills in action](see-it-in-action.md) for an evidence-backed change journey and a
+read-only risk review. The examples deliberately show a blocked test gate rather than presenting a
+tests-skipped package as a successful release.
 
 ## Choosing the right skill
 

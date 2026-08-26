@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.7.0 — Evidence-backed developer journeys
+
+### Added
+
+- Added a GitHub Pages journey that shows a small Mule behavior and MUnit change using the pinned
+  `mule-build` sample, followed by the actual readiness, lint, test, packaging, and review evidence.
+- Added a read-only risk-review journey using the intentionally flawed `mule-lint` sample, including
+  observed finding totals, a prioritized finding, evidence coverage, and explicit mutation limits.
+
+### Changed
+
+- Expanded the published catalog for all eight skills with each skill's primary job, default side
+  effects, and expected developer handoff.
+- Replaced the blanket promise of a deployable build artifact with exact artifact-or-failure
+  evidence. A tests-skipped package is now explicitly diagnostic rather than release proof.
+- Linked the evidence-backed journeys from the documentation home, getting-started guide, workflow
+  guide, site navigation, and README.
+
+### Quality
+
+- Repository validation now rejects missing, unknown, or duplicate skills in the published catalog
+  without requiring an artificial sample output for every skill.
+
 ## 1.6.2 — MuleSoft-first workflows
 
 ### Updated

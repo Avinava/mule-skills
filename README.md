@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://avinava.github.io/mule-skills/">Documentation</a> ·
+  <a href="https://avinava.github.io/mule-skills/see-it-in-action/">See it in action</a> ·
   <a href="https://avinava.github.io/mule-skills/anypoint-access/">Anypoint access</a> ·
   <a href="https://avinava.github.io/mule-skills/faq/">FAQ</a>
 </p>
@@ -64,16 +65,16 @@ Then give the agent context about your project by following
 
 ## Skills
 
-| Skill | Use it for | Default result |
+| Skill | Use it for | What you receive |
 | --- | --- | --- |
 | [`mule-api-design`](skills/mule-api-design/) | HTTP API workshops, URI/method/data/error design, RAML/OAS authoring, contract assessment, and safe Design Center workflows | Consumer-centered contract, decision ledger, and validation evidence |
 | [`mule-docs`](skills/mule-docs/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
 | [`mule-development`](skills/mule-development/) | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch, and configuration | Implemented source change with proportionate validation |
 | [`mule-testing`](skills/mule-testing/) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration | Faithful tests with focused and full validation evidence |
-| [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or fix plan; no source change unless requested |
-| [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Evidence-backed operational assessment |
-| [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings and fix options; no implementation or PR-state change unless requested |
-| [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags | Deployable artifact and validation summary |
+| [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or ranked hypotheses, confidence, evidence gaps, and fix plan |
+| [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Health assessment, evidence coverage, risks, and recommended actions |
+| [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings, fix options, coverage limits, and readiness verdict when applicable |
+| [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags | Exact checks, test totals, artifact or failure evidence, and release actions performed |
 
 ### Choosing the right skill
 
@@ -91,6 +92,10 @@ Then give the agent context about your project by following
 Documentation and review questions are optional and non-blocking. When business information would
 materially improve the result, the skill offers concise choices plus `Other` and `Not sure / Skip`,
 then continues with verified technical evidence if the user skips.
+
+For grounded output, see [two developer journeys](docs/see-it-in-action.md): a small Mule change
+whose test gate blocks release readiness, and a read-only review of an intentionally flawed sample.
+The catalog's detailed mutation and handoff expectations live in [the skill catalog](docs/skills.md).
 
 ## Agent support
 

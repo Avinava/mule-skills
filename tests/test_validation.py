@@ -161,6 +161,17 @@ class PluginManifestTests(unittest.TestCase):
             root = self.copy_repository(temporary)
             self.assertEqual([], validator.validate_repository(root))
 
+    def test_rejects_skill_missing_from_documented_catalog(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            catalog = root / "docs/skills.md"
+            lines = catalog.read_text(encoding="utf-8").splitlines(keepends=True)
+            catalog.write_text(
+                "".join(line for line in lines if "[`mule-testing`]" not in line),
+                encoding="utf-8",
+            )
+            self.assert_finding(root, "skill catalog missing: mule-testing")
+
     def test_rejects_unresolvable_plugin_source(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)

@@ -18,6 +18,7 @@ PIN_RE = re.compile(r"@sfdxy(?:%2F|/)([a-z0-9-]+)@(\d+\.\d+\.\d+)")
 REGISTRY_PIN_RE = re.compile(r"@sfdxy%2F([a-z0-9-]+)/(\d+\.\d+\.\d+)")
 NODE_REQUIREMENT_RE = re.compile(r"^>=(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 NAV_ENTRY_RE = re.compile(r"^\s*(?:-\s*)?(?:[^:]+:\s*)?([A-Za-z0-9._/-]+\.md)\s*$")
+SKILL_CATALOG_ROW_RE = re.compile(r"^\|\s*\[`(mule-[a-z0-9-]+)`\]\(")
 READINESS_REFERENCE = "references/anypoint-readiness.md"
 READINESS_SKILLS = (
     "mule-api-design",
@@ -92,6 +93,32 @@ def validate_skills(root: Path) -> list[str]:
             findings.append(f"{skill_path}: name {name!r} does not match folder {folder_name!r}")
         if len(values.get("description", "")) > 1024:
             findings.append(f"{skill_path}: description exceeds 1024 characters")
+    return findings
+
+
+def validate_skill_catalog(root: Path) -> list[str]:
+    """Keep the developer-facing catalog complete without requiring samples per skill."""
+    findings: list[str] = []
+    catalog_path = root / "docs/skills.md"
+    if not catalog_path.is_file():
+        return [f"{catalog_path}: missing skill catalog"]
+
+    skill_names = {
+        path.parent.name for path in (root / "skills").glob("*/SKILL.md") if path.is_file()
+    }
+    catalog_names: list[str] = []
+    for line in catalog_path.read_text(encoding="utf-8").splitlines():
+        match = SKILL_CATALOG_ROW_RE.match(line)
+        if match:
+            catalog_names.append(match.group(1))
+
+    for name in sorted(skill_names - set(catalog_names)):
+        findings.append(f"docs/skills.md: skill catalog missing: {name}")
+    for name in sorted(set(catalog_names) - skill_names):
+        findings.append(f"docs/skills.md: skill catalog contains unknown skill: {name}")
+    for name in sorted(set(catalog_names)):
+        if catalog_names.count(name) > 1:
+            findings.append(f"docs/skills.md: skill catalog duplicates: {name}")
     return findings
 
 
@@ -614,6 +641,7 @@ def validate_anypoint_readiness(root: Path) -> list[str]:
 def validate_repository(root: Path) -> list[str]:
     findings: list[str] = []
     findings.extend(validate_skills(root))
+    findings.extend(validate_skill_catalog(root))
     findings.extend(validate_local_links(root))
     findings.extend(validate_alignment(root))
     findings.extend(validate_plugin_manifests(root))
