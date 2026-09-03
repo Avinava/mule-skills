@@ -22,7 +22,7 @@
     },
     "mule-lint": {
       "npm": "@sfdxy/mule-lint",
-      "version": "1.29.1",
+      "version": "1.30.0",
       "node": ">=20.0.0",
       "role": "Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation",
       "credentials": "None",
