@@ -49,7 +49,7 @@ The plugin bundles credential-free launch configuration for three pinned servers
 | Server | Pin | Role |
 | --- | --- | --- |
 | [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.3.0` | Validation, testing, packaging, local runtime, versioning, tagging, security checks |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.29.1` | Canonical Mule standards, static analysis, XML formatting, RAML/OAS validation |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.30.1` | Canonical Mule standards, static analysis, XML formatting, RAML/OAS validation |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.13.0` | Authorized Design Center, Exchange, Governance, runtime evidence, mutations |
 
 Plugin MCP servers start automatically when the plugin is enabled, so the first session after

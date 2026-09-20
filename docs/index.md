@@ -94,7 +94,7 @@ authentication decisions with you. [Walk through the result](getting-started.md)
 | Layer | Purpose | Credentials |
 | --- | --- | --- |
 | Eight `mule-*` skills | Decide how to design, implement, test, document, build, review, operate, and diagnose | None |
-| `mule-lint@1.29.1` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
+| `mule-lint@1.30.1` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
 | `mule-build@2.3.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
 | `anypoint-connect@0.13.0` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
 

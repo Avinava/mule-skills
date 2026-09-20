@@ -425,6 +425,13 @@ def validate_pin_consistency(root: Path) -> list[str]:
     if not pins:
         return findings
 
+    # Bare `mule-lint@x.y.z` (no @sfdxy/ prefix). Lookbehind excludes the prefixed
+    # form PIN_RE already covers, registry `%2F` URLs, and path segments.
+    bare_pin_re = re.compile(
+        r"(?<![\w/@%-])(" + "|".join(re.escape(name) for name in sorted(pins)) + r")@(\d+\.\d+\.\d+)"
+    )
+    evidence_page = (root / "docs/see-it-in-action.md").resolve()
+
     candidates = [root / "README.md", root / "install/install.sh"]
     for directory in ("docs", "install", "skills"):
         for suffix in ("*.md", "*.json", "*.toml", "*.sh", "*.yaml", "*.yml"):
@@ -456,6 +463,21 @@ def validate_pin_consistency(root: Path) -> list[str]:
                 findings.append(
                     f"{path}: registry link for @sfdxy/{package}@{version} disagrees with "
                     f".mcp.json pin {expected}"
+                )
+        for match in bare_pin_re.finditer(text):
+            package, version = match.groups()
+            expected = pins.get(package)
+            if expected is None or version == expected:
+                continue
+            if path.resolve() == evidence_page:
+                findings.append(
+                    f"{path}: observed evidence was measured against `{package}@{version}`; "
+                    f"re-run the tool and re-record the counts before taking the "
+                    f".mcp.json pin `{package}@{expected}`"
+                )
+            else:
+                findings.append(
+                    f"{path}: {package}@{version} disagrees with .mcp.json pin {expected}"
                 )
     return findings
 
