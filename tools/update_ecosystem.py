@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 from generate_ecosystem import (
@@ -55,7 +56,16 @@ def main() -> int:
 
     # Pin references in prose, skills, and installer guidance remain useful to readers. Keep them
     # synchronized mechanically while generated host files come directly from the manifest.
+    #
+    # docs/see-it-in-action.md is excluded on purpose: its version strings sit next to measured
+    # counts. Renaming them would silently relabel old evidence as if it were observed on the new
+    # pin. The validator fails that page until a human re-measures.
     pattern = re.compile(rf'{re.escape(package["npm"])}@{re.escape(old_version)}\b')
+    bare_pattern = re.compile(
+        rf"(?<![\w/@%-]){re.escape(requested)}@{re.escape(old_version)}\b"
+    )
+    today = date.today().isoformat()
+    evidence_page = (root / "docs/see-it-in-action.md").resolve()
     candidates = [root / "README.md", root / "install/install.sh"]
     for directory in ("docs", "install", "skills"):
         for suffix in ("*.md", "*.json", "*.toml", "*.sh", "*.yaml", "*.yml"):
@@ -63,8 +73,11 @@ def main() -> int:
     for path in sorted(set(candidates)):
         if not path.is_file():
             continue
+        if path.resolve() == evidence_page:
+            continue
         text = path.read_text(encoding="utf-8")
         updated = pattern.sub(f'{package["npm"]}@{args.version}', text)
+        updated = bare_pattern.sub(f"{requested}@{args.version}", updated)
         updated = updated.replace(
             f"@sfdxy%2F{requested}/{old_version}",
             f"@sfdxy%2F{requested}/{args.version}",
@@ -92,6 +105,12 @@ def main() -> int:
         )
         for old_claim, new_claim in shared_claims:
             updated = updated.replace(old_claim, new_claim)
+        # Hand-maintained verification date next to the pin table.
+        updated = re.sub(
+            r"(These pins were verified on \*\*)\d{4}-\d{2}-\d{2}(\*\*)",
+            rf"\g<1>{today}\g<2>",
+            updated,
+        )
         if updated != text:
             path.write_text(updated, encoding="utf-8")
 

@@ -55,7 +55,7 @@ is releasable.
 | Embedded-expression check | Passed | No malformed embedded expression was found |
 | Build doctor for `test` | Passed | Maven, the POM, Mule/MUnit plugins, source layout, and a compatible local runtime were detected |
 | Secure-property enforcement | Passed; 1 Mule file checked | The configured sensitive-property gate found no violation |
-| `mule-lint@1.29.1` | Non-clean: 1 error, 5 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
+| `mule-lint@1.30.1` | Non-clean: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
 | Focused MUnit selector | Blocked: `No test suites were found!` | The requested suite/test selector was not resolved by this sample/tool combination |
 | Full MUnit run | Blocked before execution; 0 tests ran after a Log4j path error | Test behavior was not proven; this is an evidence gap, not a passing test |
 | Normal package | Blocked by the same MUnit failure | No release candidate was produced |
@@ -76,7 +76,7 @@ Changed:
 
 Evidence:
 - Embedded-expression and secure-property checks passed.
-- mule-lint is non-clean: 1 error, 5 warnings, 5 information findings.
+- mule-lint is non-clean: 1 error, 6 warnings, 5 information findings.
 - Focused MUnit selection found no suite; the full run then failed before executing tests.
 - Normal packaging therefore failed. A tests-skipped JAR was created only as a diagnostic check.
 
@@ -104,16 +104,18 @@ perfect result.
 
 ### Observed tool evidence
 
-`mule-lint@1.29.1` scanned three Mule files and exited non-zero with:
+`mule-lint@1.30.1` scanned three Mule files and exited non-zero with:
 
 ```text
-Errors: 1    Warnings: 5    Info: 5
+Errors: 1    Warnings: 10    Info: 8
 ```
 
 The release-blocking error is at `src/main/mule/orders-api.xml:31`: flow
-`get-order-by-id-flow` has no error handler (`MULE-003`). Warnings also cover correlation handling,
-HTTP status handling, rate limiting, and missing environment properties. Informational findings
-include missing component descriptions.
+`get-order-by-id-flow` has no error handler (`MULE-003`). Warnings also cover correlation
+handling, HTTP status handling, rate limiting, missing TLS context on an HTTPS backend,
+unversioned listener paths, missing API specification evidence, inbound authentication
+evidence, and missing environment properties. Informational findings include missing
+component descriptions, Try-scope guidance around HTTP requests, and a missing health endpoint.
 
 ### Representative review handoff
 
@@ -130,7 +132,7 @@ Fix direction: define or reference the project's approved error handler, then ad
 the expected error event and rerun lint plus the focused and full test gates.
 ```
 
-The review would then list the five warnings in priority order, distinguish standards findings from
+The review would then list the ten warnings in priority order, distinguish standards findings from
 demonstrated runtime defects, and state its coverage: repository XML and static rules were inspected;
 runtime logs, metrics, deployment state, and API contract behavior were not available. No source,
 comment, commit, PR, or runtime state is changed by the review.

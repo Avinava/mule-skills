@@ -1,14 +1,14 @@
 # Ecosystem
 
 This is the canonical compatibility and ownership map for the Mule agent toolkit. The current
-bundle is `mule-skills@1.7.0`; its MCP dependencies are pinned exactly so an
+bundle is `mule-skills@1.8.0`; its MCP dependencies are pinned exactly so an
 installation is reproducible.
 
 | Project | Exact package | Node.js | Owns | Credentials | Reference |
 | ------- | ------------- | ------- | ---- | ----------- | --------- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.13.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
 | [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.3.0` | `>=20.19.0` | Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts | None | [Docs](https://avinava.github.io/mule-build/) |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.29.1` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.30.1` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
 
 Node.js `>=22.0.0` satisfies the complete bundle. Node.js 24 LTS is recommended for a new
 installation.
@@ -56,7 +56,7 @@ python3 tools/generate_ecosystem.py --check
 To prepare a pin update locally:
 
 ```bash
-python3 tools/update_ecosystem.py mule-lint 1.29.1   --node '>=20.0.0'
+python3 tools/update_ecosystem.py mule-lint 1.30.1   --node '>=20.0.0'
 ```
 
 Release a new `mule-skills` minor version when skills, compatibility policy, host configuration, or

@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.8.0 — mule-lint 1.30.1 pin and measured-evidence tripwire
+
+### Updated
+
+- Pinned `mule-lint@1.30.1` (98 rules; same analyzer as 1.30.0, with docs pins corrected). Upgrading
+  from the previous hub pin (`1.29.1`) inherits mule-lint's own measured ~4% finding increase from
+  the sixteen new rules and widened `ERR-003` / `DW-001` — expect more findings on existing projects.
+- Re-measured both published journeys against `mule-lint@1.30.1` on the unchanged sample SHAs:
+  - Journey 1 (`mule-build` sample): **1 error, 6 warnings, 5 info** (was 1 / 5 / 5).
+  - Journey 2 (`mule-lint` sample): **1 error, 10 warnings, 8 info** (was 1 / 5 / 5). The
+    release-blocking `MULE-003` at `orders-api.xml:31` is unchanged; the warning narrative now
+    reflects the additional 1.30.x findings (TLS evidence, API path versioning, auth/spec evidence).
+
+### Fixed
+
+- Bare `mule-lint@…` / `mule-build@…` / `anypoint-connect@…` pins in docs were invisible to
+  `validate_pin_consistency` and never rewritten by `update_ecosystem.py`. The validator and updater
+  now cover them; the six previously unprotected lines in `docs/index.md`, `docs/workflows.md`, and
+  `docs/see-it-in-action.md` are guarded.
+- The hand-maintained verification date in `docs/agent-install.md` now updates with every pin bump.
+
+### Quality
+
+- `docs/see-it-in-action.md` is **deliberately excluded** from automated pin rewriting. Its version
+  strings sit next to measured counts; renaming them would silently relabel old evidence. After a
+  future `mule-lint` release, a red `Propose ecosystem pin update` run means the published evidence
+  must be re-measured — not that the automation is broken.
+- Added regression tests for bare-pin drift, bundle-version exclusion, the evidence tripwire, and
+  updater date rewrite.
+
 ## 1.7.0 — Evidence-backed developer journeys
 
 ### Added

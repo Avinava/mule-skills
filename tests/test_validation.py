@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 
@@ -311,6 +312,58 @@ class PluginManifestTests(unittest.TestCase):
             )
             self.assert_finding(root, "disagrees with .mcp.json pin")
 
+    def test_rejects_bare_pin_that_drifts_from_the_mcp_config(self):
+        """Bare package@version mentions must match .mcp.json too."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            package = self.ecosystem_package(root, "mule-lint")
+            self.edit(
+                root / "docs/index.md",
+                f'mule-lint@{package["version"]}',
+                "mule-lint@9.9.9",
+            )
+            self.assert_finding(root, "mule-lint@9.9.9 disagrees with .mcp.json pin")
+
+    def test_bare_pin_check_ignores_the_bundle_version(self):
+        """mule-skills@bundleVersion is not an MCP pin and must not trip the bare check."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            findings = validator.validate_repository(root)
+            self.assertEqual([], findings)
+            ecosystem = (root / "docs/ecosystem.md").read_text(encoding="utf-8")
+            bundle = json.loads((root / "ecosystem.json").read_text(encoding="utf-8"))[
+                "bundleVersion"
+            ]
+            self.assertIn(f"mule-skills@{bundle}", ecosystem)
+
+    def test_updater_does_not_relabel_measured_evidence(self):
+        """see-it-in-action.md is a tripwire: pin bumps must not silently rewrite counts."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            evidence = root / "docs/see-it-in-action.md"
+            before = evidence.read_text(encoding="utf-8")
+            package = self.ecosystem_package(root, "mule-lint")
+            major, minor, patch = (int(part) for part in package["version"].split("."))
+            next_version = f"{major}.{minor}.{patch + 1}"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / UPDATER.relative_to(ROOT)),
+                    "mule-lint",
+                    next_version,
+                    "--node",
+                    package["node"],
+                    "--root",
+                    str(root),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual(before, evidence.read_text(encoding="utf-8"))
+            self.assert_finding(root, "observed evidence was measured against")
+
     def test_rejects_ecosystem_manifest_pin_drift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
@@ -376,6 +429,12 @@ class PluginManifestTests(unittest.TestCase):
             )
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertEqual([], validator.validate_repository(root))
+            index = (root / "docs/index.md").read_text(encoding="utf-8")
+            self.assertIn(f"anypoint-connect@{next_version}", index)
+            self.assertNotIn(f"anypoint-connect@{package['version']}", index)
+            agent_install = (root / "docs/agent-install.md").read_text(encoding="utf-8")
+            today = date.today().isoformat()
+            self.assertIn(f"These pins were verified on **{today}**", agent_install)
 
     def test_rejects_documented_pin_for_a_server_that_is_not_launched(self):
         with tempfile.TemporaryDirectory() as temporary:
