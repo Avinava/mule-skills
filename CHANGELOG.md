@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+- Add manifest-owned minimum MCP tool/input/resource conformance checks and generated capability documentation; published package pins remain unchanged.
+
+### Added
+
+- Shared complete/incomplete/no-files interpretation for canonical lint report-v1, with explicit
+  legacy coverage gaps and unchanged published dependency pins.
+- Artifact handoff using embedded coordinates and reviewed SHA-256, preserving explicit Exchange
+  remaps and separate publication/deployment authorization.
+- Credential-isolated executable MCP compatibility smoke for the pinned host configuration, with
+  optional built local sources and a required-report-v1 gate.
+
+### Changed
+
+- Narrowed build security wording to its documented secure-reference preconditions and kept tool
+  ownership and independently configured validation gates explicit.
+- Required executable compatibility checks before proposing dependency pin updates.
+
 ## 1.8.0 — mule-lint 1.30.1 pin and measured-evidence tripwire
 
 ### Updated

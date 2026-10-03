@@ -5,7 +5,7 @@ them sharper: two need no credentials, one needs an Anypoint login.
 
 | Server and source | Pin | Role | Credentials |
 | --- | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.3.0) | Validation, testing, packaging, local runtime, versioning, tagging, security checks | None |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.3.0) | Validation, testing, packaging, local runtime, versioning, tagging, secure-reference preconditions | None |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.30.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.30.1) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS validation | None |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.13.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.13.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and mutations | Anypoint Platform login |
 
@@ -40,8 +40,8 @@ workflow.
 ## Capabilities by server
 
 **`mule-build`** — project readiness and resolved configuration, build and validation runs, local
-runtime start, stop, and status, security enforcement and secure-property handling, and version and
-release operations.
+runtime start, stop, and status, documented secure-reference preconditions and secure-property
+handling, and version and release operations.
 
 **`mule-lint`** — full-project lint analysis, AMF-backed RAML/OAS validation and local governance
 profiles, rule detail lookup, single-snippet validation, and Mule XML formatting.
@@ -53,6 +53,11 @@ operations such as restart, scale, deploy, rollback, stop, start, and delete; Ex
 publication; API-manager instances, policies, and alerts; preview-bound Design Center project creation,
 file sync, Exchange publication, and Governance reads; audit log;
 Anypoint MQ queues and dead-letter inspection; and Object Store keys and values.
+
+The build tool's secure-reference precondition is a narrow packaging check, not a full security
+assessment. Static analysis belongs to mule-lint; runtime/platform operations belong to the connector.
+Neither the build tool nor the connector requires a mandatory lint dependency. See the
+[compatibility and handoff policy](ecosystem.md#execution-evidence-and-artifact-handoff).
 
 Lifecycle and mutating operations are never part of establishing readiness, and the skills require
 explicit authorization before any of them.

@@ -44,6 +44,14 @@ Use neutral placeholders in examples:
 | `<ENV>` | Authorized Anypoint environment |
 | `<HOURS>` | Requested lookback window |
 
+## Authorized artifact operations
+
+When the user explicitly requests publication or deployment of a locally built JAR, follow
+[Artifact identity handoff](../mule-build/references/artifact-handoff.md) in addition to the Anypoint
+readiness gate. Preserve the reviewed digest and embedded identity, disclose any approved coordinate
+remap, and keep publication, deployment, and runtime verification outcomes separate. Operational
+analysis alone never authorizes a mutation.
+
 ## Evidence states
 
 Classify material conclusions:

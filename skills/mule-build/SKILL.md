@@ -44,11 +44,18 @@ credentials into reusable commands or output.
 Before choosing a lint profile, follow the shared
 [mule-lint standards protocol](../mule-development/references/mule-lint-standards.md). The build
 workflow executes the project gate; it does not redefine which Mule practices or rules are canonical.
+Read execution completeness before findings or gates. An incomplete or no-files scan cannot establish
+readiness, and an older result without execution evidence leaves that check unverified.
+
+The build tool's secure-reference precondition checks only its documented sensitive-property
+reference policy. It is not a full security audit or proof of encryption/runtime secret safety.
+Keep source-quality analysis in mule-lint and the project's security checks independent; neither
+packaging nor platform operations require a mandatory mule-lint dependency.
 
 Run the project's configured checks before packaging. Prefer, when available:
 
 1. XML, DataWeave, RAML/OAS, and configuration validation;
-2. Mule lint and security checks;
+2. Mule lint plus the project's separately configured security checks;
 3. focused MUnit tests for changed behavior;
 4. the required full test suite.
 
@@ -139,16 +146,21 @@ After a successful package:
 
 - locate the generated deployable artifact;
 - confirm it was produced by the current build and is not a stale file;
-- confirm the packaged version matches the intended build or release version;
+- confirm the embedded Maven coordinates and packaged version match the intended candidate;
+- record the returned artifact identity and SHA-256 when supported, independently of display name
+  and timestamped filename;
 - report whether tests, lint, and security checks passed, failed, or were skipped;
 - confirm no secret-bearing configuration or unintended generated files entered the diff.
+
+For an authorized platform handoff, follow [Artifact identity handoff](references/artifact-handoff.md).
+Keep missing identity/digest support visible when using an older installed release.
 
 ## 8. Report
 
 Provide:
 
 1. build mode and outcome;
-2. exact artifact path;
+2. exact artifact path, embedded coordinates, and SHA-256 when supported;
 3. validations and tests run;
 4. tests or checks skipped and why;
 5. files changed by the workflow;

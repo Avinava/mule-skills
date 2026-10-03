@@ -29,5 +29,102 @@
       "repository": "https://github.com/Avinava/mule-lint",
       "documentation": "https://avinava.github.io/mule-lint/"
     }
+  },
+  "capabilities": {
+    "anypoint-connect": {
+      "tools": {
+        "search_exchange": {
+          "query": "string"
+        },
+        "publish_app_jar": {
+          "jarPath": "string",
+          "confirm": "boolean"
+        }
+      },
+      "resources": [],
+      "examples": {
+        "search_exchange": [
+          {
+            "query": "synthetic"
+          }
+        ],
+        "publish_app_jar": [
+          {
+            "jarPath": "/synthetic/example.jar"
+          },
+          {
+            "jarPath": "/synthetic/example.jar",
+            "confirm": false
+          }
+        ]
+      }
+    },
+    "mule-build": {
+      "tools": {
+        "run_build": {
+          "cwd": "string"
+        },
+        "run_tests": {
+          "cwd": "string"
+        },
+        "get_project_config": {
+          "cwd": "string"
+        }
+      },
+      "resources": [],
+      "examples": {
+        "run_build": [
+          {},
+          {
+            "cwd": "."
+          }
+        ],
+        "run_tests": [
+          {},
+          {
+            "cwd": "."
+          }
+        ],
+        "get_project_config": [
+          {},
+          {
+            "cwd": "."
+          }
+        ]
+      }
+    },
+    "mule-lint": {
+      "tools": {
+        "run_lint_analysis": {
+          "projectPath": "string",
+          "profile": "string"
+        },
+        "validate_snippet": {
+          "code": "string",
+          "type": "string"
+        }
+      },
+      "resources": [
+        "mule-lint://rules",
+        "mule-lint://standards"
+      ],
+      "examples": {
+        "run_lint_analysis": [
+          {
+            "projectPath": "/synthetic/project"
+          },
+          {
+            "projectPath": "/synthetic/project",
+            "profile": "recommended"
+          }
+        ],
+        "validate_snippet": [
+          {
+            "code": "<mule/>",
+            "type": "xml"
+          }
+        ]
+      }
+    }
   }
 }

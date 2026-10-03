@@ -144,7 +144,7 @@ Credential-free launch configuration for three pinned MCP servers:
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.13.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.13.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.3.0) | Mule validation, testing, packaging, local runtime, versioning, tagging, and security checks |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/2.3.0) | Mule validation, testing, packaging, local runtime, versioning, tagging, and secure-reference preconditions |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@1.30.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/1.30.1) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
 
 Source links come from each published package's repository metadata. Package links resolve to the
@@ -244,7 +244,9 @@ Run before opening a pull request:
 
 ```bash
 python3 -m unittest discover -s tests -v
+python3 tools/generate_ecosystem.py --check
 python3 tools/validate_repository.py .
+python3 tools/compatibility_smoke.py
 python3 skills/mule-docs/scripts/audit_documentation.py .
 claude plugin validate . --strict
 pip install -r requirements-docs.txt && mkdocs build --strict
@@ -253,6 +255,11 @@ pip install -r requirements-docs.txt && mkdocs build --strict
 The validator enforces the invariants that documentation alone cannot: MCP pins agree everywhere,
 every page under `docs/` is reachable from the site navigation, and the skills that need authorized
 runtime evidence route through the shared readiness reference.
+
+The executable smoke uses the exact published host pins with an isolated home and synthetic lint
+fixtures; it never calls authenticated platform tools. For built local repositories use
+`--source-root <source-root> --require-report-v1`. See [compatibility policy](docs/ecosystem.md) for
+legacy coverage limits, artifact identity handoff, and tool ownership.
 
 CI runs the same checks. See [CHANGELOG.md](CHANGELOG.md) for release history, including the skill
 rename table.

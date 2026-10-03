@@ -16,12 +16,17 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Validate repository structure
         run: |
           python tools/generate_ecosystem.py --check
           python tools/validate_repository.py .
+      - name: Exercise pinned MCP compatibility
+        run: python tools/compatibility_smoke.py
       - name: Audit reusable documentation
         run: python skills/mule-docs/scripts/audit_documentation.py .
       - name: Lint the installer

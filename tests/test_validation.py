@@ -157,6 +157,19 @@ class PluginManifestTests(unittest.TestCase):
         ]
         return ">=" + ".".join(str(part) for part in max(floors))
 
+    def test_shared_protocol_and_smoke_are_required(self):
+        cases = (
+            ("skills/mule-development/references/mule-lint-standards.md", "scopeKnown"),
+            ("skills/mule-build/references/artifact-handoff.md", "expectedSha256"),
+            ("skills/mule-ops/SKILL.md", "../mule-build/references/artifact-handoff.md"),
+            (".github/workflows/update-ecosystem.yml", "tools/compatibility_smoke.py"),
+        )
+        for relative_path, required in cases:
+            with self.subTest(path=relative_path), tempfile.TemporaryDirectory() as temporary:
+                root = self.copy_repository(temporary)
+                self.edit(root / relative_path, required, "removed-protocol-token")
+                self.assert_finding(root, "missing protocol requirement")
+
     def test_baseline_repository_is_clean(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copy_repository(temporary)
