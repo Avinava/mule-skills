@@ -59,15 +59,15 @@ The user still authorizes access in a browser, and a new headless CI runner cann
 only those two values.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.13.0 config init
-npx -y @sfdxy/anypoint-connect@0.13.0 auth login
-npx -y @sfdxy/anypoint-connect@0.13.0 auth status
+npx -y @sfdxy/anypoint-connect@0.14.0 config init
+npx -y @sfdxy/anypoint-connect@0.14.0 auth login
+npx -y @sfdxy/anypoint-connect@0.14.0 auth status
 ```
 
 A global install gives you the shorter `anc` command:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.13.0
+npm install -g @sfdxy/anypoint-connect@0.14.0
 anc config init
 anc auth login
 anc auth status

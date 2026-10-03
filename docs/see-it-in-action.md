@@ -3,7 +3,8 @@
 These two journeys show what a Mule developer actually receives. They are grounded in the sample
 projects shipped by [`mule-build` at `5b252ed`](https://github.com/Avinava/mule-build/tree/5b252edd1d36b1d91d9f1f8b682fbc6038eaf0f1/examples/sample-orders-system-api)
 and [`mule-lint` at `b828113`](https://github.com/Avinava/mule-lint/tree/b8281135ced9d68846b39e19b578710b0fe8e8e0/examples/sample-orders-system-api),
-using the package versions pinned by Mule Skills.
+using `mule-lint@2.0.0` and `mule-build@3.0.0`, measured on 2026-10-03 with Java 17.
+The samples remain at these exact commits; tool upgrades do not silently change the source baseline.
 
 This is not a gallery where every skill is forced to produce a file. Some skills change source or
 tests; some return a decision, review, diagnosis, or operational assessment. Each journey says what
@@ -34,7 +35,7 @@ assertions. In an isolated copy of the sample, the returned value and its test b
 ```dataweave
 output application/json
 ---
-[{ id: "1001", status: "READY", currency: "USD" }]
+[{ id: "ORD-1001", status: "READY", total: 42.50, currency: "USD" }]
 ```
 
 ```xml
@@ -54,16 +55,17 @@ is releasable.
 | Project inventory | 1 flow, 1 MUnit suite, 1 test, now 3 assertions | The change has a focused test target |
 | Embedded-expression check | Passed | No malformed embedded expression was found |
 | Build doctor for `test` | Passed | Maven, the POM, Mule/MUnit plugins, source layout, and a compatible local runtime were detected |
-| Secure-property enforcement | Passed; 1 Mule file checked | The configured sensitive-property gate found no violation |
-| `mule-lint@1.30.1` | Non-clean: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
-| Focused MUnit selector | Blocked: `No test suites were found!` | The requested suite/test selector was not resolved by this sample/tool combination |
-| Full MUnit run | Blocked before execution; 0 tests ran after a Log4j path error | Test behavior was not proven; this is an evidence gap, not a passing test |
-| Normal package | Blocked by the same MUnit failure | No release candidate was produced |
-| Diagnostic package with tests skipped | Passed; a timestamped JAR was created under `target/` | Useful packaging evidence only; skipping tests does not make the artifact release-ready |
+| Secure-property enforcement | Passed; 1 Mule file checked | The documented property-name/reference checks found no violation; this is not a general secret scan |
+| `mule-lint@2.0.0` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
+| Focused MUnit selector | Exit `1`: no matching suite found | The requested suite/test selector was not resolved; the full run below executed the test |
+| Full MUnit run | Passed: 1 run, 0 failures, 0 errors, 0 skipped | The test, including the added currency assertion, executed successfully |
+| Normal package | Passed with tests enabled; 1 test passed and a JAR was produced | Local test and packaging evidence is available; lint findings still need review |
 
-The full MUnit failure was reproduced on the unchanged pulled sample, so this evidence does not
-attribute the failure to the `currency` change. It also does not guess at a root cause. A separate
-troubleshooting request would be appropriate if the team wants that failure diagnosed and fixed.
+The focused command used `--suite orders-test-suite --test list-orders-flow-returns-an-order`.
+It did not select a suite. Running `test` without selectors and then `package` both succeeded with
+tests enabled. The selector result remains a separate limitation; it does not erase the successful
+full-suite evidence. No tests-skipped package was used. The default lint scan evaluated no configured
+quality gate; its complete execution and non-clean findings are separate facts.
 
 ### Representative developer handoff
 
@@ -77,11 +79,11 @@ Changed:
 Evidence:
 - Embedded-expression and secure-property checks passed.
 - mule-lint is non-clean: 1 error, 6 warnings, 5 information findings.
-- Focused MUnit selection found no suite; the full run then failed before executing tests.
-- Normal packaging therefore failed. A tests-skipped JAR was created only as a diagnostic check.
+- Focused MUnit selection found no suite; the full run passed 1 test with no failures or skips.
+- Normal packaging passed with tests enabled and produced a JAR with embedded coordinates and SHA-256.
 
-Review verdict: Not ready to release. Restore executable MUnit evidence and clear or disposition the
-lint findings before treating any artifact as a release candidate.
+Review verdict: Not ready to release. Test and packaging evidence passed; clear or disposition the
+lint findings before treating the artifact as a release candidate.
 
 Release actions: None. No commit, tag, publish, or deployment was performed.
 ```
@@ -104,18 +106,22 @@ perfect result.
 
 ### Observed tool evidence
 
-`mule-lint@1.30.1` scanned three Mule files and exited non-zero with:
+`mule-lint@2.0.0` returned a complete report-v1 scan of three Mule files and exited `1` with:
 
 ```text
-Errors: 1    Warnings: 10    Info: 8
+Errors: 1    Warnings: 10    Info: 9
 ```
+
+No configured quality gate was evaluated in this default scan. The non-zero exit reflects the
+error finding; execution completeness is reported separately.
 
 The release-blocking error is at `src/main/mule/orders-api.xml:31`: flow
 `get-order-by-id-flow` has no error handler (`MULE-003`). Warnings also cover correlation
 handling, HTTP status handling, rate limiting, missing TLS context on an HTTPS backend,
 unversioned listener paths, missing API specification evidence, inbound authentication
 evidence, and missing environment properties. Informational findings include missing
-component descriptions, Try-scope guidance around HTTP requests, and a missing health endpoint.
+component descriptions, Try-scope guidance around HTTP requests, a missing health endpoint, and
+`TEST-001`: four production flows with no executable MUnit tests.
 
 ### Representative review handoff
 

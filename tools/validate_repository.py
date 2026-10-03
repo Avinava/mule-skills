@@ -660,6 +660,37 @@ def validate_anypoint_readiness(root: Path) -> list[str]:
     return findings
 
 
+def validate_execution_and_artifact_protocol(root: Path) -> list[str]:
+    """Protect shared workflow boundaries from drifting back to success-only summaries."""
+    requirements = {
+        "skills/mule-development/references/mule-lint-standards.md": (
+            "structuredContent", "schemaVersion", "execution.status", "report-json", "complete",
+            "incomplete", "no-files", "scopeKnown", "unverified", "secure-reference precondition",
+        ),
+        "skills/mule-build/references/artifact-handoff.md": (
+            "artifact.artifactId", "artifact.version", "artifact.sha256", "expectedSha256",
+            "assetVersion", "confirm", "anypoint-readiness.md", "older installed release",
+        ),
+        "skills/mule-build/SKILL.md": ("references/artifact-handoff.md", "secure-reference precondition"),
+        "skills/mule-ops/SKILL.md": ("../mule-build/references/artifact-handoff.md",),
+        ".github/workflows/validate.yml": ("tools/compatibility_smoke.py",),
+        ".github/workflows/update-ecosystem.yml": ("tools/compatibility_smoke.py",),
+    }
+    findings: list[str] = []
+    for relative_path, tokens in requirements.items():
+        path = root / relative_path
+        if not path.is_file():
+            findings.append(f"{relative_path}: missing shared workflow protocol")
+            continue
+        text = path.read_text(encoding="utf-8")
+        for token in tokens:
+            if token not in text:
+                findings.append(f"{relative_path}: missing protocol requirement {token!r}")
+    if not (root / "tools/compatibility_smoke.py").is_file():
+        findings.append("tools/compatibility_smoke.py: missing executable compatibility check")
+    return findings
+
+
 def validate_repository(root: Path) -> list[str]:
     findings: list[str] = []
     findings.extend(validate_skills(root))
@@ -674,6 +705,7 @@ def validate_repository(root: Path) -> list[str]:
     findings.extend(validate_pin_consistency(root))
     findings.extend(validate_site_nav(root))
     findings.extend(validate_anypoint_readiness(root))
+    findings.extend(validate_execution_and_artifact_protocol(root))
     return findings
 
 

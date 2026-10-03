@@ -34,34 +34,14 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
       - name: Wait for the released package
         id: registry
         shell: bash
         run: |
-          package_key="${PACKAGE#@sfdxy/}"
-          package_spec="@sfdxy/${package_key}@${VERSION}"
-          published=""
-          node_requirement=""
-          for attempt in 1 2 3 4 5 6; do
-            published="$(npm view "$package_spec" version 2>/dev/null || true)"
-            node_requirement="$(npm view "$package_spec" engines.node 2>/dev/null || true)"
-            if [ "$published" = "$VERSION" ] && [ -n "$node_requirement" ]; then
-              break
-            fi
-            if [ "$attempt" -eq 6 ]; then
-              echo "::error::$package_spec metadata was not visible after 6 registry checks"
-              exit 1
-            fi
-            echo "$package_spec metadata is not visible yet; retrying in 10 seconds ($attempt/6)"
-            sleep 10
-          done
-          test "$published" = "$VERSION"
-          node_pattern='^>=[0-9]+\.[0-9]+\.[0-9]+$'
-          if [[ ! "$node_requirement" =~ $node_pattern ]]; then
-            echo "::error::$package_spec has unsupported engines.node: $node_requirement"
-            exit 1
-          fi
-          echo "node_requirement=$node_requirement" >> "$GITHUB_OUTPUT"
+          python tools/wait_for_release.py "$PACKAGE" "$VERSION" --github-output "$GITHUB_OUTPUT"
       - name: Update the allowlisted pin and generated files
         run: >-
           python tools/update_ecosystem.py "$PACKAGE" "$VERSION"
@@ -71,6 +51,8 @@ jobs:
           python tools/generate_ecosystem.py --check
           python -m unittest discover -s tests -v
           python tools/validate_repository.py .
+      - name: Exercise pinned MCP compatibility
+        run: python tools/compatibility_smoke.py --require-report-v1
       - name: Open a pull request
         run: |
           if git diff --quiet; then
