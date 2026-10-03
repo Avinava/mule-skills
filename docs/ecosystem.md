@@ -1,14 +1,14 @@
 # Ecosystem
 
 This is the canonical compatibility and ownership map for the Mule agent toolkit. The current
-bundle is `mule-skills@1.8.0`; its MCP dependencies are pinned exactly so an
+bundle is `mule-skills@1.9.0`; its MCP dependencies are pinned exactly so an
 installation is reproducible.
 
 | Project | Exact package | Node.js | Owns | Credentials | Reference |
 | ------- | ------------- | ------- | ---- | ----------- | --------- |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.13.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
-| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@2.3.0` | `>=20.19.0` | Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts | None | [Docs](https://avinava.github.io/mule-build/) |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@1.30.1` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.14.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
+| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@3.0.0` | `>=20.19.0` | Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts | None | [Docs](https://avinava.github.io/mule-build/) |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@2.0.0` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
 
 Node.js `>=22.0.0` satisfies the complete bundle. Node.js 24 LTS is recommended for a new
 installation.
@@ -80,10 +80,10 @@ release lacks required identity/digest support, disclose the gap instead of sile
 
 ## Executable compatibility checks
 
-Run the default check against the exact published pins in `install/hosts/mcp.json`:
+Run the required contract check against the exact published pins in `install/hosts/mcp.json`:
 
 ```bash
-python3 tools/compatibility_smoke.py
+python3 tools/compatibility_smoke.py --require-report-v1
 ```
 
 This starts each server with a temporary home and no inherited application/npm credentials,
@@ -103,8 +103,9 @@ python3 tools/compatibility_smoke.py --source-root <source-root> --require-repor
 
 `--require-report-v1` rejects legacy-only results. A report-v1 server must prove complete, malformed,
 and no-files states, top-level structured output, CLI/MCP finding parity, and legacy flat JSON.
-The default mode reports the older release's limited evidence explicitly; it never treats legacy
-text as verified execution completeness. Local-source success does not certify the published pins.
+The pinned releases provide report-v1, and CI requires that contract. For older releases, omitting
+`--require-report-v1` reports legacy coverage gaps explicitly; it never treats legacy text as verified
+execution completeness. Local-source success does not certify the published pins.
 
 ## Version management
 
@@ -127,7 +128,7 @@ python3 tools/generate_ecosystem.py --check
 To prepare a pin update locally:
 
 ```bash
-python3 tools/update_ecosystem.py mule-lint 1.30.1   --node '>=20.0.0'
+python3 tools/update_ecosystem.py mule-lint 2.0.0   --node '>=20.0.0'
 ```
 
 Keep existing pins until a published release passes the executable check. Use

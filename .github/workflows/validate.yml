@@ -26,7 +26,7 @@ jobs:
           python tools/generate_ecosystem.py --check
           python tools/validate_repository.py .
       - name: Exercise pinned MCP compatibility
-        run: python tools/compatibility_smoke.py
+        run: python tools/compatibility_smoke.py --require-report-v1
       - name: Audit reusable documentation
         run: python skills/mule-docs/scripts/audit_documentation.py .
       - name: Lint the installer

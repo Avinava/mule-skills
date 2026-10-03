@@ -1,19 +1,29 @@
 # Changelog
 
-## Unreleased
+## 1.9.0 — 2026-10-03
 
-- Add manifest-owned minimum MCP tool/input/resource conformance checks and generated capability documentation; published package pins remain unchanged.
+- Pin the verified published releases: `mule-lint@2.0.0`, `mule-build@3.0.0`, and
+  `anypoint-connect@0.14.0`. Generated host configuration and installation guidance use these exact versions.
+- Require canonical report-v1 in CI and proposed pin updates; verify published CLI/MCP parity,
+  complete/incomplete/no-files execution states, and legacy flat JSON.
+- Add manifest-owned minimum MCP tool/input/resource conformance checks and generated capability documentation.
 
 ### Added
 
 - Shared complete/incomplete/no-files interpretation for canonical lint report-v1, with explicit
-  legacy coverage gaps and unchanged published dependency pins.
+  legacy coverage gaps for older releases.
 - Artifact handoff using embedded coordinates and reviewed SHA-256, preserving explicit Exchange
   remaps and separate publication/deployment authorization.
 - Credential-isolated executable MCP compatibility smoke for the pinned host configuration, with
   optional built local sources and a required-report-v1 gate.
 
 ### Changed
+
+- Re-measured both public journeys with the new tool releases. The changed sample passes full MUnit
+  and normal packaging with tests enabled; the focused selector limitation and remaining lint findings
+  stay explicit. Corrected the sample payload to preserve its original order ID and total.
+- Bound registry propagation checks to five minutes and report safe npm exit/error-code diagnostics
+  instead of hiding command failures.
 
 - Narrowed build security wording to its documented secure-reference preconditions and kept tool
   ownership and independently configured validation gates explicit.

@@ -112,15 +112,15 @@ the detailed administrator setup belongs to
 <https://avinava.github.io/anypoint-connect/credentials/>.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.13.0 config init
-npx -y @sfdxy/anypoint-connect@0.13.0 auth login
-npx -y @sfdxy/anypoint-connect@0.13.0 auth status
+npx -y @sfdxy/anypoint-connect@0.14.0 config init
+npx -y @sfdxy/anypoint-connect@0.14.0 auth login
+npx -y @sfdxy/anypoint-connect@0.14.0 auth status
 ```
 
 A global install gives the shorter `anc` form and needs separate approval:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.13.0
+npm install -g @sfdxy/anypoint-connect@0.14.0
 anc auth login
 anc auth status
 ```

@@ -170,10 +170,10 @@ release lacks required identity/digest support, disclose the gap instead of sile
 
 ## Executable compatibility checks
 
-Run the default check against the exact published pins in `install/hosts/mcp.json`:
+Run the required contract check against the exact published pins in `install/hosts/mcp.json`:
 
 ```bash
-python3 tools/compatibility_smoke.py
+python3 tools/compatibility_smoke.py --require-report-v1
 ```
 
 This starts each server with a temporary home and no inherited application/npm credentials,
@@ -193,8 +193,9 @@ python3 tools/compatibility_smoke.py --source-root <source-root> --require-repor
 
 `--require-report-v1` rejects legacy-only results. A report-v1 server must prove complete, malformed,
 and no-files states, top-level structured output, CLI/MCP finding parity, and legacy flat JSON.
-The default mode reports the older release's limited evidence explicitly; it never treats legacy
-text as verified execution completeness. Local-source success does not certify the published pins.
+The pinned releases provide report-v1, and CI requires that contract. For older releases, omitting
+`--require-report-v1` reports legacy coverage gaps explicitly; it never treats legacy text as verified
+execution completeness. Local-source success does not certify the published pins.
 
 ## Version management
 
