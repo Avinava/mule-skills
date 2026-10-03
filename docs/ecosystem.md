@@ -133,5 +133,20 @@ python3 tools/update_ecosystem.py mule-lint 1.30.1   --node '>=20.0.0'
 Keep existing pins until a published release passes the executable check. Use
 `--require-report-v1` before claiming that a proposed lint release provides the new report contract.
 
+The pin-update workflow uses `GITHUB_TOKEN`. GitHub may hold the resulting pull-request checks
+for maintainer approval; use **Approve workflows to run** on the proposed PR when shown, and wait
+for its checks before merging. See [GitHub's workflow trigger documentation](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow).
+The proposal workflow's own validation is not a substitute for the PR's required checks.
+
+The bundle version in `ecosystem.json` and the plugin manifest must agree. The marketplace uses
+that plugin manifest; it does not introduce another independently versioned package. Source versions
+and changelog entries can precede a GitHub release; do not create a tag merely to hide that distinction.
+Tool package versions, this bundle version, and GitHub releases are separate release decisions.
+
+Documentation follows the default branch through a strict Pages build independently of tool or
+bundle tags. Manual Pages publication also requires the default branch. Pull-request documentation
+checks do not deploy the site. Keep unpublished capabilities explicitly capability-detected until
+published packages pass compatibility validation and the reviewed pin update is merged.
+
 Release a new `mule-skills` minor version when skills, compatibility policy, host configuration, or
 the user-facing bundle changes. A dependency-only compatible pin refresh can be a patch release.
