@@ -117,11 +117,11 @@ the existing file first and add only the server keys it lacks.
 
 If the destination already defines a server with the same name, leave it alone and tell the user.
 
-These pins were verified on **2026-10-03**:
+These pins were verified on **2026-10-05**:
 
 | Package | Source | Node.js |
 | --- | --- | ---: |
-| [`@sfdxy/anypoint-connect@0.14.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.14.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=22.0.0` |
+| [`@sfdxy/anypoint-connect@0.15.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.15.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=22.0.0` |
 | [`@sfdxy/mule-build@3.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.0.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
 | [`@sfdxy/mule-lint@2.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.0.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 

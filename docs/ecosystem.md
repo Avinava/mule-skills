@@ -6,7 +6,7 @@ installation is reproducible.
 
 | Project | Exact package | Node.js | Owns | Credentials | Reference |
 | ------- | ------------- | ------- | ---- | ----------- | --------- |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.14.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.15.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
 | [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@3.0.0` | `>=20.19.0` | Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts | None | [Docs](https://avinava.github.io/mule-build/) |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@2.0.0` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
 
