@@ -1,12 +1,12 @@
 # Ecosystem
 
 This is the canonical compatibility and ownership map for the Mule agent toolkit. The current
-bundle is `mule-skills@1.9.0`; its MCP dependencies are pinned exactly so an
+bundle is `mule-skills@1.10.0`; its MCP dependencies are pinned exactly so an
 installation is reproducible.
 
 | Project | Exact package | Node.js | Owns | Credentials | Reference |
 | ------- | ------------- | ------- | ---- | ----------- | --------- |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.14.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.15.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
 | [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@3.0.0` | `>=20.19.0` | Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts | None | [Docs](https://avinava.github.io/mule-build/) |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@2.0.0` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
 
@@ -93,6 +93,12 @@ solely to satisfy its configuration prerequisite; it never logs in. Only public 
 build, authenticated Anypoint, publication, deployment, or other mutation tools are called. The first
 run downloads pinned npm packages with lifecycle scripts disabled, so registry access is required.
 Discovery success is not an authenticated platform integration test.
+
+The connector's tool list is also checked against the skills and documentation: every
+`mcp_anypoint-connect_<tool>` or `mcp__…anypoint-connect__<tool>` reference under `skills/` and
+`docs/`, plus bare connector tool names in the Anypoint reference files listed in
+`tools/compatibility_smoke.py`, must exist in the pinned server. A missing name fails the smoke and
+lists the files that cite it, so a renamed or removed tool cannot reach a pin update unnoticed.
 
 For coordinated development, build each of the three repositories first, then point to their common
 parent directory without changing published pins:

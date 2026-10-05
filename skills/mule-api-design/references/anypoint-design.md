@@ -17,21 +17,21 @@ organization, profile, project IDs, or tenant data.
 
 - Resolve projects by exact name or ID. List branches/files, then read the main file, `exchange.json`, and
   referenced local files.
-- Create with `preview_design_center_project_create`, show the neutral action, then consume the token with
+- Create with `preview_create_design_center_project`, show the neutral action, then consume the token with
   `create_design_center_project` only after approval. RAML creation is documented; OAS creation must be
   proven in the current environment or performed through the UI with the connector gap recorded.
-- Validate locally before `preview_design_center_sync`. Review create/update/unchanged actions and hashes,
+- Validate locally before `preview_sync_design_center_files`. Review create/update/unchanged actions and hashes,
   then call `sync_design_center_files` after approval. Generate a new preview after any change.
 - Never write `exchange_modules`. The sync workflow does not delete, move, or rename.
 
 ## Publication
 
 Publication is separate. Validate locally, query governance when requested, then call
-`preview_exchange_publication` with exact group, asset, versions, classifier, branch, main, and name. Show
-the bound source hash. Publish only after approval using `publish_previewed_exchange_asset`, and require
+`preview_publish_exchange_asset` with exact group, asset, versions, classifier, branch, main, and name. Show
+the bound source hash. Publish only after approval using `publish_exchange_asset`, and require
 successful Exchange artifact hash verification.
 
-Do not use legacy `publish_to_exchange` in new automation. Do not publish custom rulesets or create
+Never publish without a fresh preview token. Do not publish custom rulesets or create
 governance profiles unless separately requested. Project, branch, file, asset, and ruleset deletion always
 requires separate exact approval and is outside this skill's default workflow.
 

@@ -28,6 +28,28 @@ SERVER_BINS = {
     "mule-lint": "dist/bin/mule-lint.js",
 }
 PUBLIC_RESOURCES = {"mule-lint://standards", "mule-lint://rules"}
+# Files whose bare snake_case tool names refer to anypoint-connect tools.
+ANYPOINT_REFERENCE_FILES = (
+    "skills/mule-ops/SKILL.md",
+    "skills/mule-ops/references/anypoint-readiness.md",
+    "skills/mule-troubleshooting/SKILL.md",
+    "skills/mule-api-design/references/anypoint-design.md",
+    "skills/mule-build/references/artifact-handoff.md",
+    "docs/anypoint-access.md",
+    "docs/mcp-servers.md",
+)
+REFERENCE_ROOTS = ("skills", "docs")
+REFERENCE_SUFFIXES = {".md", ".yaml", ".yml"}
+TOOL_VERBS = (
+    "get", "list", "preview", "publish", "deploy", "sync", "create", "compare", "analyze",
+    "download", "search", "explain", "read", "update", "restart", "scale", "stop", "start",
+    "delete", "rollback", "raw", "set", "put",
+)
+# mcp_anypoint-connect_<tool>, mcp__anypoint-connect__<tool>, mcp__plugin_<x>_anypoint-connect__<tool>
+PREFIXED_TOOL_RE = re.compile(r"mcp_{1,2}(?:[A-Za-z0-9_-]*?_)?anypoint-connect_{1,2}([a-z][a-z0-9_]*[a-z0-9])")
+BARE_TOOL_RE = re.compile(
+    r"(?<![\w-])((?:" + "|".join(TOOL_VERBS) + r")_[a-z0-9_]*[a-z0-9]|whoami)(?![\w-]|\.\w)"
+)
 DISCOVERY_METHODS = {"initialize", "notifications/initialized", "tools/list", "resources/list"}
 
 
@@ -418,6 +440,35 @@ def validate_capabilities(tools: list[dict], resources: list[dict], expected: di
         require(uri in uris, f"Required resource missing: {uri}")
 
 
+def referenced_anypoint_tools(root: Path) -> dict[str, set[str]]:
+    """Map each anypoint-connect tool name the skills and docs reference to the files citing it."""
+    references: dict[str, set[str]] = {}
+    bare_files = set(ANYPOINT_REFERENCE_FILES)
+    for relative in sorted(bare_files):
+        require((root / relative).is_file(), f"Anypoint reference file missing: {relative}")
+    for base in REFERENCE_ROOTS:
+        for path in sorted((root / base).rglob("*")):
+            if not path.is_file() or path.suffix not in REFERENCE_SUFFIXES:
+                continue
+            relative = path.relative_to(root).as_posix()
+            text = path.read_text(encoding="utf-8")
+            names = set(PREFIXED_TOOL_RE.findall(text))
+            if relative in bare_files:
+                names.update(BARE_TOOL_RE.findall(PREFIXED_TOOL_RE.sub(" ", text)))
+            for name in names:
+                references.setdefault(name, set()).add(relative)
+    return references
+
+
+def validate_referenced_tools(tools: list[dict], references: dict[str, set[str]]) -> None:
+    """Every tool a skill or doc tells an agent to call must exist in the pinned server."""
+    available = {tool.get("name") for tool in tools}
+    missing = sorted(name for name in references if name not in available)
+    require(not missing, "Referenced tools missing from tools/list: " + "; ".join(
+        f"{name} ({', '.join(sorted(references[name]))})" for name in missing
+    ))
+
+
 def run(root: Path, source_root: Path | None, required: bool, timeout: float) -> None:
     commands = launch_commands(root, source_root)
     capabilities = json.loads((root / "ecosystem.json").read_text(encoding="utf-8"))["capabilities"]
@@ -453,6 +504,10 @@ def run(root: Path, source_root: Path | None, required: bool, timeout: float) ->
                 require(tools and resources, f"{name}: empty tool or resource catalog")
                 validate_capabilities(tools, resources, capabilities[name])
                 detail = "discovery and capability contract verified; no tool or resource content calls"
+                if name == "anypoint-connect":
+                    references = referenced_anypoint_tools(root)
+                    validate_referenced_tools(tools, references)
+                    detail += f"; {len(references)} referenced tool names resolved"
                 if name == "mule-lint":
                     for uri in sorted(PUBLIC_RESOURCES):
                         require(any(item.get("uri") == uri for item in resources), "Public standards/rules resource missing")

@@ -4,7 +4,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/anypoint-connect@0.14.0",
+        "@sfdxy/anypoint-connect@0.15.0",
         "mcp"
       ]
     },

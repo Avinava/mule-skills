@@ -27,9 +27,12 @@ evidence-backed context — see [project setup](project-setup.md).
 
 ## MCP servers
 
-**A server does not connect.** Check Node.js: all three need `>=22.0.0`. Then verify the host sees
-it — `/mcp`, `codex mcp list`, `copilot mcp list`, or the host's MCP view. VS Code needs a window
-reload after its configuration changes.
+**A server does not connect.** Check Node.js. Engine floors differ per server — `anypoint-connect`
+sets the highest and the other two accept older releases (see the
+[per-package table](agent-install.md#4-merge-mcp-configuration-for-selected-hosts-only)) — so
+Node.js `>=22.0.0` satisfies all three. Then verify the host sees it — `/mcp`, `codex mcp list`,
+`copilot mcp list`, or the host's MCP view. VS Code needs a window reload after its configuration
+changes.
 
 **The first call hangs for a while.** That is `npx` downloading a pinned package on a cold start. It
 happens once per server per cache.

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.10.0 — 2026-10-05
+
+- Pin `anypoint-connect@0.15.0`, which consolidates its monitoring tools and aligns tool naming.
+
+### Changed
+
+- `mule-ops` health sweeps use `get_metrics` per app and per worker, `get_runtime_metrics` for heap,
+  old-generation, GC, CPU and RAM, and `get_metrics_timeseries` with explicit signals and 1m–1d buckets
+  for incident windows and multi-day trends.
+- Memory-pressure guidance in `mule-ops` and `mule-troubleshooting` uses old-generation usage against its
+  limit, its baseline over days, and old-generation GC deltas. A sawtooth heap is not treated as a leak.
+- Monitoring tool errors are treated as query, permission or platform problems; empty results mean no
+  recorded traffic.
+- The API design reference uses the renamed preview and publish pairs.
+
+### Added
+
+- The compatibility smoke fails when a skill or document references an anypoint-connect tool that the
+  pinned server does not register.
+
 ## 1.9.0 — 2026-10-03
 
 - Pin the verified published releases: `mule-lint@2.0.0`, `mule-build@3.0.0`, and

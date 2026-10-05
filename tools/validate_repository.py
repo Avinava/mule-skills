@@ -46,7 +46,7 @@ CLASS_NAMES = (
 SHARED_NODE_CLAIMS = {
     "README.md": "Node.js `{requirement}` satisfies all three",
     "docs/index.md": "Node.js `{requirement}` for the MCP servers",
-    "docs/faq.md": "all three need `{requirement}`",
+    "docs/faq.md": "Node.js `{requirement}` satisfies all three",
     "docs/install-claude-code.md": "Node.js `{requirement}` satisfies all three",
     "docs/mcp-servers.md": "Node.js `{requirement}` satisfies all three",
     "docs/agent-install.md": "Use Node.js `{requirement}` to satisfy all three",
