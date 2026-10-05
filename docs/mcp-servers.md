@@ -48,7 +48,8 @@ profiles, rule detail lookup, single-snippet validation, and Mule XML formatting
 
 **`anypoint-connect`** — identity and environment discovery; application status, deployment
 specification, resources, and settings; log retrieval, error analysis, log patterns, and log
-statistics; performance, worker, memory, and time-series metrics plus AMQL queries; lifecycle
+statistics; traffic, latency, and failure metrics per application, worker, or route, runtime JVM
+and host metrics (old-generation memory, GC, CPU), metric time series, and raw AMQL queries; lifecycle
 operations such as restart, scale, deploy, rollback, stop, start, and delete; Exchange search and
 publication; API-manager instances, policies, and alerts; preview-bound Design Center project creation,
 file sync, Exchange publication, and Governance reads; audit log;

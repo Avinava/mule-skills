@@ -97,7 +97,6 @@ def main() -> int:
                 f"Use Node.js `{old_shared_node}` to satisfy all three",
                 f"Use Node.js `{new_shared_node}` to satisfy all three",
             ),
-            (f"all three need `{old_shared_node}`", f"all three need `{new_shared_node}`"),
             (
                 f"Node.js `{old_shared_node}` for the MCP servers",
                 f"Node.js `{new_shared_node}` for the MCP servers",

@@ -224,9 +224,12 @@ after swallowing an error unless the queue and source semantics prove it.
 
 ### Memory pressure
 
-Compare heap baseline after GC, allocation slope, full-GC activity, payload size, concurrent work,
-batch settings, queue depth, and replica divergence. A repeated sawtooth is normally collection
-activity; a rising post-GC baseline is only a leak hypothesis until retention evidence supports it.
+Judge pressure by the old-generation pool rather than total heap: its peak against its limit, and
+its baseline trend across days in hourly or daily buckets. Compare that with old-generation collection
+count and time, payload size, concurrent work, batch settings, queue depth, CPU load, free host memory,
+and replica divergence. A total-heap sawtooth is normally collection activity; frequent
+old-generation collections that reclaim little suggest pressure, and a rising old-generation floor is
+only a leak hypothesis until retention evidence supports it.
 
 Check for:
 

@@ -531,8 +531,9 @@ class RepositoryValidationTests(unittest.TestCase):
             self.assertIn(required, skill)
         for required in (
             "list_design_center_projects",
-            "preview_design_center_sync",
-            "preview_exchange_publication",
+            "preview_sync_design_center_files",
+            "preview_publish_exchange_asset",
+            "publish_exchange_asset",
             "Do not require `list_environments`",
         ):
             self.assertIn(required, anypoint)
