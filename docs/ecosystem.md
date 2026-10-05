@@ -94,6 +94,12 @@ build, authenticated Anypoint, publication, deployment, or other mutation tools 
 run downloads pinned npm packages with lifecycle scripts disabled, so registry access is required.
 Discovery success is not an authenticated platform integration test.
 
+The connector's tool list is also checked against the skills and documentation: every
+`mcp_anypoint-connect_<tool>` or `mcp__…anypoint-connect__<tool>` reference under `skills/` and
+`docs/`, plus bare connector tool names in the Anypoint reference files listed in
+`tools/compatibility_smoke.py`, must exist in the pinned server. A missing name fails the smoke and
+lists the files that cite it, so a renamed or removed tool cannot reach a pin update unnoticed.
+
 For coordinated development, build each of the three repositories first, then point to their common
 parent directory without changing published pins:
 

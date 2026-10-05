@@ -216,3 +216,79 @@ class CapabilityTests(unittest.TestCase):
                         {**schema, "properties": {"path": {"anyOf": "invalid"}}}):
             with self.subTest(schema=changed), self.assertRaises(smoke.SmokeError):
                 smoke.validate_capabilities([{"name": "scan", "inputSchema": changed}], [], expected)
+
+
+class ReferencedToolTests(unittest.TestCase):
+    def fixture(self, temporary: str, files: dict[str, str]) -> Path:
+        root = Path(temporary)
+        for relative in smoke.ANYPOINT_REFERENCE_FILES:
+            (root / relative).parent.mkdir(parents=True, exist_ok=True)
+            (root / relative).write_text("", encoding="utf-8")
+        for relative, text in files.items():
+            (root / relative).parent.mkdir(parents=True, exist_ok=True)
+            (root / relative).write_text(text, encoding="utf-8")
+        return root
+
+    def test_extracts_prefixed_forms_everywhere_and_bare_names_only_in_reference_files(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.fixture(temporary, {
+                "skills/mule-ops/SKILL.md": (
+                    "mcp_anypoint-connect_get_metrics(environment: \"<ENV>\")\n"
+                    "Then `get_runtime_metrics` and `whoami`; never `exchange_modules`, "
+                    "`offline_access`, `tools/validate_repository.py` or `get_x.md`.\n"
+                ),
+                "skills/other/SKILL.md": (
+                    "Call mcp__plugin_mule-skills_anypoint-connect__list_apps and "
+                    "mcp__anypoint-connect__get_logs. Bare `get_local_thing` is not a connector tool.\n"
+                ),
+                "docs/page.md": "`mcp_anypoint-connect_whoami()`\n",
+                "README.md": "mcp_anypoint-connect_ignored_outside_scanned_roots\n",
+            })
+            references = smoke.referenced_anypoint_tools(root)
+        self.assertEqual(
+            {"get_metrics", "get_runtime_metrics", "whoami", "list_apps", "get_logs"}, set(references)
+        )
+        self.assertEqual({"skills/mule-ops/SKILL.md", "docs/page.md"}, references["whoami"])
+        self.assertEqual({"skills/other/SKILL.md"}, references["list_apps"])
+
+    def test_missing_reference_file_fails_instead_of_silently_skipping(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.fixture(temporary, {})
+            (root / smoke.ANYPOINT_REFERENCE_FILES[0]).unlink()
+            with self.assertRaises(smoke.SmokeError):
+                smoke.referenced_anypoint_tools(root)
+
+    def test_reports_every_referenced_tool_absent_from_the_catalog(self):
+        tools = [{"name": "whoami"}, {"name": "get_metrics"}, {"name": "additive_tool"}]
+        smoke.validate_referenced_tools(tools, {"whoami": {"a.md"}, "get_metrics": {"b.md"}})
+        references = {
+            "whoami": {"a.md"},
+            "get_memory_metrics": {"skills/mule-ops/SKILL.md"},
+            "publish_to_exchange": {"docs/x.md", "docs/y.md"},
+        }
+        with self.assertRaises(smoke.SmokeError) as raised:
+            smoke.validate_referenced_tools(tools, references)
+        message = str(raised.exception)
+        self.assertIn("get_memory_metrics (skills/mule-ops/SKILL.md)", message)
+        self.assertIn("publish_to_exchange (docs/x.md, docs/y.md)", message)
+        self.assertNotIn("whoami", message)
+
+    def test_repository_references_resolve_against_the_consolidated_catalog(self):
+        catalog = """
+            whoami list_environments get_entitlements list_apps get_app_status get_deployment_spec
+            get_app_resources get_app_settings compare_app_deployments restart_app scale_app stop_app
+            start_app update_app_settings delete_app deploy_jar deploy_app update_app_artifact
+            rollback_app get_logs download_logs analyze_errors get_log_patterns get_log_stats
+            get_metrics get_runtime_metrics get_metrics_timeseries raw_amql_query search_exchange
+            get_exchange_asset download_api_spec publish_app_jar list_api_instances get_api_policies
+            get_api_alerts list_design_center_projects list_design_center_branches
+            list_design_center_files read_design_center_file preview_create_design_center_project
+            create_design_center_project preview_sync_design_center_files sync_design_center_files
+            preview_publish_exchange_asset publish_exchange_asset explain_api_governance_plan
+            get_api_governance_conformance get_project_profile set_project_profile get_audit_log
+            list_queues get_queue_stats get_dlq_messages publish_mq_message list_stores
+            list_store_keys get_store_value put_store_value delete_store_value
+        """.split()
+        references = smoke.referenced_anypoint_tools(ROOT)
+        self.assertIn("get_runtime_metrics", references)
+        smoke.validate_referenced_tools([{"name": name} for name in catalog], references)
