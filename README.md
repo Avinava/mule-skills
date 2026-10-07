@@ -60,6 +60,15 @@ It detects your hosts, vendors the skills into `.agents/skills/`, and merges MCP
 without overwriting what is already there. Add `--dry-run` to preview. Options and host reference in
 [docs/install-other-agents.md](docs/install-other-agents.md).
 
+#### Any agent — skills CLI
+
+```bash
+npx skills add Avinava/mule-skills
+```
+
+Installs the eight skills through the [skills.sh](https://skills.sh) CLI. MCP servers are not
+configured by this path; use the plugin or script above for those.
+
 Then give the agent context about your project by following
 [docs/project-setup.md](docs/project-setup.md) — that step matters for every install path.
 
