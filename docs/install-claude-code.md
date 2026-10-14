@@ -23,7 +23,7 @@ That writes to `.claude/settings.json`, so everyone who clones the repository ge
 
 ## What you get
 
-Eight skills, namespaced under the plugin:
+Nine skills, namespaced under the plugin:
 
 | Skill | Use it for |
 | --- | --- |
@@ -35,6 +35,7 @@ Eight skills, namespaced under the plugin:
 | `mule-ops` | Runtime health, deployments, logs, metrics, recurring checks |
 | `mule-review` | Working changes, commits, branches, PRs, release readiness |
 | `mule-build` | Local validation, tests, packaging, runtime work, versioning, and tags |
+| `mule-dependencies` | Latest and compatible connector, plugin, and runtime versions, pom upgrade checks |
 
 Claude selects them from their descriptions, so you can just describe the task. Plugin skills are
 namespaced, so they appear as `mule-skills:mule-review`, `mule-skills:mule-docs`, and so on — use

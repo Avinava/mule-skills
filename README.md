@@ -34,7 +34,7 @@ commit or authenticate to Anypoint unless I approve it.
 ```
 
 That is enough. The runbook detects whether this is a new install or upgrade, selects the right
-host configuration, previews changes, installs all eight skills, and verifies what landed.
+host configuration, previews changes, installs all nine skills, and verifies what landed.
 
 ### Direct install options
 
@@ -66,7 +66,7 @@ without overwriting what is already there. Add `--dry-run` to preview. Options a
 npx skills add Avinava/mule-skills
 ```
 
-Installs the eight skills through the [skills.sh](https://skills.sh) CLI. MCP servers are not
+Installs the nine skills through the [skills.sh](https://skills.sh) CLI. MCP servers are not
 configured by this path; use the plugin or script above for those.
 
 Then give the agent context about your project by following
@@ -84,6 +84,7 @@ Then give the agent context about your project by following
 | [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Health assessment, evidence coverage, risks, and recommended actions |
 | [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings, fix options, coverage limits, and readiness verdict when applicable |
 | [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags | Exact checks, test totals, artifact or failure evidence, and release actions performed |
+| [`mule-dependencies`](skills/mule-dependencies/) | Latest and compatible connector, plugin, and runtime versions, and pom upgrade checks | Newest and newest compatible release per dependency, with source and fetch time |
 
 ### Choosing the right skill
 
@@ -96,6 +97,7 @@ Then give the agent context about your project by following
 | Diagnose a symptom | `mule-troubleshooting` | `mule-ops` for authorized runtime evidence; development only when a fix is requested |
 | Assess current runtime health | `mule-ops` | `mule-troubleshooting` when a specific causal question emerges |
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
+| Find the latest or compatible connector, plugin, or runtime version | `mule-dependencies` | `mule-development` to apply the upgrade; `mule-build` to verify it |
 | Prepare a release | `mule-build` | `mule-review` before commit/tag; `mule-ops` for separately approved publish/deploy |
 
 Documentation and review questions are optional and non-blocking. When business information would
@@ -108,7 +110,7 @@ The catalog's detailed mutation and handoff expectations live in [the skill cata
 
 ## Agent support
 
-The eight skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
+The nine skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
 reads them from `.agents/skills/`, with instruction files telling the agent how to route.
 
 | Host | Skill discovery | Repository instructions | MCP configuration | Verification |
@@ -180,7 +182,7 @@ generic JSON forms, and the installer merges only the entries your config lacks.
 mule-skills/
 ├── .claude-plugin/                 # Plugin and marketplace manifests
 ├── .mcp.json                       # Pinned MCP servers shipped with the plugin
-├── skills/                         # The eight reusable skills — host-neutral
+├── skills/                         # The nine reusable skills — host-neutral
 │   ├── mule-api-design/            # HTTP design, RAML/OAS contracts, and safe Design Center workflow
 │   ├── mule-docs/                  # Documentation workflow, references, and audit tools
 │   ├── mule-development/           # Implementation workflow and post-change checklist
@@ -188,6 +190,7 @@ mule-skills/
 │   ├── mule-troubleshooting/       # Root-cause analysis workflow
 │   ├── mule-ops/                   # Runtime health workflow
 │   ├── mule-review/                # Change, project, and release-readiness review
+│   ├── mule-dependencies/          # Live connector, plugin, and runtime version lookup
 │   └── mule-build/                 # Validate, package, run, version, and tag locally
 ├── install/
 │   ├── install.sh                  # Vendored install for non-plugin hosts
@@ -205,8 +208,16 @@ mule-skills/
 Each skill has a required `SKILL.md` and may include:
 
 - `agents/openai.yaml` for interface metadata;
-- `references/` or `resources/` for guidance loaded by the workflow;
-- `scripts/` for deterministic, repeatable inspection and validation.
+- `references/` for guidance loaded on demand by the workflow, one level deep from `SKILL.md`;
+- `scripts/` for deterministic, repeatable inspection and validation;
+- `assets/` for data files and templates the scripts or workflow consume.
+
+No other folders are allowed inside a skill. `SKILL.md` stays at or under 500 lines, and any
+reference over 100 lines starts with a table of contents. Each `SKILL.md` link to a reference says
+when to read it. Scripts are Python standard library only, never prompt for input, support `--help`,
+print results as JSON on stdout and diagnostics on stderr, and use exit code 0 for success, 1 for
+reported findings, 2 for usage errors or invalid input, and 3 for network or access failure where
+applicable.
 
 Skills refer to bundled scripts through `<skill-root>` and `<skills-root>` placeholders rather than a
 fixed path, so the same file works under a plugin install and a vendored install.
@@ -242,7 +253,7 @@ When adding or changing a reusable skill:
    in this reusable repository.
 3. Use neutral examples and mechanism-based guidance; do not retain prior-project fingerprints or
    numeric tuning values.
-4. Add `agents/openai.yaml` and only the references, resources, scripts, or assets the skill needs.
+4. Add `agents/openai.yaml` and only the references, scripts, or assets the skill needs.
 5. Refer to bundled scripts through `<skill-root>` or `<skills-root>`, never a host-specific path.
 6. Validate the skill, test it with neutral representative tasks, and inspect outputs for unsupported
    claims or sensitive data.

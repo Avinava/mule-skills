@@ -60,7 +60,9 @@ Perform project coverage plus these gates:
 
 - release candidate and intended version are unambiguous
 - required lint, security, test, and package steps pass
-- packaged runtime and connector compatibility match the deployment target
+- packaged runtime and connector compatibility match the deployment target; verify pinned
+  connector versions against the project's runtime and Java with
+  [`mule-dependencies`](../../mule-dependencies/SKILL.md) rather than from memory
 - public contract changes are compatible or coordinated
 - configuration inputs, secret boundaries, and deployment automation are complete
 - changed asynchronous paths have safe acknowledgement, retry, idempotency, and recovery behavior
@@ -120,6 +122,11 @@ Apply **value contracts** and **expression embedding** mechanisms (Classes A and
   after markup edits are Class B until disproven).
 - Check query inputs, escaping or binding, pagination, empty results, and selection of all fields
   consumed downstream.
+- Check DataWeave streaming misuse: a streamed or deferred input read more than once, consumed by a
+  logger or earlier transform before the real consumer, or fully materialized by a transform that
+  defeats the streaming choice. Check nested searches over large collections where indexing or
+  grouping would do. See
+  [DataWeave guidance](../../mule-development/references/dataweave.md) before judging a transform.
 - Treat naming and decomposition as improvements unless they cause broken references, misleading
   operations, or unsafe behavior.
 
@@ -150,6 +157,12 @@ Apply **failure disposition** mechanisms (Class D):
   hop completed.
 - Business-impactful skip guards need a durable error, metric, or intentional disposition—not log
   only.
+- Check batch policy gaps: an unstated record-failure policy, step failures that vanish without a
+  durable disposition, aggregators that commit partial work with no reconciliation, and an
+  on-complete phase that ignores failed records.
+- Compare native redelivery and dead-letter support with custom in-flow counters. Counters held in
+  one replica, in memory, or in a store without atomic updates do not give a shared delivery count;
+  flag them where the broker or source already provides redelivery and a dead-letter destination.
 - Group connector failure, retry summary, structured logger, and default exception-listener entries
   when they describe the same transaction.
 - Do not claim automatic reprocessing or recovery without source and queue evidence.
@@ -200,6 +213,14 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
   structured error-key mismatches against consumers, duplicate failures, and missing safe correlation
   or outcome fields.
 - Treat log absence as inconclusive when retention, level, sampling, or error handling can hide an event.
+- Check policy and error-contract drift: the error envelope and status codes the contract promises
+  against what handlers and policies emit, including responses produced by a gateway or policy
+  before the application runs. Require one consistent error shape and status mapping rather than
+  per-flow variants.
+- Check secret and TLS hygiene at the mechanism level: secrets supplied through a secure-properties
+  or external provider path and never in source; truststores and keystores referenced by property,
+  not committed; verification not disabled to make a connection work; and a rotation path that does
+  not need a code change.
 
 ## Tests, build, and deployment
 
@@ -218,6 +239,9 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
 - Check artifact version surfaces (including logger/app version properties), deployment inputs,
   rollback path, and current-vs-desired version interpretation when relevant.
 - Treat deployment overlap as a hypothesis until lifecycle, replica, or before/after evidence supports it.
+- Check pipeline gate bypasses: a gate skipped or marked non-blocking, tests or lint excluded from the
+  required path, secrets echoed into pipeline logs, deploy steps that run without the packaged
+  artifact the gates approved, and a manual path that reaches the target without the same checks.
 
 ## Documentation and operations
 

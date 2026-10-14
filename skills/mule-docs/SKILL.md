@@ -217,3 +217,14 @@ Then:
 - Never include examples or terminology from unrelated customer projects in this reusable skill.
   Generalize the mechanism; do not retain prior application names, topology, fields, endpoints,
   schedules, volumes, error counts, exact log text, or numeric tuning values.
+
+## Gotchas
+
+- Inventory output is value-safe by design. Do not paste raw property values, payloads, or whole
+  Mule XML into the documents you produce; cite the source location instead.
+- Connector and runtime versions in documentation come from the project's POM and artifact metadata,
+  not from memory or a newer release. Use [`mule-dependencies`](../mule-dependencies/SKILL.md) only to
+  say what is current, never to rewrite what the project runs.
+- Mermaid labels stay role-based and free of project identity, and only the allowed diagram types
+  render in the audit.
+- A flow name is not evidence of a business guarantee. Describe only what the source shows.

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -19,6 +20,10 @@ REGISTRY_PIN_RE = re.compile(r"@sfdxy%2F([a-z0-9-]+)/(\d+\.\d+\.\d+)")
 NODE_REQUIREMENT_RE = re.compile(r"^>=(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 NAV_ENTRY_RE = re.compile(r"^\s*(?:-\s*)?(?:[^:]+:\s*)?([A-Za-z0-9._/-]+\.md)\s*$")
 SKILL_CATALOG_ROW_RE = re.compile(r"^\|\s*\[`(mule-[a-z0-9-]+)`\]\(")
+SKILL_MAX_LINES = 500
+REFERENCE_TOC_LINES = 100
+ALLOWED_SKILL_DIRS = ("references", "scripts", "assets", "agents")
+CONTENTS_HEADING_RE = re.compile(r"^#{2,3}\s+(?:table of )?contents\s*$", re.IGNORECASE | re.MULTILINE)
 READINESS_REFERENCE = "references/anypoint-readiness.md"
 READINESS_SKILLS = (
     "mule-api-design",
@@ -96,6 +101,45 @@ def validate_skills(root: Path) -> list[str]:
     return findings
 
 
+def validate_skill_structure(root: Path) -> list[str]:
+    """Enforce progressive disclosure and the script conventions for every skill."""
+    findings: list[str] = []
+    for skill_md in sorted((root / "skills").glob("*/SKILL.md")):
+        skill_dir = skill_md.parent
+        line_count = len(skill_md.read_text(encoding="utf-8").splitlines())
+        if line_count > SKILL_MAX_LINES:
+            findings.append(
+                f"{skill_md}: SKILL.md has {line_count} lines; keep it at or under {SKILL_MAX_LINES}"
+            )
+        for child in sorted(skill_dir.iterdir()):
+            if child.is_dir() and child.name not in ALLOWED_SKILL_DIRS and child.name != "__pycache__":
+                findings.append(
+                    f"{child}: unexpected skill folder; use only {', '.join(ALLOWED_SKILL_DIRS)}"
+                )
+        for reference in sorted((skill_dir / "references").glob("*.md")):
+            text = reference.read_text(encoding="utf-8")
+            if len(text.splitlines()) > REFERENCE_TOC_LINES and not CONTENTS_HEADING_RE.search(text):
+                findings.append(
+                    f"{reference}: reference over {REFERENCE_TOC_LINES} lines needs a Contents section"
+                )
+        for script in sorted((skill_dir / "scripts").glob("*.py")):
+            try:
+                result = subprocess.run(
+                    [sys.executable, "-I", str(script), "--help"],
+                    stdin=subprocess.DEVNULL,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired:
+                findings.append(f"{script}: --help did not return (scripts must not prompt)")
+                continue
+            if result.returncode != 0:
+                findings.append(f"{script}: --help must exit 0 (exit {result.returncode})")
+    return findings
+
+
 def validate_skill_catalog(root: Path) -> list[str]:
     """Keep the developer-facing catalog complete without requiring samples per skill."""
     findings: list[str] = []
@@ -151,7 +195,7 @@ def validate_alignment(root: Path) -> list[str]:
     development = (root / "skills/mule-development/SKILL.md").read_text(encoding="utf-8")
     invariant_path = root / "skills/mule-development/references/invariant-classes.md"
     invariants = invariant_path.read_text(encoding="utf-8")
-    checklist = (root / "skills/mule-development/resources/post-development-checklist.md").read_text(
+    checklist = (root / "skills/mule-development/references/post-development-checklist.md").read_text(
         encoding="utf-8"
     )
 
@@ -162,7 +206,7 @@ def validate_alignment(root: Path) -> list[str]:
             findings.append(f"{invariant_path}: missing canonical {class_name}")
         if class_name not in checklist:
             findings.append(
-                "skills/mule-development/resources/post-development-checklist.md: "
+                "skills/mule-development/references/post-development-checklist.md: "
                 f"missing canonical {class_name}"
             )
 
@@ -178,7 +222,7 @@ def validate_alignment(root: Path) -> list[str]:
             if token not in text:
                 findings.append(f"{relative_path}: missing shared-model reference {token!r}")
 
-    if "resources/post-development-checklist.md" not in development:
+    if "references/post-development-checklist.md" not in development:
         findings.append("skills/mule-development/SKILL.md: stale or missing checklist routing")
     if "scripts/check_embedded_expressions.py" not in checklist:
         findings.append("post-development checklist: missing deterministic embedded-expression check")
@@ -694,6 +738,7 @@ def validate_execution_and_artifact_protocol(root: Path) -> list[str]:
 def validate_repository(root: Path) -> list[str]:
     findings: list[str] = []
     findings.extend(validate_skills(root))
+    findings.extend(validate_skill_structure(root))
     findings.extend(validate_skill_catalog(root))
     findings.extend(validate_local_links(root))
     findings.extend(validate_alignment(root))

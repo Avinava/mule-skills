@@ -15,6 +15,7 @@ from urllib.parse import unquote
 
 
 IGNORED_DIRECTORIES = {".git", ".m2", "__MACOSX", "node_modules", "target"}
+IGNORED_RELATIVE_DIRECTORIES = {("evals", "results")}
 TEXT_SUFFIXES = {".json", ".md", ".properties", ".py", ".txt", ".yaml", ".yml"}
 DOCUMENT_SUFFIXES = {".json", ".md", ".properties", ".txt", ".yaml", ".yml"}
 ALLOWED_MERMAID_DIRECTIVES = {
@@ -67,6 +68,7 @@ def walk_text_files(root: Path) -> Iterable[Path]:
             name
             for name in names
             if name not in IGNORED_DIRECTORIES
+            and (*current.relative_to(root).parts, name) not in IGNORED_RELATIVE_DIRECTORIES
             and not (current / name).is_symlink()
             and is_within(root, (current / name).resolve(strict=False))
         )

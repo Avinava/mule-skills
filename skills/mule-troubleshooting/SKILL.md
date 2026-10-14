@@ -114,131 +114,27 @@ failure.
 
 ## Phase 2: Test hypotheses
 
-### Timeout and connection failures
+Discriminate between candidate causes with checks that could prove a hypothesis wrong. Load the
+reference that matches the symptom:
 
-Inventory each distinct timer instead of comparing similarly named properties blindly:
+- Read [references/hypothesis-checks.md](references/hypothesis-checks.md) for timeouts and
+  connection failures (inventory each distinct timer), concurrency and rate limits (estimate
+  effective concurrency across the whole path, never recommend a numeric value without observed
+  workload), and error propagation through intermediate applications or proxies.
+- Read [references/signatures-and-pressure.md](references/signatures-and-pressure.md) for recurring
+  mechanism signatures mapped to `mule-development` Classes A–E and the cross-cutting gates, for
+  deploy-related bursts, and for memory pressure judged by the old-generation pool.
+- Read [references/jvm-diagnostics.md](references/jvm-diagnostics.md) when requests wait or a
+  replica looks saturated: read-only checks first, thread-dump reading by pool, blocked cpu-light
+  patterns, heap histograms, connection-pool exhaustion signatures, and 502/503/504 attribution,
+  including what a managed platform without a shell can and cannot provide.
+- Read [references/deployment-failure-triage.md](references/deployment-failure-triage.md) when a
+  deployment never reaches running, a replica restarts repeatedly, or an app starts and then fails:
+  pod and replica failure signals, out-of-memory termination vs application error, a cause
+  checklist, and decoded startup error messages.
 
-| Timer | What it governs |
-| --- | --- |
-| Connect timeout | Time allowed to establish a connection |
-| Requester response timeout | Time the caller waits for a response |
-| Read timeout | Connector-specific wait for inbound data |
-| Connection idle timeout | Lifetime of an unused persistent connection |
-| Proxy or gateway timeout | Deadline imposed outside the Mule app |
-| Retry duration | Attempts, delay, and per-attempt timeout combined |
-| Upstream request deadline | Total time available to return a useful result |
-
-For a synchronous chain, verify that inner work, retries, and error mapping can finish with margin
-before the upstream deadline. A connection idle timeout is not automatically the request-processing
-deadline, so do not apply a universal `idleTimeout >= responseTimeout` rule across unrelated
-components.
-
-Discriminate among:
-
-- dependency slowness
-- stale pooled connection or remote close
-- exhausted connection pool
-- caller deadline shorter than valid processing time
-- proxy or load-balancer timeout
-- CPU, thread, or event-loop starvation
-- retry duration exceeding the caller's budget
-
-### Concurrency and rate limits
-
-Estimate effective concurrency across the whole path:
-
-- source consumer count
-- flow `maxConcurrency` and connector-specific back pressure
-- batch-job `maxConcurrency` and block size
-- parallel scopes and asynchronous handoffs
-- replica count and queue distribution
-- connection-pool limits
-- dependency quotas and rate limits
-
-Treat batch block size as a memory and scheduling parameter, not a direct statement that every
-record in a block is sent concurrently. Mule processes record blocks in parallel according to batch
-concurrency and runtime capacity. Confirm behavior with metrics or a controlled load test before
-choosing a limit.
-
-Evaluate multiple remedies where appropriate:
-
-| Option | Benefit | Tradeoff |
-| --- | --- | --- |
-| Lower flow or batch concurrency | Protects a constrained dependency | Reduces throughput |
-| Add bounded retry with jitter | Absorbs transient failures | Extends latency and can amplify load |
-| Queue or bulkhead the work | Isolates callers from bursts | Changes delivery and recovery semantics |
-| Increase capacity | Preserves throughput | Adds cost and may move the bottleneck |
-| Reduce payload or batch size | Lowers memory and call pressure | Increases call or coordination overhead |
-
-Do not recommend a numeric value without observed workload, replica count, and dependency capacity.
-
-### Error propagation and proxy behavior
-
-A caller-side 5xx or timeout does not identify the origin. Inspect the intermediate application's
-operation result and error handler. No ERROR-level entry in an intermediate app can mean:
-
-- insufficient log coverage
-- failure logged at another level or only in a structured response
-- handled or continued error
-- transparent proxy behavior
-- missing correlation propagation
-- failure before or after that application
-
-Keep the cause unresolved until evidence distinguishes these cases.
-
-### Recurring mechanism signatures
-
-Use these signatures only as hypothesis starters. Confirm with code and aligned telemetry. Mechanism
-names match `mule-development` Classes A–E; also apply its security/configuration,
-capacity/lifecycle, delivery/transactions, privacy/observability, and validation cross-cutting gates.
-
-| Signature | Leading class | Discriminating checks |
-| --- | --- | --- |
-| After editing HTTP query/header/uri CDATA: Map/MultiMap or "literal expression" transform errors; packaging was green | B — Expression embedding | Confirm CDATA still ends with `]` before `]]>`; compare the edited block only, not siblings |
-| Flow exists in source but an APIKit caller gets 404 / not-found | C — Contract authority | Path absent from **bound** contract → 404; bound path wrong method → 405; bound path without implementation → usually `NOT_IMPLEMENTED`/501; check other sources/callers before calling the flow dead |
-| Bound contract route exists but returns not-implemented / 501 | C — Contract authority | Implement or remove the resource/method; check FlowFinder "no implementation" warnings |
-| Bound path exists but method fails with 405 | C — Contract authority | Add method to contract and flow, or stop calling the unsupported method |
-| `Unable to infer output media type` on vars, `targetValue`, or mixed input expression | A — Value contracts | Make output explicit for the next consumer when inputs differ or inference mismatches it |
-| Records never process; logs show skip only; little or no durable error | A or D | Empty vs null ids, dual accessors, known request id; skip path durable signal |
-| Same business record fails every scheduler cycle for a long window | D — Failure disposition | Classify permanent vs retryable; permanent/poison leaves eligibility through terminal, quarantine, error-store, or manual-recovery disposition; intentional indefinite retryable paths need governed recovery |
-| Caller 500 after retries; dependency status empty or generic | D — Failure disposition | Permanent 4xx not retried; 401 only if auth refreshes; diagnostics must survive attempt reset (log/durable/nested cause), not only rolled-back vars |
-| MUnit green; production empty or alternate id fields | A — Fixture fidelity | Cover normal and representative adverse production shapes, not Studio convenience alone |
-| Fix deployed; previously failed ids still not re-delivered | E — State | Watermark/dedupe hold; source re-emit or operational recovery |
-| Multi-hop try always blames writeback | D — Attribution | Result flag only after first hop; separate error subjects |
-| Cache-miss ERROR storms or Object Store failures | E — Object Store | Separate expected `KEY_NOT_FOUND`, availability fallback, and invalid key/null/configuration errors; encode keys |
-
-When the signature matches Class D disposition gaps, fix classification first: permanent/poison
-must leave the eligible loop through terminal, quarantine, error-store, or manual-recovery
-disposition. Intentional indefinite retryable recovery needs backoff, monitoring, ownership,
-recovery criteria, and replay/manual recovery—not only higher dependency capacity.
-
-### Deploy-related bursts
-
-Compare error windows with deployment and replica events. Lifecycle or event-after-stop signatures
-close to a rolling transition can support a deployment-related hypothesis, but timestamps alone do
-not prove it.
-
-Before proposing suppression or `on-error-continue`, verify acknowledgement, persistence,
-redelivery, idempotency, and message-loss behavior. Never claim that a message will be reprocessed
-after swallowing an error unless the queue and source semantics prove it.
-
-### Memory pressure
-
-Judge pressure by the old-generation pool rather than total heap: its peak against its limit, and
-its baseline trend across days in hourly or daily buckets. Compare that with old-generation collection
-count and time, payload size, concurrent work, batch settings, queue depth, CPU load, free host memory,
-and replica divergence. A total-heap sawtooth is normally collection activity; frequent
-old-generation collections that reclaim little suggest pressure, and a rising old-generation floor is
-only a leak hypothesis until retention evidence supports it.
-
-Check for:
-
-- full-payload logging or repeated serialization
-- large repeatable in-memory streams
-- oversized variables or queue messages
-- high batch or parallel concurrency
-- unbounded caches or object-store usage
-- connector or custom-code resource retention
+A caller-side 5xx or timeout does not identify the origin, and timestamps alone do not prove a
+deployment cause. Keep the cause unresolved until a discriminating check separates the alternatives.
 
 ## Phase 3: Produce the RCA or plan
 
@@ -285,3 +181,15 @@ If the event has not recurred or telemetry coverage is inadequate, report the re
 - Preserve client confidentiality and keep prior-project identity out of reusable examples and
   current-project output.
 - State unresolved alternatives and the next discriminating check.
+
+## Gotchas
+
+- A caller-side 5xx or timeout does not identify the origin. Inspect the intermediate application's
+  result and error handler before naming a cause.
+- Do not apply a universal `idleTimeout >= responseTimeout` rule. Inventory each distinct timer and the
+  full retry budget instead.
+- A total-heap sawtooth is normal collection activity. A rising old-generation floor is only a leak
+  hypothesis until retention evidence supports it.
+- Deployment overlap, missing logs, and retry summaries are signals, not proof. A retry-exhaustion
+  entry is often secondary evidence.
+- Never claim a swallowed error will be reprocessed unless queue and source semantics prove it.
