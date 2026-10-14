@@ -45,6 +45,20 @@ The agent should:
 An implementation request authorizes source changes inside that scope. It does not authorize a
 commit, push, version bump, runtime change, or deployment.
 
+## Check and upgrade dependencies
+
+```text
+Which connectors in this project are outdated, and what is the newest release that fits our Mule
+runtime and Java version? Do not change the pom yet.
+```
+
+`mule-dependencies` reads the project's runtime and Java constraints, looks up each dependency
+through the Exchange asset API (falling back to the Exchange Maven facade and the MuleSoft releases
+repository, never Maven Central), and reports the newest and newest compatible release with the
+source and fetch time. If the network is unavailable it says so and uses the dated offline
+snapshot, labelled unverified. Applying the upgrade is a separate `mule-development` step, verified
+through `mule-build`.
+
 ## Validate and package
 
 ```text
