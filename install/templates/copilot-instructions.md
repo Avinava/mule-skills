@@ -19,6 +19,7 @@ When a task matches one of these workflows, follow its instructions:
 | Runtime health and operations | `mule-ops` |
 | Documentation creation and targeted refreshes | `mule-docs` |
 | Change, project, or release-readiness review | `mule-review` |
+| Latest or compatible connector, plugin, or runtime versions | `mule-dependencies` |
 | Validation, packaging, or an explicitly requested release | `mule-build` |
 
 Load only the workflow and referenced resources relevant to the task. Preserve current-project

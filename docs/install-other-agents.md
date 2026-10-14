@@ -1,6 +1,6 @@
 # Install for Codex, Copilot, Gemini, and other agents
 
-Hosts without a plugin system read skills from the repository. `install/install.sh` vendors the eight
+Hosts without a plugin system read skills from the repository. `install/install.sh` vendors the nine
 skills into `.agents/skills/`, merges MCP configuration for the hosts you use, and adds instruction
 files — without overwriting anything you already have.
 
@@ -46,7 +46,7 @@ The script is idempotent. Skills are replaced on every run; MCP entries, instruc
 
 ```text
 your-mule-project/
-├── .agents/skills/                  # the eight mule-* skills
+├── .agents/skills/                  # the nine mule-* skills
 ├── .mcp.json                        # Claude Code, Copilot CLI, Gemini
 ├── .vscode/mcp.json                 # VS Code and Copilot Chat
 ├── .codex/config.toml               # Codex
@@ -84,7 +84,7 @@ access through repository settings.
 
 ## Manual install
 
-If you cannot run the script, clone this repository and copy the eight directories under `skills/`
+If you cannot run the script, clone this repository and copy the nine directories under `skills/`
 into `.agents/skills/`, then merge the matching file from `install/hosts/` into your host's MCP
 config and copy the instruction templates from `install/templates/`.
 

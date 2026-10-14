@@ -16,6 +16,7 @@ current source are authoritative over reusable examples.
 | Runtime health and operations | `mule-ops` |
 | Documentation creation and targeted refreshes | `mule-docs` |
 | Change, PR, project, or release-readiness review | `mule-review` |
+| Latest or compatible connector, plugin, or runtime versions | `mule-dependencies` |
 | Validation, packaging, or an explicitly requested release | `mule-build` |
 
 ## Development

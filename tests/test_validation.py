@@ -130,7 +130,7 @@ class PluginManifestTests(unittest.TestCase):
 
     def copy_repository(self, temporary: str) -> Path:
         root = Path(temporary) / "repo"
-        shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+        shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "__pycache__", "evals"))
         return root
 
     def assert_finding(self, root: Path, fragment: str):
@@ -185,6 +185,39 @@ class PluginManifestTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assert_finding(root, "skill catalog missing: mule-testing")
+
+    def test_rejects_oversized_skill_md(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            path = root / "skills/mule-testing/SKILL.md"
+            path.write_text(path.read_text(encoding="utf-8") + "\nline\n" * 500, encoding="utf-8")
+            self.assert_finding(root, "SKILL.md has")
+
+    def test_rejects_unexpected_skill_folder(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            (root / "skills/mule-testing/resources").mkdir()
+            self.assert_finding(root, "unexpected skill folder")
+
+    def test_rejects_long_reference_without_contents(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            path = root / "skills/mule-testing/references/long-guide.md"
+            path.write_text("# Long guide\n\n" + "text\n" * 120, encoding="utf-8")
+            self.assert_finding(root, "needs a Contents section")
+            path.write_text("# Long guide\n\n## Contents\n\n- [A](#a)\n\n" + "text\n" * 120, encoding="utf-8")
+            self.assertEqual([], [f for f in validator.validate_repository(root) if "long-guide" in f])
+
+    def test_rejects_script_that_prompts_or_fails_help(self):
+        cases = (
+            ("import sys\nsys.exit(1)\n", "--help must exit 0"),
+            ("input('value: ')\n", "--help must exit 0"),
+        )
+        for source, fragment in cases:
+            with self.subTest(source=source), tempfile.TemporaryDirectory() as temporary:
+                root = self.copy_repository(temporary)
+                (root / "skills/mule-testing/scripts/bad_script.py").write_text(source, encoding="utf-8")
+                self.assert_finding(root, fragment)
 
     def test_rejects_unresolvable_plugin_source(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule Dependencies"
+  short_description: "Look up current connector, plugin, and runtime versions with compatibility"
+  default_prompt: "Use $mule-dependencies to find the latest compatible connector and plugin versions for this Mule project."

@@ -23,6 +23,9 @@ field-level validation details, and truthful retry guidance.
 Do not expose stack traces, connector messages, SQL, private hosts, tokens, internal IDs, or raw rejected
 payloads. Separate caller-safe detail from internal observability.
 
+For the shared status mapping, validation error shape, and bulk partial success, read
+[Error contract](error-contract.md).
+
 Usually additive: new optional response fields/endpoints. Potentially breaking: removing/renaming fields,
 changing type/meaning, requiring optional input, narrowing accepted values, or changing status/error behavior.
 Enum additions can break closed-enum consumers.

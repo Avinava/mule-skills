@@ -106,3 +106,13 @@ Return:
 3. focused and full commands or tools run, with results and report paths;
 4. failure classification when a test was repaired;
 5. skipped checks, environment limitations, production defects, and remaining evidence gaps.
+
+## Gotchas
+
+- A mock mismatch, an unfaithful event, or a build failure says nothing about the product; a correct
+  failing test can support a defect hypothesis.
+- Fixtures shaped for Studio convenience can hide production shapes. Cover normal and representative
+  adverse inputs.
+- Do not use `-DskipTests` to validate a test change, and do not read a green exit status as proof.
+  Inspect the MUnit report and the first actionable failure.
+- No coverage percentage proves the behavior ledger is complete.

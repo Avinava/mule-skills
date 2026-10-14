@@ -59,7 +59,12 @@ def check_project(root: Path) -> list[Finding]:
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     if args in (["-h"], ["--help"]):
-        print("usage: check_embedded_expressions.py <project-root>")
+        print(
+            "usage: check_embedded_expressions.py <project-root>\n\n"
+            "Find CDATA blocks in Mule XML whose embedded DataWeave expression is truncated or\n"
+            "unterminated. Findings print as path:line: message on stdout, the summary goes to\n"
+            "stderr. Exit codes: 0 clean, 1 findings, 2 usage error or unreadable project."
+        )
         return 0
     if len(args) != 1:
         print("usage: check_embedded_expressions.py <project-root>", file=sys.stderr)

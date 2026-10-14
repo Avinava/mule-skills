@@ -1,6 +1,6 @@
 # Skills
 
-Eight skills, shared and host-neutral. Claude Code loads them from the plugin; every other host reads
+Nine skills, shared and host-neutral. Claude Code loads them from the plugin; every other host reads
 them from `.agents/skills/`. Each has a `SKILL.md` the agent selects from its description, so
 describing the task is usually enough.
 
@@ -13,6 +13,7 @@ describing the task is usually enough.
 | [`mule-troubleshooting`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-troubleshooting) | Diagnose incidents and failures | Read-only diagnosis by default | Root-cause assessment or ranked hypotheses, confidence, evidence gaps, and fix plan |
 | [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Assess runtime health and deployment evidence | Read-only telemetry analysis by default | Health assessment, evidence coverage, risks, and recommended actions |
 | [`mule-review`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-review) | Review changes, repositories, PRs, or release readiness | Read-only; no implementation, comment, or PR-state change unless requested | Prioritized findings, fix options, coverage limits, and a readiness verdict when applicable |
+| [`mule-dependencies`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-dependencies) | Look up current connector, plugin, and runtime versions and their compatibility | Read-only lookup; no project files are changed | Newest and newest compatible release per dependency, constraints used, source, and fetch time |
 | [`mule-build`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-build) | Run local readiness, security, MUnit, packaging, and release-preparation gates | Creates `target/` artifacts during packaging; source/Git changes require an explicit version or release request | Exact checks, test totals, artifact or failure evidence, and release actions performed |
 
 See [Mule Skills in action](see-it-in-action.md) for an evidence-backed change journey and a
@@ -30,6 +31,7 @@ tests-skipped package as a successful release.
 | Diagnose a symptom | `mule-troubleshooting` | `mule-ops` for authorized runtime evidence; development only when a fix is requested |
 | Assess current runtime health | `mule-ops` | `mule-troubleshooting` when a specific causal question emerges |
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
+| Find the latest or compatible connector, plugin, or runtime version | `mule-dependencies` | `mule-development` to apply the upgrade; `mule-build` to verify it |
 | Prepare a release | `mule-build` | Release-readiness review before commit/tag; `mule-ops` for separately approved publish/deploy |
 
 ## What they read

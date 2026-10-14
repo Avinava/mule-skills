@@ -15,6 +15,9 @@ Read [the mule-lint standards protocol](references/mule-lint-standards.md), then
 standards, rules, and focused guides applicable to the change. mule-lint is the cross-project
 standards authority; this skill owns the implementation workflow and project-specific reasoning.
 
+For transformation design, read [DataWeave design guidance](references/dataweave.md) when writing or
+reviewing a script.
+
 Use [Invariant classes and cross-cutting gates](references/invariant-classes.md) as the canonical
 mechanism reference. Read only the sections relevant to the changed path, plus every applicable
 cross-cutting gate:
@@ -29,7 +32,7 @@ cross-cutting gate:
 | Any source change | Applicable cross-cutting gates |
 
 After editing, read and complete
-[Post-Development Checklist](resources/post-development-checklist.md). The checklist verifies the
+[Post-Development Checklist](references/post-development-checklist.md). The checklist verifies the
 reference; it is not a second tutorial.
 
 ## Mechanism model
@@ -48,9 +51,13 @@ The classes are a reasoning aid, not an exhaustive compliance taxonomy. Apply th
 cross-cutting gates wherever relevant:
 
 - **Security and configuration:** authentication, authorization, TLS, secure properties, input
-  trust, least privilege, and environment-safe configuration.
+  trust, least privilege, and environment-safe configuration. For secure properties, rotation,
+  vaults, TLS and mTLS, and token caching, read
+  [Secrets, TLS, and credential handling](references/secrets-and-tls.md).
 - **Capacity and lifecycle:** concurrency, back pressure, streaming and memory, timeouts,
-  connections, deployment target, and graceful shutdown.
+  connections, deployment target, and graceful shutdown. For stream strategy, heap budgeting,
+  large files, and batch design, read
+  [Data volume, streaming, and batch design](references/data-volume.md).
 - **Delivery and transactions:** acknowledgement, redelivery, ordering, transaction participation,
   duplicate behavior, and recovery.
 - **Privacy and observability:** safe logging, correlation, metrics, operational version identity,
@@ -103,7 +110,7 @@ the Mule/APIKit implementation changes required to realize an approved contract.
 3. Exercise success, alternate, empty/invalid input, dependency failure, retry exhaustion or terminal
    disposition, and recovery paths that are material to the change.
 4. Run the repository-required full build or package gate when policy or release scope requires it.
-5. Complete `resources/post-development-checklist.md` and inspect the final diff.
+5. Complete `references/post-development-checklist.md` and inspect the final diff.
 6. Update bound contracts, schemas, operations guidance, recovery notes, `AGENTS.md` invariants, and
    documentation when behavior changes.
 
@@ -127,7 +134,9 @@ evidence gaps. Never weaken a required check to make it pass.
 
 ## Version-sensitive references
 
-Re-check current official documentation when installed versions differ:
+Look up current connector, plugin, and runtime versions and their compatibility with
+[`mule-dependencies`](../mule-dependencies/SKILL.md) instead of answering from memory. Re-check
+current official documentation when installed versions differ:
 
 - [Mule data types and DataWeave output inference](https://docs.mulesoft.com/mule-runtime/latest/mule-data-types)
 - [DataWeave identifier rules](https://docs.mulesoft.com/dataweave/latest/dataweave-language-introduction#rules-for-declaring-valid-identifiers)
@@ -136,3 +145,13 @@ Re-check current official documentation when installed versions differ:
 - [Object Store connector reference](https://docs.mulesoft.com/object-store-connector/latest/object-store-connector-reference)
 - [VM Connector behavior and deployment limitations](https://docs.mulesoft.com/vm-connector/latest/)
 - [HTTP Connector reference](https://docs.mulesoft.com/http-connector/latest/http-documentation)
+
+## Gotchas
+
+- Editing an HTTP query, header, or URI CDATA block can leave the expression unterminated while
+  packaging stays green. The block must end with `]` before `]]>`; run the embedded-expression check.
+- Maven Central holds only old Mule artifacts, and repository `latest` tags can be `-DEV` builds.
+  Resolve versions through [`mule-dependencies`](../mule-dependencies/SKILL.md) before pinning.
+- `Unable to infer output media type` means the next consumer needs an explicit output declaration.
+- Studio-convenience fixtures can pass MUnit while production shapes fail. Cover representative
+  adverse shapes.

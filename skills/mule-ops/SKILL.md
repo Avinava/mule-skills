@@ -170,107 +170,25 @@ would distinguish them.
 
 ### 5. Investigate conditional signals
 
-- **Latency:** Pull time series for the affected app and compare latency with traffic, outbound
-  duration, CPU, memory, GC, and replica balance. Use `groupBy: "route"` to find failing or slow
-  routes; outbound routes are labelled, while inbound routes may be unlabelled.
-- **Replica imbalance:** Compare workers with `groupBy: "worker"` before attributing a symptom to
-  the whole application.
-- **Error bursts:** Compare the burst with schedulers, batch instances, queue depth, retries,
-  dependency limits, and deployments.
-- **Memory:** Judge pressure by the old-generation pool, not total heap: compare its peak with its
-  limit (`oldGenPeakRatio`) and trend its baseline across days with the `memory` signal in 1h or 1d
-  buckets. A total-heap sawtooth is normal. A rising old-generation floor is a leak hypothesis, not
-  proof. Frequent old-generation collections (`oldGenGcCount`, `oldGenGcTimeMs`) that reclaim little
-  suggest pressure; also check a single replica diverging from peers.
-- **CPU and host memory:** Compare system and process CPU load (0–1) and average free physical
-  memory per worker before attributing latency to the application itself.
-- **Back pressure or rate limits:** Estimate effective concurrency from flow limits, source
-  consumers, batch-job concurrency, parallel scopes, replicas, and dependency quotas.
-- **Warnings:** Sample by pattern and verify recovery or impact. Do not declare a reconnect,
-  recursive-flow warning, ignored body, or cache miss harmless without checking the actual outcome.
-
-Use focused retrieval only after broad collection identifies a reason:
-
-```text
-mcp_anypoint-connect_get_logs(appName: "<APP>", environment: "<ENV>", search: "<SAFE_TERM>", lines: <LIMIT>)
-mcp_anypoint-connect_get_metrics_timeseries(environment: "<ENV>", appName: "<APP>", hoursBack: <HOURS>, signal: "traffic", granularity: "5m")
-mcp_anypoint-connect_get_metrics_timeseries(environment: "<ENV>", appName: "<APP>", hoursBack: <HOURS>, signal: "memory", granularity: "1h")
-```
-
-Choose `signal` from `traffic`, `latency`, `memory`, `cpu`, or `gc`. Use `1m` or `5m` granularity for
-an incident window and `1h` or `1d` for multi-day baseline trends. Use
-`mcp_anypoint-connect_raw_amql_query` only when the shaped tools cannot answer the question; it
-returns at most 2000 rows.
-
-Search with the least sensitive stable term that identifies the flow or operation. Do not expose
-raw results when a count and sanitized pattern are sufficient.
+After broad collection, read [references/conditional-signals.md](references/conditional-signals.md)
+for the latency, replica imbalance, error burst, memory, CPU and host memory, back pressure, and
+warning checks, and for focused log and time-series retrieval. Judge memory by the old-generation
+pool, not total heap. Use focused retrieval only after broad collection identifies a reason, and
+search with the least sensitive stable term.
 
 ### 6. Report the result
 
 Return the analysis in the requested location or directly in the response. Do not create a durable
-artifact unless the user asks for one.
+artifact unless the user asks for one. Read
+[references/report-and-lessons.md](references/report-and-lessons.md) for the required report
+structure and the reusable diagnostic lessons. State denominators and windows for every rate, present
+percentile latency with request count, keep expected business filters separate from technical
+failures, and preserve an `Unresolved` state when coverage cannot support attribution.
 
-Use this structure:
-
-```markdown
-# Runtime health analysis
-
-**Window:** <START> to <END> <TIMEZONE>
-**Scope:** <ROLE-BASED APPLICATION LIST>
-
-## Assessment
-One paragraph with current health, impact, and confidence.
-
-## Coverage
-Actual telemetry coverage and material gaps.
-
-## Health signals
-Comparable log, error, latency, memory, GC, and replica observations.
-
-## Correlated incidents
-Signature, affected path, count of unique transactions, evidence state, and user impact.
-
-## Deployment and change context
-Verified overlaps and what remains unproven.
-
-## Actions
-Prioritized immediate checks, durable improvements, owner role, and verification signal.
-
-## Unresolved questions
-Only questions whose answers would change the assessment.
-```
-
-State denominators and windows for every rate. Present percentile latency with request count. Keep
-expected business filters separate from technical failures, and preserve an `Unresolved` state when
-coverage cannot support attribution.
-
-## Reusable diagnostic lessons
-
-- Interpret recurring mechanisms through `mule-development` Classes A–E and its mandatory
-  cross-cutting gates. Use source inspection or troubleshooting before turning an operational signal
-  into a code conclusion.
-- A retry-exhaustion summary is often secondary evidence; locate the underlying connector or
-  business error with the same correlation ID.
-- Structured logger and exception-listener entries can describe one failed transaction; deduplicate
-  by correlation ID, flow, signature, and time before counting.
-- A deployment overlapping an error spike is a hypothesis until lifecycle messages, replica state,
-  version changes, or before/after behavior support it.
-- Application status and replica state are point-in-time observations. Distinguish desired,
-  transitioning, current, and last-successful versions when the API exposes them.
-- Percentiles are unstable at low request counts. Always report the sample size.
-- Correlation propagation must be verified in source or telemetry. Mule can adopt an inbound
-  `X-CORRELATION-ID`, but outbound propagation depends on configuration.
-- Default log level, custom error handling, and proxy behavior determine where a failure appears;
-  absence from an error-grouping tool is not evidence of absence.
-- The same error signature repeating every scheduler or poll cycle may be a dependency outage, a
-  permanent/poison record without terminal disposition, or intentional indefinite retry of retryable
-  errors. Hand off to troubleshooting Class D checks before assuming a terminal state is missing.
-- Logged application version that does not match the packaged artifact makes before/after and
-  deploy correlation unreliable—confirm version surfaces before attributing behavior to a release.
-- High-volume cache-miss ERROR noise can mean Object Store miss handling treats expected misses as
-  exceptional; confirm miss policy before scaling infrastructure.
-- Do not recommend concurrency or pool numbers without measured traffic, replica count, and
-  dependency capacity for this environment.
+Interpret recurring mechanisms through `mule-development` Classes A–E and its mandatory cross-cutting
+gates. Use source inspection or troubleshooting before turning an operational signal into a code
+conclusion. Do not recommend concurrency or pool numbers without measured traffic, replica count, and
+dependency capacity for this environment.
 
 ## Completion checklist
 
@@ -285,3 +203,15 @@ coverage cannot support attribution.
 - Match logged app version to packaged artifact when version metadata exists.
 - Remove secrets, payloads, identities, private endpoints, and raw correlation identifiers.
 - State what was not checked and why.
+
+## Gotchas
+
+- A monitoring tool error is a coverage gap (bad query, permission, or platform problem); an empty
+  result means no traffic was recorded in the window.
+- A total-heap sawtooth is normal collection activity. Judge pressure by the old-generation pool.
+- Audit timestamps are epoch values. Convert them explicitly and state the timezone before comparing
+  with error windows.
+- A deployment overlapping an error spike is a hypothesis, not a cause, until lifecycle messages or
+  before and after behavior support it.
+- Do not use a collection tool as the readiness probe, and do not treat a mid-collection tool error
+  as an environment finding.

@@ -28,6 +28,7 @@ Always read [Design workshop](references/design-workshop.md) and
 | Need | Read |
 | --- | --- |
 | Payloads, naming, errors, examples, privacy | [Data and errors](references/data-and-errors.md) |
+| Error envelope, status mapping, validation errors, bulk partial success | [Error contract](references/error-contract.md) |
 | Pagination, concurrency, idempotency, async work, compatibility | [Contract patterns](references/contract-patterns.md) |
 | RAML 1.0 authoring or RAML maintenance | [RAML 1.0](references/raml-1.0.md) |
 | OpenAPI 3.0 authoring or OAS maintenance | [OpenAPI 3.0](references/oas-3.0.md) |
@@ -116,3 +117,15 @@ decisions, and downstream handoffs.
 - Never use GET or HEAD request bodies, promise idempotency without a mechanism, or make a breaking change
   without explicitly identifying affected consumers and migration behavior.
 - Never publish, overwrite, or delete platform content merely because authentication works.
+
+## Gotchas
+
+- A route absent from the contract bound to APIKit returns 404 even when a flow for it exists, and a
+  bound path called with an unlisted method returns 405. Check the bound asset and version, not only
+  the file in the repository.
+- Do not pick OAS 3.1 for an APIKit-bound contract without confirming the installed APIKit version
+  supports it. Prefer the 3.0 reference until confirmed.
+- An Exchange search hit proves an asset exists, not that the project binds it. Confirm the binding
+  in the project before reasoning about its behavior.
+- Connector and runtime versions come from [`mule-dependencies`](../mule-dependencies/SKILL.md), never
+  from memory.

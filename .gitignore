@@ -4,3 +4,5 @@ __pycache__/
 # mkdocs build output
 .site/
 .tool-versions
+
+evals/results/

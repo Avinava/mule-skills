@@ -125,6 +125,8 @@ diagnosis is required.
   disposition, state/idempotency; plus applicable cross-cutting gates).
 - Use `mule-testing` for behavior-focused MUnit tests, faithful events and fixtures, boundary mocks,
   observable assertions, and test-only build configuration.
+- Use `mule-dependencies` to look up the latest or compatible connector, plugin, and runtime versions
+  instead of recalling them.
 - Validate query inputs and select every field consumed downstream.
 - Keep batch records and queue messages minimal and serializable; pin media types for the next
   consumer.

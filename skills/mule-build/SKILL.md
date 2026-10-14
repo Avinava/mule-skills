@@ -32,7 +32,8 @@ separate Anypoint operations owned by `mule-ops`.
 1. Read repository instructions, `pom.xml`, `mule-artifact.json`, build scripts, CI workflows, and
    relevant changelog or release policy.
 2. Review `git status --short` and preserve unrelated or uncommitted changes.
-3. Confirm required Java, Maven, Mule runtime, and connector versions.
+3. Confirm required Java, Maven, Mule runtime, and connector versions. For latest or compatible
+   dependency versions, use [`mule-dependencies`](../mule-dependencies/SKILL.md).
 4. Identify the project's established validation, test, package, and release commands.
 5. Check whether the requested build needs network or authenticated artifact repositories.
 
@@ -153,6 +154,7 @@ After a successful package:
 - confirm no secret-bearing configuration or unintended generated files entered the diff.
 
 For an authorized platform handoff, follow [Artifact identity handoff](references/artifact-handoff.md).
+When designing or reviewing a CI/CD pipeline, read [CI/CD gates](references/cicd-gates.md).
 Keep missing identity/digest support visible when using an older installed release.
 
 ## 8. Report
@@ -166,3 +168,12 @@ Provide:
 5. files changed by the workflow;
 6. version, commit, and tag only when release actions occurred;
 7. remaining warnings or user actions.
+
+## Gotchas
+
+- A green package does not prove embedded expressions are valid or that routes align with the bound
+  contract. Run the embedded-expression check from `mule-development` and the contract checks.
+- Mule connector and plugin versions in Maven Central are old uploads. Resolve versions with
+  [`mule-dependencies`](../mule-dependencies/SKILL.md); a `-DEV` or `-SNAPSHOT` build is not a release.
+- `-DskipTests` can make a build pass without evidence. Never use it to validate a change.
+- Publication, deployment, and runtime verification are separate outcomes. Report each on its own.

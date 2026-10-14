@@ -205,3 +205,13 @@ formal review, approve, request changes, or change PR state unless explicitly re
   workload and dependency evidence.
 - Do not expose secret values or sensitive log and payload content in findings.
 - Do not give `Ready` when required evidence is missing or a required check was skipped or failed.
+
+## Gotchas
+
+- Low-confidence observations belong in Open questions, not in findings.
+- Generic Mule advice is not a project finding. Cite the exact path and line that shows the behavior.
+- A green package or merged build does not prove route alignment or embedded-expression evaluation.
+- Connector and dependency currency claims need a lookup through
+  [`mule-dependencies`](../mule-dependencies/SKILL.md); a `-DEV` build or a Maven Central version is
+  not evidence of a current release.
+- Reviewing a pull request does not authorize inline comments, approval, or a state change.

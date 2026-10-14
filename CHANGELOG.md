@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.11.0 — 2026-10-14
+
+### Added
+
+- `mule-dependencies` skill with `mule_versions.py`: live lookup of the latest compatible connector, plugin and
+  runtime versions (Exchange asset API, Exchange Maven facade, MuleSoft releases repository; never Maven Central),
+  version filtering, a dated offline snapshot and a `check` command for project poms.
+- `mule-development` references: `dataweave.md`, `data-volume.md` and `secrets-and-tls.md`.
+- `mule-api-design/references/error-contract.md` and `mule-build/references/cicd-gates.md`.
+- `mule-troubleshooting` references: `jvm-diagnostics.md` and `deployment-failure-triage.md`.
+- `mule-review` checks for DataWeave streaming misuse, batch policy gaps, native DLQ versus custom counters,
+  policy and error-contract drift, pipeline gate bypasses, and secret and TLS hygiene.
+- `evals/` cases for `claude plugin eval` covering version lookup, DataWeave, MUnit, triage, error contracts and
+  data volume.
+- Validator rules: SKILL.md at most 500 lines, allowed skill folders, contents sections on long references, and
+  `--help` on every skill script.
+- A Gotchas section in every skill.
+
+### Changed
+
+- `mule-development/resources/` is now `references/`.
+- `mule-troubleshooting` and `mule-ops` move lookup material into references; both SKILL.md files are shorter.
+- The documentation audit skips `evals/results/`.
+
 ## 1.10.0 — 2026-10-05
 
 - Pin `anypoint-connect@0.15.0`, which consolidates its monitoring tools and aligns tool naming.

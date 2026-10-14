@@ -86,14 +86,14 @@ commit or authenticate to Anypoint unless I approve it.
 ```
 
 The agent inspects first, detects an existing install, previews file and MCP changes, avoids
-duplicate configuration, installs all eight skills, validates the result, and leaves commit and
+duplicate configuration, installs all nine skills, validates the result, and leaves commit and
 authentication decisions with you. [Walk through the result](getting-started.md).
 
 ## What gets installed
 
 | Layer | Purpose | Credentials |
 | --- | --- | --- |
-| Eight `mule-*` skills | Decide how to design, implement, test, document, build, review, operate, and diagnose | None |
+| Nine `mule-*` skills | Decide how to design, implement, test, document, build, review, operate, diagnose, and keep dependencies current | None |
 | `mule-lint@2.0.0` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
 | `mule-build@3.0.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
 | `anypoint-connect@0.15.0` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
