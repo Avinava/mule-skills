@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.12.1 — 2026-10-26
+
+### Changed
+
+- `mule-ops` safe change: the recreate update strategy is now measured, not assumed. On a CloudHub
+  2.0 sandbox, rolling overlapped old and new replicas by 7 to 32 seconds, while recreate and
+  stop-start never overlapped. Stop-start had about half the downtime, so use it for the change and
+  persist recreate on subscription apps to protect later deployments. Scaling under rolling also
+  overlaps.
+- The Salesforce profile and Class E subscription sources cite the measurement.
+
 ## 1.12.0 — 2026-10-26
 
 ### Added

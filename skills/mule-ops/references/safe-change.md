@@ -51,13 +51,30 @@ authorizes a change. Confirm the environment, and its production flag, before an
 
 | The app has | Use | Why |
 | --- | --- | --- |
-| Subscription, streaming or polling sources, or schedulers | `mode: stopStart`, or `updateStrategy: recreate` | Old and new replicas never process events together. A rolling update processes every event of the overlap twice |
+| Subscription, streaming or polling sources, or schedulers | `mode: stopStart` for the change, and `updateStrategy: recreate` persisted on the app | Old and new replicas never process events together. A rolling update processes every event of the overlap twice |
 | Only request-driven listeners | Default in-place (rolling) update | No downtime; requests drain normally |
 | A replay position held in memory only | Stop-start, then confirm the start position | A "new events only" start loses everything published while stopped |
 
-`stopStart` is the safe default. The recreate model is documented for CloudHub 2.0
-([updates](https://docs.mulesoft.com/cloudhub-2/ch2-update-apps)), but confirm on a sandbox that
-replicas really stop before new ones start before relying on it for a subscription app.
+Both no-overlap options were measured on a CloudHub 2.0 shared-region sandbox (runtime 4.9, Java
+17, 2026-10-26) with a probe whose scheduler logs its generation and pod every second. Gap is the
+time from the old generation's last tick to the new one's first; negative means both ran:
+
+| Mode | 1 replica | 2 replicas |
+| --- | --- | --- |
+| Rolling | -7 s (overlap) | -32 s (overlap) |
+| Recreate (property change or artifact version bump) | +108 s | +110 to +112 s |
+| `stopStart` | +58 s | +57 s |
+
+- Recreate never overlapped, whether it was set in the same update or already persisted, for a
+  property change and for an artifact version bump. It is documented for CloudHub 2.0
+  ([updates](https://docs.mulesoft.com/cloudhub-2/ch2-update-apps)).
+- `stopStart` gave about half the downtime of recreate. Prefer it for a change you make now.
+- Recreate is a persistent app setting, so it also protects later deployments made from Runtime
+  Manager or a pipeline that would otherwise default to rolling. Set it on every subscription app.
+- Rolling overlap grows with replica count. Scaling the replica count under rolling also replaced
+  the running pod with an overlap, so treat a scale operation as a deployment.
+- These are single measurements on one target and runtime. Re-measure on a private space or Runtime
+  Fabric before relying on the numbers there.
 
 Read the replay and duplicate rules in Class E
 ([Subscription sources](../../mule-development/references/invariant-classes.md#subscription-sources))
