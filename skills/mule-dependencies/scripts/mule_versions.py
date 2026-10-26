@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import os
 import re
@@ -38,6 +39,7 @@ JAVA_SUPPORT_URL = (
     "https://raw.githubusercontent.com/mulesoft/docs-general/HEAD/modules/ROOT/pages/java-support.adoc"
 )
 SUPPORT_POLICY_URL = "https://docs.mulesoft.com/release-notes/mule-runtime/lts-edge-release-cadence"
+RELEASE_NOTES_URL = "https://docs.mulesoft.com/release-notes/{path}"
 
 CONNECTOR_TTL = 24 * 3600
 RUNTIME_TTL = 7 * 24 * 3600
@@ -69,6 +71,32 @@ CONNECTORS: dict[str, tuple[str, str]] = {
     "anypoint-mq": ("com.mulesoft.connectors", "anypoint-mq-connector"),
 }
 
+# Release-notes pages under RELEASE_NOTES_URL. Core connectors use a different naming scheme.
+RELEASE_NOTES: dict[str, str] = {
+    "http": "connector/connector-http",
+    "db": "connector/connector-db",
+    "sftp": "connector/connector-sftp",
+    "ftp": "connector/connector-ftp",
+    "file": "connector/connector-file",
+    "jms": "connector/connector-jms",
+    "vm": "connector/connector-vm",
+    "email": "connector/connector-email",
+    "objectstore": "connector/object-store-connector-release-notes-mule-4",
+    "sockets": "connector/connector-sockets",
+    "wsc": "connector/connector-wsc",
+    "apikit": "apikit/apikit-release-notes",
+    "validation": "mule-runtime/module-validation",
+    "salesforce": "connector/salesforce-connector-release-notes-mule-4",
+    "kafka": "connector/kafka-connector-release-notes-mule-4",
+    "s3": "connector/amazon-s3-connector-release-notes-mule-4",
+    "sqs": "connector/amazon-sqs-connector-release-notes-mule-4",
+    "mongodb": "connector/mongodb-connector-release-notes-mule-4",
+    "workday": "connector/workday-connector-release-notes-mule-4",
+    "sap": "connector/sap-connector-release-notes-mule-4",
+    "netsuite": "connector/netsuite-connector-release-notes-mule-4",
+    "anypoint-mq": "connector/anypoint-mq-connector-release-notes-mule-4",
+}
+
 # Build tooling lives in the MuleSoft releases repository, not in Exchange.
 PLUGINS: dict[str, tuple[str, str]] = {
     "munit-runner": ("com.mulesoft.munit", "munit-runner"),
@@ -79,6 +107,15 @@ PLUGINS: dict[str, tuple[str, str]] = {
 
 PRERELEASE_RE = re.compile(r"[-.]?(dev|snapshot|rc|m|alpha|beta)\d*($|[-.])", re.IGNORECASE)
 JAVA_FLAG_RE = re.compile(r"^is-java-(\d+)-supported$")
+NOTES_HEADING_RE = re.compile(r'<h2 id="(\d+(?:-\d+)+)"[^>]*>')
+NOTES_DATE_RE = re.compile(
+    r"\b(January|February|March|April|May|June|July|August|September|October|November|December)"
+    r"\s+\d{1,2},\s+\d{4}\b"
+)
+NOTES_MULE_RE = re.compile(r"Mule\s+(4\.\d+(?:\.\d+)?)\s+and\s+later")
+NOTES_JAVA_RE = re.compile(r"(?:Open)?JDK\s+(\d+(?:(?:\s*,)?\s*(?:and|or)?\s*\d+)*)", re.IGNORECASE)
+NOTES_MAX_SNIPPETS = 3
+NOTES_SNIPPET_CHARS = 300
 
 
 class NotFound(Exception):
@@ -327,6 +364,93 @@ def runtime_support(fetcher: Fetcher) -> dict[str, Any]:
     if not rows:
         raise ValueError("could not parse the Java support table")
     return {"source": "mulesoft-docs-general", "fetchedAt": fetched_at, "runtimes": rows}
+
+
+def html_text(fragment: str) -> str:
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", fragment))).strip()
+
+
+def parse_release_notes(page: str) -> list[dict[str, Any]]:
+    """Split a release-notes page into one section per version heading, newest first as published."""
+    headings = list(NOTES_HEADING_RE.finditer(page))
+    sections: list[dict[str, Any]] = []
+    for index, heading in enumerate(headings):
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(page)
+        body = page[heading.end() : end]
+        # The last version section ends where the next non-version h2 (for example See Also) starts.
+        trailing = body.find("<h2")
+        if trailing != -1:
+            body = body[:trailing]
+        text = html_text(body)
+        date = NOTES_DATE_RE.search(text)
+        mule = NOTES_MULE_RE.search(text)
+        java = NOTES_JAVA_RE.search(text)
+        sections.append(
+            {
+                "version": heading.group(1).replace("-", "."),
+                "anchor": heading.group(1),
+                "date": date.group(0) if date else None,
+                "minMuleVersion": mule.group(1) if mule else None,
+                "java": sorted({int(n) for n in re.findall(r"\d+", java.group(1))}) if java else None,
+                "text": text,
+            }
+        )
+    return sections
+
+
+def snippets(text: str, term: str) -> list[str]:
+    """Text around each occurrence of the term, at most NOTES_MAX_SNIPPETS windows."""
+    found: list[str] = []
+    lowered = text.lower()
+    half = (NOTES_SNIPPET_CHARS - len(term)) // 2
+    start = lowered.find(term)
+    while start != -1 and len(found) < NOTES_MAX_SNIPPETS:
+        left = max(0, start - half)
+        right = min(len(text), start + len(term) + half)
+        found.append(("…" if left else "") + text[left:right].strip() + ("…" if right < len(text) else ""))
+        start = lowered.find(term, right)
+    return found
+
+
+def notes_result(fetcher: Fetcher, name: str, grep: str | None, url: str | None) -> dict[str, Any]:
+    if url is None:
+        if name not in RELEASE_NOTES:
+            raise NotFound(
+                f"no release-notes page known for '{name}'; pass --url or use one of: {', '.join(sorted(RELEASE_NOTES))}"
+            )
+        url = RELEASE_NOTES_URL.format(path=RELEASE_NOTES[name])
+    body, fetched_at = fetcher.get(url, CONNECTOR_TTL)
+    sections = parse_release_notes(body)
+    if not sections:
+        raise ValueError(f"no version sections found on {url}; the page layout may have changed")
+    ordered = sorted(sections, key=lambda item: version_key(item["version"]))
+    result: dict[str, Any] = {
+        "connector": name,
+        "url": url,
+        "fetchedAt": fetched_at,
+        "coverage": {"oldest": ordered[0]["version"], "newest": ordered[-1]["version"]},
+        "verified": True,
+        "source": "mulesoft-release-notes",
+    }
+    fields = ("version", "date", "minMuleVersion", "java")
+    if grep is None:
+        result["versions"] = [{key: section[key] for key in fields} for section in reversed(ordered)]
+        return result
+    term = grep.lower()
+    matches = [
+        {**{key: section[key] for key in fields}, "url": f"{url}#{section['anchor']}", "snippets": snippets(section["text"], term)}
+        for section in ordered
+        if term in section["text"].lower()
+    ]
+    result["grep"] = grep
+    result["matches"] = list(reversed(matches))
+    result["earliestMatch"] = matches[0]["version"] if matches else None
+    result["note"] = (
+        f"earliest match within this page only; it covers {ordered[0]['version']} to {ordered[-1]['version']}. "
+        "Older releases may be on an archived page, so a match at the oldest version is a lower bound, not proof "
+        "the feature started there. A mention can be a fix or a removal; read the snippet."
+    )
+    return result
 
 
 # ---------------------------------------------------------------------------------------------
@@ -654,6 +778,13 @@ def build_parser() -> Parser:
 
     sub.add_parser("runtime", help="Mule runtime channels with supported Java versions")
 
+    notes = sub.add_parser(
+        "notes", help="release-notes sections of a connector, optionally only those that mention a term"
+    )
+    notes.add_argument("name", help=f"alias with a known page ({', '.join(sorted(RELEASE_NOTES))}) or any label with --url")
+    notes.add_argument("--grep", help="case-insensitive term, e.g. 'client credentials'")
+    notes.add_argument("--url", help="release-notes page URL for a connector without a known page")
+
     check = sub.add_parser("check", help="compare a project's mule-plugin dependencies with latest compatible releases")
     check.add_argument("pom", type=Path)
     check.add_argument("--mule", help="override the project's minMuleVersion")
@@ -707,6 +838,16 @@ def run(args: argparse.Namespace) -> int:
             data["supportPolicy"] = SUPPORT_POLICY_URL
             data["note"] = "standard and extended support end dates change; confirm on the support policy page"
             emit("runtime", None, data, fetcher, args.offline)
+        elif args.command == "notes":
+            if args.offline:
+                log("notes requires network access; the result is unresolved offline")
+                return EXIT_NETWORK
+            if args.url and not args.url.startswith("https://docs.mulesoft.com/"):
+                raise NotFound("--url must be a https://docs.mulesoft.com/ page")
+            data = notes_result(fetcher, args.name, args.grep, args.url)
+            emit("notes", {"name": args.name, "grep": args.grep}, data, fetcher, False)
+            if args.grep is not None and not data["matches"]:
+                return EXIT_NOT_FOUND
         elif args.command == "check":
             if args.offline:
                 log("check requires network access; run without --offline")
@@ -727,7 +868,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if not args.command and not args.refresh_snapshot:
-        parser.error("a command is required (connector, plugins, runtime, check)")
+        parser.error("a command is required (connector, plugins, runtime, notes, check)")
     return run(args)
 
 

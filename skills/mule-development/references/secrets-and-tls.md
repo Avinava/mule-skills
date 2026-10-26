@@ -10,13 +10,14 @@ Privacy and observability gate there as well, since secrets must never reach log
 
 1. [Principles](#principles)
 2. [Secure properties lifecycle](#secure-properties-lifecycle)
-3. [Rotation](#rotation)
-4. [External vault through a properties provider](#external-vault-through-a-properties-provider)
-5. [TLS context and truststore hygiene](#tls-context-and-truststore-hygiene)
-6. [Mutual TLS setup](#mutual-tls-setup)
-7. [OAuth client credentials token cache and refresh](#oauth-client-credentials-token-cache-and-refresh)
-8. [Review checklist](#review-checklist)
-9. [Verify against installed runtime and connector versions](#verify-against-installed-runtime-and-connector-versions)
+3. [Secret supply models](#secret-supply-models)
+4. [Rotation](#rotation)
+5. [External vault through a properties provider](#external-vault-through-a-properties-provider)
+6. [TLS context and truststore hygiene](#tls-context-and-truststore-hygiene)
+7. [Mutual TLS setup](#mutual-tls-setup)
+8. [OAuth client credentials token cache and refresh](#oauth-client-credentials-token-cache-and-refresh)
+9. [Review checklist](#review-checklist)
+10. [Verify against installed runtime and connector versions](#verify-against-installed-runtime-and-connector-versions)
 
 ## Principles
 
@@ -48,6 +49,63 @@ without exposing the secrets.
 - A key held in the same repository, image, or file as the encrypted values gives no protection.
 - Fail fast at startup when a required secure property cannot be decrypted, with a message that
   names the property but not its value.
+
+## Secret supply models
+
+A secret reaches a Mule app through one of two models. The placeholder must match the model, and a
+mismatch fails at deployment or startup with an unresolved property, not with a clear message.
+
+| Model | Where the value lives | Reference in XML | Declared in |
+|---|---|---|---|
+| A. Encrypted file | `![...]` value in a properties or YAML file read by `secure-properties:config`; the key arrives at deploy time | `${secure::key}` | The `secure-properties:config` element and its file |
+| B. Platform secure property | A Runtime Manager secure or protected application property, set per environment | `${key}` | `mule-artifact.json` `secureProperties` (masks on CloudHub 1.0; declare it anyway for portability) |
+
+- `secure::` is required for, and resolved by, the Secure Configuration Properties module from its
+  encrypted file ([secure configuration properties](https://docs.mulesoft.com/mule-runtime/latest/secure-configuration-properties)).
+  A Runtime Manager property is supplied to the app as a plain property and read as `${key}`. The
+  documentation does not say what `${secure::key}` does for a key that exists only in Runtime
+  Manager; in practice the deployment failed. Treat the mix as a defect, not a style choice.
+- Pick one model per key, record it in the handoff, and keep the placeholder, the declaration and
+  the deployment input consistent. Both models can coexist in one app for different keys; the
+  documented way to combine them is to supply the module's decryption key as a platform secure
+  property. When a
+  module-backed key is also listed in `secureProperties`, list it with its `secure::` prefix.
+- Masking differs by target, so verify on the installed target before relying on it:
+  - CloudHub 1.0: list keys in `mule-artifact.json` `secureProperties` and set values on the
+    Runtime Manager properties tab
+    ([CloudHub secure properties](https://docs.mulesoft.com/cloudhub/secure-application-properties)).
+  - CloudHub 2.0: masking through `mule-artifact.json` or a file does not take effect; protect the
+    property in Runtime Manager. Runtime Manager values override bundled ones
+    ([CloudHub 2.0 properties](https://docs.mulesoft.com/cloudhub-2/ch2-manage-props)).
+  - Runtime Fabric: protected properties reach the app unencrypted as custom properties and take
+    precedence ([Runtime Fabric](https://docs.mulesoft.com/runtime-fabric/latest/manage-secure-properties)).
+  - Hybrid servers: confirm who can read Runtime Manager values before choosing model B; model A
+    keeps the value encrypted at rest.
+- Static checks follow the same split. mule-build 3.1 or later reads `secureProperties`: a
+  declared key referenced as `${key}` passes, a declared key referenced with `secure::` that no
+  scanned file defines encrypted is an error (MB-SEC-006). `secure::` with no
+  `secure-properties:config`, or with a config but no scanned file defining the key, is always a
+  warning (MB-SEC-007): MuleSoft does not document how `secure::` resolves without the module, and
+  a shared domain may provide one. On CloudHub
+  2.0 and Runtime Fabric a protected key need not be declared, but declare it anyway so the checks
+  and other targets agree, or record a reviewed `security.allow` exception in `mule-build.yaml`. See
+  [the mule-lint standards protocol](mule-lint-standards.md) for the lint rule that still assumes
+  model A. Never change a model B reference to `secure::` to satisfy a check.
+- A plaintext Runtime Manager property whose name looks secret is a finding: move it to a secure or
+  protected property and rotate it if it was readable.
+
+### Supplying values without echoing them
+
+Never pass a secret value as a command argument, in a tool call or in chat, because all three are
+recorded. Resolve it on the machine that sends it:
+
+- anypoint-connect 0.16 or later: the settings change takes secret sources (a project `.env`,
+  `.properties` or flat JSON file, or environment variables) and resolves them on the server, and it
+  can move an existing plaintext property to secure without reading it back.
+- Without that tool: build the request body from the escrowed file with `jq` and send it on stdin,
+  for example `jq -n --rawfile v <file> '{...}' | curl --data @- ...`, so the value never appears in
+  `argv`, shell history or the transcript. Keep the escrow file outside the repository with owner-only
+  permissions.
 
 ## Rotation
 
@@ -140,6 +198,8 @@ token endpoint is a shared, rate limited dependency.
 ## Review checklist
 
 - Every secret has an owner, a source of truth, and a rotation procedure.
+- Every secret key uses one supply model, and its placeholder and declaration match that model.
+- No secret-looking key is stored as a plaintext platform property.
 - No secret value appears in source, history, fixtures, logs, errors, or handoff text.
 - Decryption keys and encrypted values are stored and delivered separately.
 - Certificate and hostname validation are enabled in every environment.

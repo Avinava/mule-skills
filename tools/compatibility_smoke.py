@@ -35,6 +35,9 @@ ANYPOINT_REFERENCE_FILES = (
     "skills/mule-troubleshooting/SKILL.md",
     "skills/mule-api-design/references/anypoint-design.md",
     "skills/mule-build/references/artifact-handoff.md",
+    "skills/mule-ops/references/safe-change.md",
+    "skills/mule-connectors/SKILL.md",
+    "skills/mule-connectors/references/salesforce.md",
     "docs/anypoint-access.md",
     "docs/mcp-servers.md",
 )
@@ -225,7 +228,8 @@ def stop_owned_process(process: subprocess.Popen) -> None:
                 os.killpg(process.pid, sig)
             elif process.poll() is None:
                 process.kill() if sig == signal.SIGKILL else process.terminate()
-        except ProcessLookupError:
+        except (ProcessLookupError, PermissionError):
+            # macOS reports EPERM for a group whose remaining members are zombies: it is gone.
             pass
     terminate(signal.SIGTERM)
     if os.name == "posix":
@@ -234,7 +238,7 @@ def stop_owned_process(process: subprocess.Popen) -> None:
             process.poll()
             try:
                 os.killpg(process.pid, 0)
-            except ProcessLookupError:
+            except (ProcessLookupError, PermissionError):
                 break
             time.sleep(0.05)
         else:

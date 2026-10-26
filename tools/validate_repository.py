@@ -23,6 +23,16 @@ SKILL_CATALOG_ROW_RE = re.compile(r"^\|\s*\[`(mule-[a-z0-9-]+)`\]\(")
 SKILL_MAX_LINES = 500
 REFERENCE_TOC_LINES = 100
 ALLOWED_SKILL_DIRS = ("references", "scripts", "assets", "agents")
+CONNECTOR_PROFILE_DIR = "skills/mule-connectors/references"
+VERSION_SNAPSHOT = "skills/mule-dependencies/assets/version-snapshot.json"
+PROFILE_KEYS = ("connector", "connector-version", "verified")
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# Local-only list of real client, organization and person identifiers. It is gitignored so the list
+# itself never enters history; when present, no published file may contain an entry.
+IDENTIFIER_DENYLIST = ".identifier-denylist"
+DENYLIST_ROOTS = ("skills", "docs", "evals", "install", "tools", "tests")
+DENYLIST_FILES = ("README.md", "CHANGELOG.md", "SETUP.md", "ecosystem.json", "mkdocs.yml")
+DENYLIST_SUFFIXES = {".md", ".py", ".json", ".yaml", ".yml", ".toml", ".sh", ".txt"}
 CONTENTS_HEADING_RE = re.compile(r"^#{2,3}\s+(?:table of )?contents\s*$", re.IGNORECASE | re.MULTILINE)
 READINESS_REFERENCE = "references/anypoint-readiness.md"
 READINESS_SKILLS = (
@@ -735,6 +745,76 @@ def validate_execution_and_artifact_protocol(root: Path) -> list[str]:
     return findings
 
 
+def simple_frontmatter(text: str) -> dict[str, str]:
+    match = FRONTMATTER_RE.match(text)
+    if not match:
+        return {}
+    values: dict[str, str] = {}
+    for line in match.group(1).splitlines():
+        key, separator, value = line.partition(":")
+        if separator:
+            values[key.strip()] = value.strip().strip("\"'")
+    return values
+
+
+def validate_connector_profiles(root: Path) -> list[str]:
+    """Each curated connector profile states what it was verified against and does not lag a major."""
+    findings: list[str] = []
+    directory = root / CONNECTOR_PROFILE_DIR
+    if not directory.is_dir():
+        return findings
+    try:
+        snapshot = json.loads((root / VERSION_SNAPSHOT).read_text(encoding="utf-8")).get("connectors", {})
+    except (OSError, ValueError):
+        return [f"{VERSION_SNAPSHOT}: missing or invalid; connector profiles cannot be checked"]
+    for path in sorted(directory.glob("*.md")):
+        relative = path.relative_to(root)
+        values = simple_frontmatter(path.read_text(encoding="utf-8"))
+        missing = [key for key in PROFILE_KEYS if not values.get(key)]
+        if missing:
+            findings.append(f"{relative}: connector profile frontmatter missing {', '.join(missing)}")
+            continue
+        if not DATE_RE.match(values["verified"]):
+            findings.append(f"{relative}: verified must be YYYY-MM-DD")
+        entry = snapshot.get(values["connector"])
+        if entry is None:
+            findings.append(f"{relative}: connector {values['connector']!r} is not a mule_versions.py alias")
+            continue
+        profile_major = values["connector-version"].split(".")[0]
+        latest_major = str(entry.get("latest", "")).split(".")[0]
+        if profile_major.isdigit() and latest_major.isdigit() and int(profile_major) < int(latest_major):
+            findings.append(
+                f"{relative}: profile verified against {values['connector-version']} but the snapshot's latest "
+                f"is {entry['latest']}; re-verify the profile against the new major"
+            )
+    return findings
+
+
+def validate_identifier_denylist(root: Path) -> list[str]:
+    """Names the file only, never the matched entry, so the output is safe to share."""
+    path = root / IDENTIFIER_DENYLIST
+    if not path.is_file():
+        return []
+    terms = [
+        line.strip().lower()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not terms:
+        return []
+    candidates = [root / name for name in DENYLIST_FILES]
+    for directory in DENYLIST_ROOTS:
+        candidates.extend(p for p in (root / directory).rglob("*") if p.suffix in DENYLIST_SUFFIXES)
+    findings: list[str] = []
+    for candidate in sorted(set(candidates)):
+        if not candidate.is_file() or "results" in candidate.relative_to(root).parts:
+            continue
+        text = candidate.read_text(encoding="utf-8", errors="replace").lower()
+        if any(term in text for term in terms):
+            findings.append(f"{candidate.relative_to(root)}: contains a denylisted identifier")
+    return findings
+
+
 def validate_repository(root: Path) -> list[str]:
     findings: list[str] = []
     findings.extend(validate_skills(root))
@@ -751,6 +831,8 @@ def validate_repository(root: Path) -> list[str]:
     findings.extend(validate_site_nav(root))
     findings.extend(validate_anypoint_readiness(root))
     findings.extend(validate_execution_and_artifact_protocol(root))
+    findings.extend(validate_connector_profiles(root))
+    findings.extend(validate_identifier_denylist(root))
     return findings
 
 

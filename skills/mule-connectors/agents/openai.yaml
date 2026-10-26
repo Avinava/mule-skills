@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mule Connectors"
+  short_description: "Connector auth, identity, sources and log signatures with evidence"
+  default_prompt: "Use $mule-connectors to check which connection type, token rules and identity checks this connector version needs."

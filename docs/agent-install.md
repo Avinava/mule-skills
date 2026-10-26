@@ -72,7 +72,7 @@ git clone --depth 1 https://github.com/Avinava/mule-skills.git "$MULE_SKILLS_TMP
 mkdir -p .agents/skills
 ```
 
-Copy all nine skills:
+Copy all ten skills:
 
 | Skill | Contents |
 | --- | --- |
@@ -81,10 +81,11 @@ Copy all nine skills:
 | `mule-development` | `SKILL.md`, metadata, invariant classes, checklist, embedded-expression checker |
 | `mule-testing` | `SKILL.md`, metadata, behavior model, value-safe MUnit inventory |
 | `mule-troubleshooting` | `SKILL.md`, metadata |
-| `mule-ops` | `SKILL.md`, metadata |
+| `mule-ops` | `SKILL.md`, metadata, readiness, signal, report and safe-change references |
 | `mule-review` | `SKILL.md`, metadata, review domains, finding policy |
 | `mule-build` | `SKILL.md`, metadata |
 | `mule-dependencies` | `SKILL.md`, metadata, sources reference, version lookup script, dated offline snapshot |
+| `mule-connectors` | `SKILL.md`, metadata, curated connector profiles |
 
 ```bash
 for skill_dir in "$MULE_SKILLS_TMP"/mule-skills/skills/*; do
@@ -118,13 +119,13 @@ the existing file first and add only the server keys it lacks.
 
 If the destination already defines a server with the same name, leave it alone and tell the user.
 
-These pins were verified on **2026-10-05**:
+These pins were verified on **2026-10-26**:
 
 | Package | Source | Node.js |
 | --- | --- | ---: |
-| [`@sfdxy/anypoint-connect@0.15.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.15.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=22.0.0` |
-| [`@sfdxy/mule-build@3.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.0.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
-| [`@sfdxy/mule-lint@2.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.0.0) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
+| [`@sfdxy/anypoint-connect@0.16.2`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.16.2) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=22.0.0` |
+| [`@sfdxy/mule-build@3.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.1.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
+| [`@sfdxy/mule-lint@2.1.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.1.1) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 
 Use Node.js `>=22.0.0` to satisfy all three; Node.js 24 LTS is recommended. Do not change a pin
 without reviewing the linked source repository and its release notes.

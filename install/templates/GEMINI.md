@@ -17,6 +17,7 @@ current source are authoritative over reusable examples.
 | Documentation creation and targeted refreshes | `mule-docs` |
 | Change, PR, project, or release-readiness review | `mule-review` |
 | Latest or compatible connector, plugin, or runtime versions | `mule-dependencies` |
+| Connector authentication, identity, subscription sources, and log signatures | `mule-connectors` |
 | Validation, packaging, or an explicitly requested release | `mule-build` |
 
 ## Development

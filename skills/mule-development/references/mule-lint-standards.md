@@ -57,3 +57,21 @@ authorized platform operations. Skills compose these independent packages; build
 not require a mandatory lint dependency. A secure-reference precondition is a narrow packaging
 check, not proof of encryption correctness, runtime secret handling, vulnerability absence, or a
 full security audit. Report exactly which checks ran and the gaps left behind.
+
+## Secret supply models in lint
+
+From mule-lint 2.1 the secret rules follow both
+[secret supply models](secrets-and-tls.md#secret-supply-models), matching mule-build 3.1:
+
+- [`SEC-007`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#sec-007-connector-credentials-secured) accepts a plain `${key}` that is declared
+  as a plain `secureProperties` entry; an undeclared plain credential reference is a warning.
+- [`SEC-017`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#sec-017-platform-secure-property-referenced-with-secure) (error, mule-build
+  MB-SEC-006): a platform-declared key referenced with `secure::`.
+- [`SEC-018`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#sec-018-unresolved-secure-reference) (warning, MB-SEC-007): a `secure::` reference
+  with no `secure-properties:config`, or one that no scanned file defines.
+- Connector rules: [`LOG-006`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#log-006-connector-debug-logging) for connector-internal loggers at
+  DEBUG or TRACE, and [`SF-003`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#sf-003-salesforce-replay-listener-loses-events) for a Salesforce
+  replay listener that loses events on restart.
+
+With an older pinned mule-lint, `SEC-007` still asks for `${secure::key}` on every credential.
+Treat that as a known false positive for platform-supplied keys and keep the `${key}` reference.

@@ -23,7 +23,7 @@ That writes to `.claude/settings.json`, so everyone who clones the repository ge
 
 ## What you get
 
-Nine skills, namespaced under the plugin:
+Ten skills, namespaced under the plugin:
 
 | Skill | Use it for |
 | --- | --- |
@@ -36,6 +36,7 @@ Nine skills, namespaced under the plugin:
 | `mule-review` | Working changes, commits, branches, PRs, release readiness |
 | `mule-build` | Local validation, tests, packaging, runtime work, versioning, and tags |
 | `mule-dependencies` | Latest and compatible connector, plugin, and runtime versions, pom upgrade checks |
+| `mule-connectors` | Connector authentication by version, identity, subscription sources, log signatures |
 
 Claude selects them from their descriptions, so you can just describe the task. Plugin skills are
 namespaced, so they appear as `mule-skills:mule-review`, `mule-skills:mule-docs`, and so on — use
@@ -49,9 +50,9 @@ The plugin bundles credential-free launch configuration for three pinned servers
 
 | Server | Pin | Role |
 | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@3.0.0` | Validation, testing, packaging, local runtime, versioning, tagging, secure-reference preconditions |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@2.0.0` | Canonical Mule standards, static analysis, XML formatting, RAML/OAS validation |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.15.0` | Authorized Design Center, Exchange, Governance, runtime evidence, mutations |
+| [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@3.1.0` | Validation, testing, packaging, local runtime, versioning, tagging, secure-reference preconditions |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@2.1.1` | Canonical Mule standards, static analysis, XML formatting, RAML/OAS validation |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.16.2` | Authorized Design Center, Exchange, Governance, runtime evidence, mutations |
 
 Plugin MCP servers start automatically when the plugin is enabled, so the first session after
 installing pays three `npx` cold starts. They are cached afterwards.

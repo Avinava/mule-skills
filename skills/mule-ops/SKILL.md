@@ -1,6 +1,6 @@
 ---
 name: mule-ops
-description: Analyze MuleSoft runtime health across one or more applications using Anypoint logs, metrics, deployment state, and cross-system correlation. Use for production or non-production health checks, incident windows, error spikes, latency or memory investigations, deployment-impact checks, and recurring operational reviews. Use the available Anypoint connector when configured, or apply the same evidence workflow to exported telemetry. Do not use for source-code changes unless the user also requests a fix.
+description: Analyze MuleSoft runtime health across one or more applications using Anypoint logs, metrics, deployment state, and cross-system correlation. Use for production or non-production health checks, incident windows, error spikes, latency or memory investigations, deployment-impact checks, and recurring operational reviews. Also use to plan and verify an authorized change to a running app (version, settings, secrets, runtime, integration identity) without losing or duplicating events. Use the available Anypoint connector when configured, or apply the same evidence workflow to exported telemetry. Do not use for source-code changes unless the user also requests a fix.
 ---
 
 # Mule Operations Analysis
@@ -51,6 +51,11 @@ When the user explicitly requests publication or deployment of a locally built J
 readiness gate. Preserve the reviewed digest and embedded identity, disclose any approved coordinate
 remap, and keep publication, deployment, and runtime verification outcomes separate. Operational
 analysis alone never authorizes a mutation.
+
+For any authorized change to a running app (version, settings or secrets, runtime, authentication
+flow or integration user), follow [Safe change](references/safe-change.md): compare the deployed
+artifact with the repository first, check the environment boundary and identity dependents, deploy
+subscription apps with stop-start rather than rolling, and verify with side-effect-free probes.
 
 ## Evidence states
 
@@ -213,5 +218,9 @@ dependency capacity for this environment.
   with error windows.
 - A deployment overlapping an error spike is a hypothesis, not a cause, until lifecycle messages or
   before and after behavior support it.
+- A deployed artifact can differ from the repository. Compare them before attributing behavior to
+  a commit or changing the app.
+- Classify connector log lines against the `mule-connectors` profile's known signatures before
+  counting them as errors.
 - Do not use a collection tool as the readiness probe, and do not treat a mid-collection tool error
   as an environment finding.
