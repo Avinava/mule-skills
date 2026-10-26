@@ -1,5 +1,38 @@
 # Changelog
 
+## Unreleased (1.12.0)
+
+### Added
+
+- `mule-connectors` skill: connector profiles whose claims carry a version range, documented or
+  observed evidence and a re-verify step, plus a live method for connectors without a profile.
+  The first profile is Salesforce: connection types by version (client credentials since 11.0.0,
+  OAuth username-password removed in 12.0.0), My Domain token URL, run-as identity, Integration
+  user limits, replay options and retention, the benign `403::Unknown client` reconnect, the
+  streaming logger that writes session identifiers, and `LoginHistory` / identity-URL checks.
+- `mule_versions.py notes <connector> [--grep <term>]`: per-version date, minimum Mule version, Java
+  levels and matching snippets from the MuleSoft release notes, with the page's version coverage so
+  an "earliest version" claim is a stated lower bound.
+- `mule-ops/references/safe-change.md`: compare the deployed artifact with the repository, check the
+  environment boundary and identity dependents, deploy subscription apps with stop-start or
+  recreate, supply secrets without echoing them, and verify with side-effect-free probes.
+- Secret supply models in `mule-development/references/secrets-and-tls.md`: encrypted file with
+  `${secure::key}` versus platform secure property with `${key}`, per-target masking, and the
+  mule-build 3.1 MB-SEC-006/007 checks.
+- Class E subscription sources: replay start position, duplicates from overlapping replicas, and
+  reconnects.
+- Review, troubleshooting and build guidance for mixed supply models, sensitive connector loggers,
+  non-production configs that reach live systems, and connection types missing in a version.
+- Validator checks: connector profile metadata and staleness against the version snapshot, and a
+  local, gitignored `.identifier-denylist`.
+- Evals: `salesforce-client-credentials`, `subscription-deploy-strategy`,
+  `integration-identity-switch`, `connector-without-profile`.
+
+### Changed
+
+- `mule-lint` `ConnectorCredentialsSecuredRule` is documented as a known false positive for
+  platform secure properties until its model-aware fix ships.
+
 ## 1.11.0 — 2026-10-14
 
 ### Added

@@ -127,6 +127,11 @@ diagnosis is required.
   observable assertions, and test-only build configuration.
 - Use `mule-dependencies` to look up the latest or compatible connector, plugin, and runtime versions
   instead of recalling them.
+- Use `mule-connectors` for connector authentication by version, run-as identity, subscription
+  sources and replay, and benign log signatures. Keep one secret supply model per key: encrypted
+  file with `${secure::key}`, or platform secure property with `${key}`.
+- Before changing a deployed app, compare the deployed artifact with the repository, and deploy
+  subscription apps with stop-start or recreate, never rolling.
 - Validate query inputs and select every field consumed downstream.
 - Keep batch records and queue messages minimal and serializable; pin media types for the next
   consumer.

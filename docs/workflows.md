@@ -59,6 +59,23 @@ source and fetch time. If the network is unavailable it says so and uses the dat
 snapshot, labelled unverified. Applying the upgrade is a separate `mule-development` step, verified
 through `mule-build`.
 
+## Switch a connector's authentication safely
+
+```text
+Move our Salesforce connection from username and password to OAuth client credentials. Tell me what
+has to change, then deploy it to the sandbox and prove it works without writing test data.
+```
+
+`mule-connectors` checks the project's connector version against the profile and live release
+notes (`mule_versions.py notes`), because a connection type can be missing in an older major and
+removed in a newer one. It names the token URL rule, where the run-as user is configured, and how to
+prove the identity afterwards. `mule-development` makes the configuration change with one secret
+supply model per key: `${key}` for a platform secure property, `${secure::key}` only for an encrypted
+file. `mule-ops` then follows its safe-change playbook: compare the deployed artifact with the
+repository, check what depends on the integration user, deploy subscription apps with stop-start
+instead of a rolling update, supply the secret from a file without echoing it, and verify with a
+probe that stops at a guard rather than writing a record.
+
 ## Validate and package
 
 ```text

@@ -51,7 +51,9 @@ Work through these as hypotheses, not a sequence of fixes.
   every connector's requirements. Use [`mule-dependencies`](../../mule-dependencies/SKILL.md) rather
   than memory for compatibility.
 - **Properties:** every referenced property key exists in the target environment, secrets resolve,
-  and the secure-properties key is supplied. Check key presence, never values.
+  and the secure-properties key is supplied. Check key presence, never values. Check that each
+  secret's placeholder matches its supply model (`${secure::key}` for the encrypted file, `${key}`
+  for a platform secure property).
 - **Dependencies at startup:** connectors that connect eagerly can fail the whole start when the
   target is unreachable. Check network path, certificates, and trust configuration.
 - **Resources:** requested sizing, replica count, and any quota or entitlement of the target.
@@ -72,6 +74,8 @@ Messages vary by runtime and connector. Read each as the mechanism it names, the
 | --- | --- | --- |
 | Application failed to start, with a root cause line below | A startup component failed; the first cause is the lead | Read the deepest cause, not the wrapper |
 | Unresolved placeholder or property not found | A key is referenced but not supplied in this environment | Compare keys against the environment inputs |
+| Secure property not found although it is set in Runtime Manager | Supply models mixed: a platform secure property referenced as `${secure::key}`, which reads only the encrypted file | Compare the placeholder with the key's model; see secret supply models in `mule-development` |
+| Unknown or invalid connection element, or a connection parameter that is not allowed | The connection type does not exist in the installed connector version | Check connection types by version in `mule-connectors` and `mule_versions.py notes` |
 | Could not resolve a dependency, or class not found | Packaging or connector set mismatch | Compare packaged dependencies with the declared set |
 | Unsupported class version or unsupported Java level | Artifact or connector built for a newer Java than the runtime | Compare Java levels; see the compatibility checks above |
 | Address already in use, or bind failure | Two listeners or a platform port mismatch | Inspect listener configuration |

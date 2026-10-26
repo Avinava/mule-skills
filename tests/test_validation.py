@@ -208,6 +208,34 @@ class PluginManifestTests(unittest.TestCase):
             path.write_text("# Long guide\n\n## Contents\n\n- [A](#a)\n\n" + "text\n" * 120, encoding="utf-8")
             self.assertEqual([], [f for f in validator.validate_repository(root) if "long-guide" in f])
 
+    def test_connector_profile_needs_metadata_and_a_current_major(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            profile = root / "skills/mule-connectors/references/sample.md"
+            profile.write_text("# Sample\n", encoding="utf-8")
+            self.assert_finding(root, "connector profile frontmatter missing")
+            profile.write_text(
+                "---\nconnector: salesforce\nconnector-version: 1.0\nverified: 2026-01-01\n---\n# Sample\n",
+                encoding="utf-8",
+            )
+            self.assert_finding(root, "re-verify the profile against the new major")
+            profile.write_text(
+                "---\nconnector: no-such-alias\nconnector-version: 1.0\nverified: 2026-01-01\n---\n",
+                encoding="utf-8",
+            )
+            self.assert_finding(root, "is not a mule_versions.py alias")
+
+    def test_local_identifier_denylist_names_the_file_not_the_term(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.copy_repository(temporary)
+            (root / ".identifier-denylist").write_text("# comment\n" + "zz" + "sampleclient" + "zz\n", encoding="utf-8")
+            self.assertEqual([], [f for f in validator.validate_repository(root) if "denylisted" in f])
+            guide = root / "skills/mule-testing/references/behavior-model.md"
+            guide.write_text(guide.read_text(encoding="utf-8") + "\nZZ" + "SampleClient" + "ZZ\n", encoding="utf-8")
+            findings = [f for f in validator.validate_repository(root) if "denylisted" in f]
+            self.assertEqual(1, len(findings))
+            self.assertNotIn("zz" + "sampleclient", findings[0].lower())
+
     def test_rejects_script_that_prompts_or_fails_help(self):
         cases = (
             ("import sys\nsys.exit(1)\n", "--help must exit 0"),

@@ -36,6 +36,9 @@ separate Anypoint operations owned by `mule-ops`.
    dependency versions, use [`mule-dependencies`](../mule-dependencies/SKILL.md).
 4. Identify the project's established validation, test, package, and release commands.
 5. Check whether the requested build needs network or authenticated artifact repositories.
+6. Before a local run or a first start in a non-production environment, check the environment
+   boundary in [safe change](../mule-ops/references/safe-change.md#before-the-change): a
+   non-production configuration can still point at a live system, and schedulers fire on start.
 
 Do not copy organization names, application identity, repositories, profiles, endpoints, or
 credentials into reusable commands or output.
@@ -95,6 +98,11 @@ unrelated prose or add unsupported business context.
 
 Use the repository's established command or the configured Mule build tool. For a tool call, pass the
 project root as `cwd` and preserve the project's normal test behavior.
+
+Before packaging for a target or preparing a release, run the read-only compatibility check when the
+mule-build server provides it: `check_compatibility` (`cwd`, optional `artifact` for a built JAR,
+optional `toolchain`). It compares connector minimum Mule versions and Java support with the target
+runtime and JDK. Report its findings by code; an inconclusive warning is not a pass.
 
 Before running, show or record:
 
@@ -177,3 +185,7 @@ Provide:
   [`mule-dependencies`](../mule-dependencies/SKILL.md); a `-DEV` or `-SNAPSHOT` build is not a release.
 - `-DskipTests` can make a build pass without evidence. Never use it to validate a change.
 - Publication, deployment, and runtime verification are separate outcomes. Report each on its own.
+- A secret check that asks for `${secure::key}` is right only for the encrypted-file model. A key
+  supplied as a platform secure property stays `${key}` and is declared in `mule-artifact.json`
+  `secureProperties`; see
+  [secret supply models](../mule-development/references/secrets-and-tls.md#secret-supply-models).

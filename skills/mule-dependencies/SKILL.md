@@ -17,6 +17,7 @@ Run the bundled script. It is read-only, standard library only, and prints JSON 
 python3 <skill-root>/scripts/mule_versions.py connector salesforce sftp --mule 4.9.0 --java 17
 python3 <skill-root>/scripts/mule_versions.py plugins
 python3 <skill-root>/scripts/mule_versions.py runtime
+python3 <skill-root>/scripts/mule_versions.py notes salesforce --grep "client credentials"
 python3 <skill-root>/scripts/mule_versions.py check <project-root>/pom.xml
 ```
 
@@ -29,6 +30,14 @@ python3 <skill-root>/scripts/mule_versions.py check <project-root>/pom.xml
 - `check` reads `mule-plugin` dependencies and the build plugins from the pom, resolves version
   properties, and takes `minMuleVersion` from the sibling `mule-artifact.json` and the Java level from
   pom properties. Pass `--mule` or `--java` to override.
+- `notes` reads the connector's MuleSoft release-notes page and returns each version's date,
+  minimum Mule version and Java levels. With `--grep` it returns only the versions that mention the
+  term, with snippets, anchors and `earliestMatch`. Use it for "which version added or removed this
+  feature or connection type" instead of answering from memory. `--url` takes a
+  `docs.mulesoft.com` page for a connector without a known page. The result's `coverage` gives the
+  oldest version on the page: a match at that version is a lower bound, because older releases can
+  sit on an archived page. A mention can be a fix or a removal, so read the snippet before claiming
+  when a feature arrived.
 - Every result carries `source` and `fetchedAt`. Quote them when you report a version.
 
 When the user is logged in to Anypoint, the anypoint-connect `get_exchange_asset` tool returns the
@@ -41,7 +50,8 @@ script for public MuleSoft artifacts and for pom checks.
 | --- | --- | --- |
 | 0 | Answer produced | Report it with source and time; surface `warnings` |
 | 2 | Unknown alias, artifact not found, or no release satisfies the constraints | Say so; do not substitute a nearby version |
-| 3 | Network or authentication failure | Report that live verification failed; offer `--offline` |
+| 2 | `notes --grep` found no mention | Say the page does not mention it; it is not proof the feature is absent |
+| 3 | Network or authentication failure | Fetch the URL named in the error with the agent's web fetch tool when one is available; otherwise report that live verification failed and offer `--offline` (not for `notes` or `check`) |
 | 64 | Usage error | Fix the command |
 
 `--offline` reads a dated snapshot bundled with the skill. Treat its answers as unverified, say

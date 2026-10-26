@@ -194,6 +194,11 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
   required; note watermark/dedupe hold and recovery when deploy does not re-emit failed records.
 - Verify event listener payload nesting against the project's verified shape and reconnection policy
   for continuous streams.
+- For subscription sources, check the replay start position: a "new events only" option on a
+  business-critical channel loses events published while the app is stopped unless the
+  connector's resume option or another durable position or recovery path is enabled. Check replica
+  count too: some subscription sources deliver every event to every replica. Check that the deployment strategy is stop-start or
+  recreate, not rolling, so two replica generations never consume together.
 - Prefer idempotent create/upsert patterns where failed writebacks can duplicate work.
 - Require current workload and dependency evidence before recommending numeric tuning values.
 
@@ -221,6 +226,15 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
   or external provider path and never in source; truststores and keystores referenced by property,
   not committed; verification not disabled to make a connection work; and a rotation path that does
   not need a code change.
+- Check secret supply models: each secret key uses one model, `${secure::key}` only for keys in an
+  encrypted file read by `secure-properties:config`, and plain `${key}` for platform secure
+  properties declared in `mule-artifact.json` `secureProperties`. A mixed reference fails at
+  deployment. A secret-looking key stored as a plaintext platform property is a finding even when
+  the code is correct. Do not report a correct platform-property reference as missing `secure::`.
+- Check `log4j2.xml` and runtime log-level overrides for connector-internal categories at DEBUG or
+  TRACE that write credentials or session identifiers; `mule-connectors` profiles list them.
+- Check that non-production configuration cannot reach a live or production system through a
+  hard-coded endpoint, a copied properties file, or a shared credential.
 
 ## Tests, build, and deployment
 

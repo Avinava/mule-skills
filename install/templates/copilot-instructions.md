@@ -20,6 +20,7 @@ When a task matches one of these workflows, follow its instructions:
 | Documentation creation and targeted refreshes | `mule-docs` |
 | Change, project, or release-readiness review | `mule-review` |
 | Latest or compatible connector, plugin, or runtime versions | `mule-dependencies` |
+| Connector authentication, identity, subscription sources, and log signatures | `mule-connectors` |
 | Validation, packaging, or an explicitly requested release | `mule-build` |
 
 Load only the workflow and referenced resources relevant to the task. Preserve current-project

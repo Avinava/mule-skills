@@ -316,6 +316,28 @@ Watermark or dedupe state can retain identifiers after processing fails. A succe
 does not guarantee re-emission. Document replay, re-modification, watermark recovery, or another
 operational path for business-critical records.
 
+### Subscription sources
+
+Push and streaming sources (event bus subscriptions, change-data streams, topic listeners) keep
+their position outside the flow, so restarts and deployments decide what is lost or repeated.
+
+- **Start position after a restart.** A "new events only" replay option resumes at the moment of
+  subscription, so events published while the app was stopped, restarting or redeploying are lost,
+  including on a channel that has received nothing since boot. For business-critical channels,
+  persist the last processed replay position durably and resume from it, within the publisher's
+  retention window. Some connectors do this for you behind an option (for example an auto-replay
+  flag); check it is enabled and what its stored state is keyed on. State what happens when the stored position is older than retention.
+- **Overlapping replicas.** Two generations of replicas subscribed at once each receive every
+  event. A rolling update therefore processes events twice during the overlap, and so do several
+  replicas of an uncoordinated subscriber. Deploy subscription apps with stop-then-start or a
+  recreate strategy, not rolling, and check whether replicas share one subscription or each get
+  their own.
+- **Consumers stay idempotent anyway.** Redelivery after a reconnect, replay from a stored position
+  and operator replays all repeat events. Key side effects on a stable event or record identifier.
+- **Reconnects are normal.** Long-lived subscriptions reconnect and re-authenticate periodically.
+  Verify that a reconnect renews credentials and resumes from the right position before treating
+  its log lines as benign; connector-specific signatures live in `mule-connectors` profiles.
+
 ### Content hashes and skip lists
 
 When a project uses hashes to prevent sync feedback:

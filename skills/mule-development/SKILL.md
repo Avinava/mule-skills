@@ -81,12 +81,17 @@ the Mule/APIKit implementation changes required to realize an approved contract.
 
 1. Read repository instructions and the owning flow, callers, referenced flows, bound contract or
    event schema, DataWeave, configuration keys, effective error strategy, and relevant MUnit tests.
-2. Confirm Mule runtime, Java, connector, plugin, and deployment-target versions before using
-   version-sensitive syntax or semantics.
-3. Record the behavior, caller/source outcome, delivery guarantees, state transitions, security
+2. When the app is already deployed, compare the deployed artifact with the repository before
+   editing. A deployed JAR can carry changes that were never committed; the JAR is the source of
+   truth until the difference is reconciled. See
+   [safe change](../mule-ops/references/safe-change.md#before-the-change).
+3. Confirm Mule runtime, Java, connector, plugin, and deployment-target versions before using
+   version-sensitive syntax or semantics. For connector authentication, sources and identity, use
+   `mule-connectors`.
+4. Record the behavior, caller/source outcome, delivery guarantees, state transitions, security
    boundary, and operational signals that must remain stable.
-4. Identify which invariant classes and cross-cutting gates apply.
-5. Decide the focused and integration validation before editing.
+5. Identify which invariant classes and cross-cutting gates apply.
+6. Decide the focused and integration validation before editing.
 
 ### 2. Implement the smallest coherent change
 

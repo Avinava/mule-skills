@@ -193,3 +193,7 @@ If the event has not recurred or telemetry coverage is inadequate, report the re
 - Deployment overlap, missing logs, and retry summaries are signals, not proof. A retry-exhaustion
   entry is often secondary evidence.
 - Never claim a swallowed error will be reprocessed unless queue and source semantics prove it.
+- Connector log lines can be benign by design, such as a periodic subscription reconnect. Check the
+  `mule-connectors` profile's known signatures and their criteria before counting them as errors.
+- Never raise a connector-internal logger to DEBUG or TRACE in a shared environment without checking
+  the profile's sensitive loggers; some write session identifiers or tokens.

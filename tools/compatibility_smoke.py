@@ -35,6 +35,9 @@ ANYPOINT_REFERENCE_FILES = (
     "skills/mule-troubleshooting/SKILL.md",
     "skills/mule-api-design/references/anypoint-design.md",
     "skills/mule-build/references/artifact-handoff.md",
+    "skills/mule-ops/references/safe-change.md",
+    "skills/mule-connectors/SKILL.md",
+    "skills/mule-connectors/references/salesforce.md",
     "docs/anypoint-access.md",
     "docs/mcp-servers.md",
 )

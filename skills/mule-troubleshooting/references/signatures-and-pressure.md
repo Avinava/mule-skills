@@ -30,6 +30,10 @@ capacity/lifecycle, delivery/transactions, privacy/observability, and validation
 | Multi-hop try always blames writeback | D — Attribution | Result flag only after first hop; separate error subjects |
 | Cache-miss ERROR storms or Object Store failures | E — Object Store | Separate expected `KEY_NOT_FOUND`, availability fallback, and invalid key/null/configuration errors; encode keys |
 
+| Same events processed twice around a deployment | E — Subscription sources | Rolling update or uncoordinated replicas on a subscription source; compare replica start and stop times with duplicate timestamps |
+| Events missing after a restart, with no errors | E — Subscription sources | Replay option resumes at "new events only"; compare the stop-start window with publisher timestamps |
+| Periodic connector reconnect ERROR with no functional impact | Connector signature | Match it against the `mule-connectors` profile, then confirm its benign criteria still hold (events keep arriving, reconnect succeeds) |
+
 When the signature matches Class D disposition gaps, fix classification first: permanent/poison
 must leave the eligible loop through terminal, quarantine, error-store, or manual-recovery
 disposition. Intentional indefinite retryable recovery needs backoff, monitoring, ownership,

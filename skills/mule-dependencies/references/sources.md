@@ -18,6 +18,7 @@ Read this when a lookup fails, two sources disagree, or the script needs mainten
 | 2 | Exchange asset API (`exchange/api/v1/assets/<group>/<artifact>`) | None for public MuleSoft assets | All versions, minimum Mule version, Java support flags |
 | 3 | Exchange Maven facade (`maven-metadata.xml`) | None for metadata | Version list only |
 | 4 | MuleSoft releases repository (`maven-metadata.xml`) | None | Version list only; the only source for MUnit and the Mule Maven plugin |
+| Notes | Connector release-notes pages on `docs.mulesoft.com/release-notes/` | None | Per-version date, minimum Mule version, Java levels, and the text of what changed |
 | Runtime | Java support table in the public MuleSoft docs source repository | None | Java versions per runtime and channel |
 
 The Exchange endpoints are not a documented public contract, so the script validates the response
@@ -28,6 +29,13 @@ shape and falls through to the next source when it changes.
 - Only Exchange attributes report `min-mule-version` and `is-java-<n>-supported`. They can lag the
   connector jar's own descriptor by a release. For a decision with real risk, confirm against the
   connector's release notes.
+- Release notes are the only source for when a feature, connection type or behavior changed. A page
+  holds a limited range of versions, so `coverage.oldest` bounds any "earliest" claim. Core connectors
+  use `connector/connector-<name>` page names and the others use
+  `connector/<name>-connector-release-notes-mule-4`; the script keeps a fixed map rather than
+  guessing. MuleSoft drops old releases from a page over time; for those, read an archived copy of
+  the same URL (for example the Wayback Machine) and cite it as archived. Each page also has a
+  Markdown copy at the same URL plus `.md`, which is a fallback if the HTML layout changes.
 - Maven metadata reports versions only. The script marks compatibility `unknown` and warns.
 - Maven Central is never queried for Mule artifacts: it holds only old uploads.
 - Enterprise repositories require credentials. A 401 or 403 is reported as an authentication failure.
@@ -54,13 +62,14 @@ shape and falls through to the next source when it changes.
 | Warning: Exchange unusable | Response shape changed or service down | Result comes from Maven sources; compatibility is unknown |
 | Warning: stale cache | Network failed, an older cached answer was used | Report the cache time; retry later |
 | Version differs from the project's internal mirror | Mirror lags or pins | Report both; the project's mirror decides what is installable |
+| `notes` exit 3, no version sections | Release-notes page moved or changed layout | Read the page directly, pass `--url` if it moved, and report that the script needs maintenance |
 | Runtime table parse error | Docs table layout changed | Read the Java support page directly and report that the script needs maintenance |
 
 ## Cache and snapshot
 
 - Responses are cached under the user cache directory (`MULE_VERSIONS_CACHE_DIR` overrides it) for
-  24 hours for connectors and plugins and 7 days for runtime data. `--no-cache` bypasses it. A stale
-  entry is used only when the network fails, and the result says so.
+  24 hours for connectors, plugins and release notes, and 7 days for runtime data. `--no-cache`
+  bypasses it. A stale entry is used only when the network fails, and the result says so.
 - `assets/version-snapshot.json` is the only dated artifact in this skill. It is an unverified offline
   fallback regenerated with `--refresh-snapshot`. It records the latest release per alias, the runtime
   Java table, and the generation date. Never describe a snapshot answer as current.

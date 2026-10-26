@@ -6,3 +6,6 @@ __pycache__/
 .tool-versions
 
 evals/results/
+
+# Local-only denylist of real identifiers checked by tools/validate_repository.py
+.identifier-denylist

@@ -234,6 +234,64 @@ class CheckTests(IsolatedCacheCase):
         self.assertEqual(by_artifact["mule-sftp-connector"]["status"], "current")
 
 
+RELEASE_NOTES_PAGE = """
+<h1>Sample Connector Release Notes</h1>
+<div class="sect1"><h2 id="3-0-0"><a class="anchor" href="#3-0-0"></a>3.0.0</h2>
+<div class="sectionbody"><p><strong>July 1, 2026</strong></p>
+<h3 id="whats-new">What&#8217;s New</h3>
+<ul><li><p>The <strong>Basic</strong> connection type is removed.</p></li></ul>
+<table><tr><td>Mule</td><td>4.9.0 and later</td></tr><tr><td>OpenJDK</td><td>17</td></tr></table>
+</div></div>
+<div class="sect1"><h2 id="2-1-0"><a class="anchor" href="#2-1-0"></a>2.1.0</h2>
+<div class="sectionbody"><p><strong>March 3, 2025</strong></p>
+<p>Adds the <strong>OAuth Client Credentials</strong> connection type.</p>
+<table><tr><td>Mule</td><td>4.6.6 and later</td></tr><tr><td>OpenJDK</td><td>8, 11, and 17</td></tr></table>
+</div></div>
+<div class="sect1"><h2 id="2-0-0"><a class="anchor" href="#2-0-0"></a>2.0.0</h2>
+<div class="sectionbody"><p><strong>January 9, 2025</strong></p><p>Initial release.</p></div></div>
+<div class="sect1"><h2 id="see-also"><a class="anchor" href="#see-also"></a>See Also</h2>
+<p>Mentions client credentials outside any version.</p></div>
+"""
+
+
+class ReleaseNotesTests(IsolatedCacheCase):
+    def test_parses_versions_dates_and_compatibility(self):
+        sections = mv.parse_release_notes(RELEASE_NOTES_PAGE)
+        self.assertEqual([s["version"] for s in sections], ["3.0.0", "2.1.0", "2.0.0"])
+        self.assertEqual(sections[0]["date"], "July 1, 2026")
+        self.assertEqual(sections[0]["minMuleVersion"], "4.9.0")
+        self.assertEqual(sections[0]["java"], [17])
+        self.assertEqual(sections[1]["java"], [8, 11, 17])
+        self.assertIsNone(sections[2]["minMuleVersion"])
+        self.assertNotIn("outside any version", sections[2]["text"])
+
+    def test_grep_reports_earliest_match_and_page_coverage(self):
+        self.patch_http({"release-notes/connector/salesforce": RELEASE_NOTES_PAGE})
+        result = mv.notes_result(mv.Fetcher(), "salesforce", "client credentials", None)
+        self.assertEqual(result["earliestMatch"], "2.1.0")
+        self.assertEqual(result["coverage"], {"oldest": "2.0.0", "newest": "3.0.0"})
+        match = result["matches"][0]
+        self.assertTrue(match["url"].endswith("#2-1-0"))
+        self.assertIn("Client Credentials", match["snippets"][0])
+        self.assertIn("lower bound", result["note"])
+
+    def test_without_grep_lists_versions_newest_first(self):
+        self.patch_http({"release-notes/connector/salesforce": RELEASE_NOTES_PAGE})
+        result = mv.notes_result(mv.Fetcher(), "salesforce", None, None)
+        self.assertEqual([v["version"] for v in result["versions"]], ["3.0.0", "2.1.0", "2.0.0"])
+        self.assertNotIn("text", result["versions"][0])
+
+    def test_unknown_alias_and_unparseable_page(self):
+        with self.assertRaises(mv.NotFound):
+            mv.notes_result(mv.Fetcher(), "no-such-connector", None, None)
+        self.patch_http({"release-notes": "<html>moved</html>"})
+        with self.assertRaises(ValueError):
+            mv.notes_result(mv.Fetcher(), "salesforce", None, None)
+
+    def test_every_connector_alias_has_a_notes_page(self):
+        self.assertEqual(set(mv.RELEASE_NOTES), set(mv.CONNECTORS))
+
+
 class OfflineAndCliTests(IsolatedCacheCase):
     def run_cli(self, *argv: str) -> tuple[int, str, str]:
         out, err = io.StringIO(), io.StringIO()
@@ -279,6 +337,20 @@ class OfflineAndCliTests(IsolatedCacheCase):
         self.assertEqual(code, mv.EXIT_NETWORK)
         code, _, _ = self.run_cli()
         self.assertEqual(code, mv.EXIT_USAGE)
+
+    def test_notes_cli_exit_codes(self):
+        fake = self.patch_http({"release-notes": RELEASE_NOTES_PAGE})
+        code, out, _ = self.run_cli("notes", "salesforce", "--grep", "client credentials")
+        self.assertEqual(code, mv.EXIT_OK)
+        self.assertEqual(json.loads(out)["result"]["earliestMatch"], "2.1.0")
+        code, _, _ = self.run_cli("notes", "salesforce", "--grep", "not mentioned anywhere")
+        self.assertEqual(code, mv.EXIT_NOT_FOUND)
+        code, _, _ = self.run_cli("notes", "custom", "--url", "https://example.invalid/notes")
+        self.assertEqual(code, mv.EXIT_NOT_FOUND)
+        calls = len(fake.calls)
+        code, _, _ = self.run_cli("--offline", "notes", "salesforce")
+        self.assertEqual(code, mv.EXIT_NETWORK)
+        self.assertEqual(len(fake.calls), calls)
 
     def test_json_on_stdout_and_diagnostics_on_stderr(self):
         self.patch_http({"exchange/api/v1/assets": SAMPLE_EXCHANGE})

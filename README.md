@@ -34,7 +34,7 @@ commit or authenticate to Anypoint unless I approve it.
 ```
 
 That is enough. The runbook detects whether this is a new install or upgrade, selects the right
-host configuration, previews changes, installs all nine skills, and verifies what landed.
+host configuration, previews changes, installs all ten skills, and verifies what landed.
 
 ### Direct install options
 
@@ -66,7 +66,7 @@ without overwriting what is already there. Add `--dry-run` to preview. Options a
 npx skills add Avinava/mule-skills
 ```
 
-Installs the nine skills through the [skills.sh](https://skills.sh) CLI. MCP servers are not
+Installs the ten skills through the [skills.sh](https://skills.sh) CLI. MCP servers are not
 configured by this path; use the plugin or script above for those.
 
 Then give the agent context about your project by following
@@ -84,7 +84,8 @@ Then give the agent context about your project by following
 | [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Health assessment, evidence coverage, risks, and recommended actions |
 | [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings, fix options, coverage limits, and readiness verdict when applicable |
 | [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags | Exact checks, test totals, artifact or failure evidence, and release actions performed |
-| [`mule-dependencies`](skills/mule-dependencies/) | Latest and compatible connector, plugin, and runtime versions, and pom upgrade checks | Newest and newest compatible release per dependency, with source and fetch time |
+| [`mule-dependencies`](skills/mule-dependencies/) | Latest and compatible connector, plugin, and runtime versions, release-note feature lookups, and pom upgrade checks | Newest and newest compatible release per dependency, with source and fetch time |
+| [`mule-connectors`](skills/mule-connectors/) | Connector authentication by version, token rules, run-as identity, subscription sources and replay, benign signatures, and sensitive loggers | Version-scoped claims with documented or observed evidence, re-verified live |
 
 ### Choosing the right skill
 
@@ -98,6 +99,7 @@ Then give the agent context about your project by following
 | Assess current runtime health | `mule-ops` | `mule-troubleshooting` when a specific causal question emerges |
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
 | Find the latest or compatible connector, plugin, or runtime version | `mule-dependencies` | `mule-development` to apply the upgrade; `mule-build` to verify it |
+| Switch a connector's authentication, integration user, or subscription settings | `mule-connectors` | `mule-development` for the change; `mule-ops` safe change to deploy and verify it |
 | Prepare a release | `mule-build` | `mule-review` before commit/tag; `mule-ops` for separately approved publish/deploy |
 
 Documentation and review questions are optional and non-blocking. When business information would
@@ -110,7 +112,7 @@ The catalog's detailed mutation and handoff expectations live in [the skill cata
 
 ## Agent support
 
-The nine skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
+The ten skills are shared and host-neutral. Claude Code loads them from the plugin; every other host
 reads them from `.agents/skills/`, with instruction files telling the agent how to route.
 
 | Host | Skill discovery | Repository instructions | MCP configuration | Verification |
@@ -182,7 +184,7 @@ generic JSON forms, and the installer merges only the entries your config lacks.
 mule-skills/
 ├── .claude-plugin/                 # Plugin and marketplace manifests
 ├── .mcp.json                       # Pinned MCP servers shipped with the plugin
-├── skills/                         # The nine reusable skills — host-neutral
+├── skills/                         # The ten reusable skills — host-neutral
 │   ├── mule-api-design/            # HTTP design, RAML/OAS contracts, and safe Design Center workflow
 │   ├── mule-docs/                  # Documentation workflow, references, and audit tools
 │   ├── mule-development/           # Implementation workflow and post-change checklist
@@ -191,6 +193,7 @@ mule-skills/
 │   ├── mule-ops/                   # Runtime health workflow
 │   ├── mule-review/                # Change, project, and release-readiness review
 │   ├── mule-dependencies/          # Live connector, plugin, and runtime version lookup
+│   ├── mule-connectors/            # Connector profiles: auth, identity, sources, signatures
 │   └── mule-build/                 # Validate, package, run, version, and tag locally
 ├── install/
 │   ├── install.sh                  # Vendored install for non-plugin hosts

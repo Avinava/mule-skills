@@ -57,3 +57,15 @@ authorized platform operations. Skills compose these independent packages; build
 not require a mandatory lint dependency. A secure-reference precondition is a narrow packaging
 check, not proof of encryption correctness, runtime secret handling, vulnerability absence, or a
 full security audit. Report exactly which checks ran and the gaps left behind.
+
+## Known rule conflicts
+
+A rule that contradicts a documented platform behavior is reported, not obeyed.
+
+- `ConnectorCredentialsSecuredRule` in mule-lint 2.0.0 flags every credential written as plain
+  `${key}` and suggests `${secure::key}`. That is correct only for the encrypted-file model. For a
+  platform secure property, `${key}` is the required form, and switching it to `secure::` breaks the
+  deployment. Check the key's model first
+  ([secret supply models](secrets-and-tls.md#secret-supply-models)); for a platform-supplied key,
+  report the finding as a known false positive with the reason, and keep the reference. A
+  model-aware fix is planned in mule-lint; re-check this note when the pin moves.

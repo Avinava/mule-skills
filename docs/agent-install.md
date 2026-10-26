@@ -72,7 +72,7 @@ git clone --depth 1 https://github.com/Avinava/mule-skills.git "$MULE_SKILLS_TMP
 mkdir -p .agents/skills
 ```
 
-Copy all nine skills:
+Copy all ten skills:
 
 | Skill | Contents |
 | --- | --- |
@@ -81,10 +81,11 @@ Copy all nine skills:
 | `mule-development` | `SKILL.md`, metadata, invariant classes, checklist, embedded-expression checker |
 | `mule-testing` | `SKILL.md`, metadata, behavior model, value-safe MUnit inventory |
 | `mule-troubleshooting` | `SKILL.md`, metadata |
-| `mule-ops` | `SKILL.md`, metadata |
+| `mule-ops` | `SKILL.md`, metadata, readiness, signal, report and safe-change references |
 | `mule-review` | `SKILL.md`, metadata, review domains, finding policy |
 | `mule-build` | `SKILL.md`, metadata |
 | `mule-dependencies` | `SKILL.md`, metadata, sources reference, version lookup script, dated offline snapshot |
+| `mule-connectors` | `SKILL.md`, metadata, curated connector profiles |
 
 ```bash
 for skill_dir in "$MULE_SKILLS_TMP"/mule-skills/skills/*; do
