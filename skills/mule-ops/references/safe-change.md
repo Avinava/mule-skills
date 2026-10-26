@@ -101,7 +101,10 @@ before changing a subscription app.
    parent does not exist so the target rejects it on its own referential rule. That proves
    connectivity, authentication and routing with nothing written. For managed HTTP APIs,
    `smoke_test_api` sends one request with the API's client credentials scrubbed from the output.
-3. **Read logs against known signatures.** Check `get_logs` for the start-up window. Classify
+3. **Read logs against known signatures.** Check `get_logs` for the start-up window. Logs are
+   stored per deployment spec, so the replicas that ran before the change disappear from a plain
+   query; pass `previousSpecs: 1` (or more) to read both sides of the rollout, and use the returned
+   spec IDs to tell the generations apart. Classify
    connector lines against the profile's known signatures before counting errors, and confirm a
    benign signature still meets its criteria (for example, events keep arriving after a periodic
    reconnect).

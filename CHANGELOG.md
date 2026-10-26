@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.12.2 — 2026-10-26
+
+### Changed
+
+- Pin `anypoint-connect@0.16.3`: creating an app without properties works, `apps update --version`
+  reaches the subcommand, and the log tools take `previousSpecs` to read earlier deployment specs.
+- Safe change and deployment triage read logs across a rollout with `previousSpecs`, since logs
+  are stored per deployment spec.
+
 ## 1.12.1 — 2026-10-26
 
 ### Changed

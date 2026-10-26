@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "1.12.1",
+  "bundleVersion": "1.12.2",
   "packages": {
     "anypoint-connect": {
       "npm": "@sfdxy/anypoint-connect",
-      "version": "0.16.2",
+      "version": "0.16.3",
       "node": ">=22.0.0",
       "role": "Authorized Anypoint evidence, Design Center workflows, and lifecycle operations",
       "credentials": "Anypoint Platform login",
