@@ -3,7 +3,7 @@
 These two journeys show what a Mule developer actually receives. They are grounded in the sample
 projects shipped by [`mule-build` at `5b252ed`](https://github.com/Avinava/mule-build/tree/5b252edd1d36b1d91d9f1f8b682fbc6038eaf0f1/examples/sample-orders-system-api)
 and [`mule-lint` at `b828113`](https://github.com/Avinava/mule-lint/tree/b8281135ced9d68846b39e19b578710b0fe8e8e0/examples/sample-orders-system-api),
-using `mule-lint@2.0.0` and `mule-build@3.0.0`, measured on 2026-10-03 with Java 17.
+using `mule-lint@2.1.1` (re-measured on 2026-10-26) and `mule-build@3.0.0` (measured on 2026-10-03), with Java 17.
 The samples remain at these exact commits; tool upgrades do not silently change the source baseline.
 
 This is not a gallery where every skill is forced to produce a file. Some skills change source or
@@ -56,7 +56,7 @@ is releasable.
 | Embedded-expression check | Passed | No malformed embedded expression was found |
 | Build doctor for `test` | Passed | Maven, the POM, Mule/MUnit plugins, source layout, and a compatible local runtime were detected |
 | Secure-property enforcement | Passed; 1 Mule file checked | The documented property-name/reference checks found no violation; this is not a general secret scan |
-| `mule-lint@2.0.0` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
+| `mule-lint@2.1.1` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
 | Focused MUnit selector | Exit `1`: no matching suite found | The requested suite/test selector was not resolved; the full run below executed the test |
 | Full MUnit run | Passed: 1 run, 0 failures, 0 errors, 0 skipped | The test, including the added currency assertion, executed successfully |
 | Normal package | Passed with tests enabled; 1 test passed and a JAR was produced | Local test and packaging evidence is available; lint findings still need review |
@@ -106,7 +106,7 @@ perfect result.
 
 ### Observed tool evidence
 
-`mule-lint@2.0.0` returned a complete report-v1 scan of three Mule files and exited `1` with:
+`mule-lint@2.1.1` returned a complete report-v1 scan of three Mule files and exited `1` with:
 
 ```text
 Errors: 1    Warnings: 10    Info: 9

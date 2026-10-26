@@ -30,8 +30,8 @@
 
 ### Changed
 
-- `mule-lint` `ConnectorCredentialsSecuredRule` is documented as a known false positive for
-  platform secure properties until its model-aware fix ships.
+- Pin `mule-lint@2.1.1`, whose secret rules (`SEC-007`, `SEC-017`, `SEC-018`) accept both supply
+  models, plus connector rules `LOG-006` and `SF-003` to `SF-005`.
 
 ## 1.11.0 — 2026-10-14
 

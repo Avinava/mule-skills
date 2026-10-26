@@ -8,4 +8,4 @@ args = ["-y", "@sfdxy/mule-build@3.0.0", "mcp"]
 
 [mcp_servers.mule-lint]
 command = "npx"
-args = ["-y", "@sfdxy/mule-lint@2.0.0", "mcp"]
+args = ["-y", "@sfdxy/mule-lint@2.1.1", "mcp"]

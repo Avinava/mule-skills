@@ -8,7 +8,7 @@ installation is reproducible.
 | ------- | ------------- | ------- | ---- | ----------- | --------- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `@sfdxy/anypoint-connect@0.15.0` | `>=22.0.0` | Authorized Anypoint evidence, Design Center workflows, and lifecycle operations | Anypoint Platform login | [Docs](https://avinava.github.io/anypoint-connect/) |
 | [`mule-build`](https://github.com/Avinava/mule-build) | `@sfdxy/mule-build@3.0.0` | `>=20.19.0` | Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts | None | [Docs](https://avinava.github.io/mule-build/) |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@2.0.0` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | `@sfdxy/mule-lint@2.1.1` | `>=20.0.0` | Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation | None | [Docs](https://avinava.github.io/mule-lint/) |
 
 Node.js `>=22.0.0` satisfies the complete bundle. Node.js 24 LTS is recommended for a new
 installation.
@@ -134,7 +134,7 @@ python3 tools/generate_ecosystem.py --check
 To prepare a pin update locally:
 
 ```bash
-python3 tools/update_ecosystem.py mule-lint 2.0.0   --node '>=20.0.0'
+python3 tools/update_ecosystem.py mule-lint 2.1.1   --node '>=20.0.0'
 ```
 
 Keep existing pins until a published release passes the executable check. Use
