@@ -63,7 +63,9 @@ Work through these as hypotheses, not a sequence of fixes.
   profile that differs between environments.
 - **Version drift:** the running version, logged application version, and packaged artifact agree.
 - **Rolling transition:** old and new replicas overlapping can show lifecycle errors and duplicate
-  processing. Confirm with replica events, not timestamps alone.
+  processing. Confirm with replica events, not timestamps alone. Logs are kept per deployment spec,
+  so read the previous spec as well (`previousSpecs` on the log tools) before concluding that the
+  old replicas logged nothing.
 - **Permissions:** the deploying identity has the right in the target environment.
 
 ## Decoded common error messages
