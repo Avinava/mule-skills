@@ -13,7 +13,7 @@
     },
     "mule-build": {
       "npm": "@sfdxy/mule-build",
-      "version": "3.0.0",
+      "version": "3.1.0",
       "node": ">=20.19.0",
       "role": "Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts",
       "credentials": "None",

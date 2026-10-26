@@ -5,7 +5,7 @@ them sharper: two need no credentials, one needs an Anypoint login.
 
 | Server and source | Pin | Role | Credentials |
 | --- | --- | --- | --- |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.0.0) | Validation, testing, packaging, local runtime, versioning, tagging, secure-reference preconditions | None |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.1.0) | Validation, testing, packaging, local runtime, versioning, tagging, secure-reference preconditions | None |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.1.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.1.1) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS validation | None |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.15.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.15.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and mutations | Anypoint Platform login |
 
@@ -83,7 +83,7 @@ The generic form:
     },
     "mule-build": {
       "command": "npx",
-      "args": ["-y", "@sfdxy/mule-build@3.0.0", "mcp"]
+      "args": ["-y", "@sfdxy/mule-build@3.1.0", "mcp"]
     },
     "mule-lint": {
       "command": "npx",

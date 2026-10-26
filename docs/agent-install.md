@@ -124,7 +124,7 @@ These pins were verified on **2026-10-26**:
 | Package | Source | Node.js |
 | --- | --- | ---: |
 | [`@sfdxy/anypoint-connect@0.15.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.15.0) | [`Avinava/anypoint-connect`](https://github.com/Avinava/anypoint-connect) | `>=22.0.0` |
-| [`@sfdxy/mule-build@3.0.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.0.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
+| [`@sfdxy/mule-build@3.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.1.0) | [`Avinava/mule-build`](https://github.com/Avinava/mule-build) | `>=20.19.0` |
 | [`@sfdxy/mule-lint@2.1.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.1.1) | [`Avinava/mule-lint`](https://github.com/Avinava/mule-lint) | `>=20.0.0` |
 
 Use Node.js `>=22.0.0` to satisfy all three; Node.js 24 LTS is recommended. Do not change a pin

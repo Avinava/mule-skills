@@ -30,6 +30,9 @@
 
 ### Changed
 
+- Pin `mule-build@3.1.0`: both secret supply models (MB-SEC-006/007), artifact compatibility
+  (`compat`, `check_compatibility`) and toolchain checks. The build walkthrough was re-measured with
+  it on Java 17.
 - Pin `mule-lint@2.1.1`, whose secret rules (`SEC-007`, `SEC-017`, `SEC-018`) accept both supply
   models, plus connector rules `LOG-006` and `SF-003` to `SF-005`.
 

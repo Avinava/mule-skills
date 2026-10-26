@@ -95,7 +95,7 @@ authentication decisions with you. [Walk through the result](getting-started.md)
 | --- | --- | --- |
 | Nine `mule-*` skills | Decide how to design, implement, test, document, build, review, operate, diagnose, and keep dependencies current | None |
 | `mule-lint@2.1.1` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
-| `mule-build@3.0.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
+| `mule-build@3.1.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
 | `anypoint-connect@0.15.0` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
 
 Use Node.js `>=22.0.0` for the MCP servers; Node.js 24 LTS is recommended. The skills
