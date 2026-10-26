@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (1.12.0)
+## 1.12.0 — 2026-10-26
 
 ### Added
 
@@ -30,6 +30,9 @@
 
 ### Changed
 
+- Pin `anypoint-connect@0.16.2`: one-call `update_app` with stop-start or recreate, secret sources
+  and `moveToSecure`, `compare_deployed_artifact`, `list_runtime_versions` and `smoke_test_api`,
+  which the safe-change playbook uses.
 - Pin `mule-build@3.1.0`: both secret supply models (MB-SEC-006/007), artifact compatibility
   (`compat`, `check_compatibility`) and toolchain checks. The build walkthrough was re-measured with
   it on Java 17.
