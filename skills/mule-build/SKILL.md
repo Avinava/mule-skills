@@ -1,6 +1,6 @@
 ---
 name: mule-build
-description: Validate, test, package, and locally run a MuleSoft Mule 4 application using its established repository commands and configured build tools, and prepare versions, commits, and tags only when explicitly requested. Use for local build validation, static analysis, MUnit execution, deployable artifacts, local runtime work, and versioned release preparation. Do not use for Exchange publishing or Anypoint deployment; route those authorized platform actions to mule-ops and the Anypoint connector. Default to validate-and-package; treat versioning, local runtime changes, commits, tags, pushing, and skipping tests as explicit choices.
+description: Validate, test, package, and locally run a MuleSoft Mule 4 application using its established repository commands and configured build tools, and prepare versions, hotfix qualifiers, and commits only when explicitly requested. Use for local build validation, static analysis, MUnit execution, deployable artifacts, local runtime work, and versioned release preparation. Do not use for the release-readiness verdict (mule-review) or for Exchange publishing, Anypoint deployment, and release tagging after production (mule-ops and the Anypoint connector). Default to validate-and-package; treat versioning, local runtime changes, commits, tags, pushing, and skipping tests as explicit choices.
 ---
 
 # Build Mule Application
@@ -102,7 +102,14 @@ project root as `cwd` and preserve the project's normal test behavior.
 Before packaging for a target or preparing a release, run the read-only compatibility check when the
 mule-build server provides it: `check_compatibility` (`cwd`, optional `artifact` for a built JAR,
 optional `toolchain`). It compares connector minimum Mule versions and Java support with the target
-runtime and JDK. Report its findings by code; an inconclusive warning is not a pass.
+runtime and JDK. Report its findings by code; an inconclusive warning is not a pass. It also
+compares the MUnit plugin, runner and tools versions; a mismatch can stop MUnit from booting at all.
+
+A package built with secure prefixes stripped (`strip_secure`, or a local-run build) is for local
+and sandbox use only. mule-build writes a production-deployable marker into every jar it packages,
+and the stripped build is marked not deployable. Sources stripped in place and then packaged
+normally are detected too (`MB-SEC-008`), and production profiles refuse to build them. Never hand
+a stripped jar to a production release; restore the `secure::` references instead.
 
 Before running, show or record:
 
@@ -127,7 +134,15 @@ When the user explicitly requests a release:
 5. Use `mule-review` in release-readiness mode on the resulting candidate when the skill
    is installed. Do not continue on `Not ready` or `Unresolved`; complete or explicitly accept every
    condition before continuing from `Ready with conditions`.
-6. Commit or tag only when authorized. Make an annotated tag only after the final release commit.
+6. Commit only when authorized. Version a hotfix with a prerelease qualifier such as
+   `1.4.2-hotfix.1` (`release_version` with `bump: "prerelease"` and `preid: "hotfix"`, or an
+   explicit `version`); the Mule Maven plugin rejects four-part versions. A confirmed
+   `release_version` commits, tags and pushes by default: pass `noTag: true` and `noPush: true`
+   unless the user asked for the tag or the push. Do not tag at preparation time by default: a release tag marks the source production
+   proved, so tag the commit the deployed artifact was built from after its quiet period in
+   production, and never tag a release that was rolled back
+   ([Release lifecycle](../mule-ops/references/release-lifecycle.md#tag-the-release)). Tag earlier
+   only when the user or repository policy explicitly requires it.
 7. Push only when explicitly requested.
 
 If the user also requests publishing to Exchange or deploying, restarting, scaling, or rolling back
@@ -184,6 +199,8 @@ Provide:
 - Mule connector and plugin versions in Maven Central are old uploads. Resolve versions with
   [`mule-dependencies`](../mule-dependencies/SKILL.md); a `-DEV` or `-SNAPSHOT` build is not a release.
 - `-DskipTests` can make a build pass without evidence. Never use it to validate a change.
+- A green test run with zero tests executed is not evidence. Confirm MUnit booted and ran a nonzero
+  count, and note which JDK `run_tests` used; it is the server's JDK, not the project's target.
 - Publication, deployment, and runtime verification are separate outcomes. Report each on its own.
 - A secret check that asks for `${secure::key}` is right only for the encrypted-file model. A key
   supplied as a platform secure property stays `${key}` and is declared in `mule-artifact.json`

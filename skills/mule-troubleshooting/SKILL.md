@@ -1,6 +1,6 @@
 ---
 name: mule-troubleshooting
-description: Diagnose MuleSoft incidents and produce evidence-backed root-cause assessments or fix plans for timeouts, connection failures, rate limits, concurrency, batch processing, queues, deployment transitions, memory pressure, and cross-application error propagation. Use when a Mule runtime symptom must be traced through code, configuration, logs, metrics, and dependencies. Diagnose by default; modify source or configuration only when the user explicitly requests implementation.
+description: Diagnose MuleSoft incidents and produce evidence-backed root-cause assessments or fix plans for timeouts, connection failures, rate limits, concurrency, batch processing, queues, deployment transitions, platform-initiated restarts, lost or delayed events, memory pressure, and cross-application error propagation. Use when a specific Mule runtime symptom must be traced to its cause through code, configuration, logs, metrics, and dependencies. Diagnose by default; modify source or configuration only when the user explicitly requests implementation. Route broad health checks, release watches, and authorized runtime changes to mule-ops, and connector behavior questions to mule-connectors.
 ---
 
 # MuleSoft Troubleshooting and RCA

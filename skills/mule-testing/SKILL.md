@@ -83,19 +83,47 @@ unfaithful event or fixture, mock mismatch, environment/build failure, or flaky 
 only the layer supported by evidence. Never delete an assertion, broaden a mock, ignore a test, or
 lower a gate merely to make the suite pass.
 
+## Prove the toolchain runs
+
+A green result means nothing until MUnit has booted and executed tests.
+
+- Confirm the report shows a nonzero count of executed tests for the selection. Zero tests, or a
+  run that ends before the suites load, is a toolchain failure, not a pass.
+- Use one MUnit version for `munit-maven-plugin`, `munit-runner`, and `munit-tools`. A plugin
+  property that moves while the two dependencies stay hardcoded leaves an old runner that may not
+  boot. Java support is version-specific (for example, Java 17 needs MUnit 3.1.0 or later at the
+  time of writing); confirm the supported pair through
+  [`mule-dependencies`](../mule-dependencies/SKILL.md). The mule-build `check_compatibility` tool
+  (`MB-TC-007` for version skew, `MB-TC-002` for the Java 17 minimum) and mule-lint (`TEST-002`)
+  both check MUnit versions; run them and resolve their findings.
+- `mule-build` `run_tests` runs on the server's JDK, not necessarily the project's. Read the JDK
+  the run reports and confirm it is the one the project targets.
+- When the production runtime cannot run tests locally, commit a test-only Maven profile that sets
+  the MUnit version, a test runtime, a JDK enforcer rule, and placeholder values for secure keys.
+  Prove the profile does not change what ships: package without it before and after the change and
+  compare the deployable contents (Mule XML, DataWeave, resources, `mule-artifact.json` and the
+  resolved dependency set). The embedded POM and build timestamps change with any POM edit, so a raw
+  digest comparison is not the test; any other difference is.
+- If tests cannot run, say so. Name the substitute evidence, such as DataWeave fixture tests or a
+  harness that runs the changed flow against a stub, and its limits. Never call the change tested.
+
 ## Validate
 
 Run the narrowest deterministic test first, then the repository-required broader gate:
 
 1. Prefer `mule-build` `run_tests` with `cwd` and an exact suite, test, or tag selection.
 2. Otherwise use the project's established Maven or wrapper command and its pinned profile.
-3. Inspect the MUnit report and first actionable failure, not only the process exit status.
+3. Inspect the MUnit report and first actionable failure, not only the process exit status, and
+   confirm the executed test count is nonzero.
 4. Run the affected suite, then the complete required test/package gate for release scope.
 5. Re-run the inventory and inspect the final diff for ignored tests, over-broad selectors,
    production-source edits, generated reports, fixture leakage, and unrelated changes.
 
 Do not use `-DskipTests` or equivalent to validate a test change. Coverage and Test Recorder can
 identify unexercised paths, but no fixed percentage proves the behavior ledger is complete.
+
+For black-box tests against a running API, outside MUnit, read
+[API functional tests](references/api-functional-tests.md).
 
 ## Report
 
@@ -112,7 +140,11 @@ Return:
 - A mock mismatch, an unfaithful event, or a build failure says nothing about the product; a correct
   failing test can support a defect hypothesis.
 - Fixtures shaped for Studio convenience can hide production shapes. Cover normal and representative
-  adverse inputs.
+  adverse inputs, built from real production shapes such as a field sent as an empty key rather
+  than omitted.
+- A fix for an intermittent fault passes only when the fault's own trigger passes, not when a
+  quiet run shows no errors.
+- A zero-test run exits green. Check the executed count.
 - Do not use `-DskipTests` to validate a test change, and do not read a green exit status as proof.
   Inspect the MUnit report and the first actionable failure.
 - No coverage percentage proves the behavior ledger is complete.

@@ -59,15 +59,15 @@ The user still authorizes access in a browser, and a new headless CI runner cann
 only those two values.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.16.3 config init
-npx -y @sfdxy/anypoint-connect@0.16.3 auth login
-npx -y @sfdxy/anypoint-connect@0.16.3 auth status
+npx -y @sfdxy/anypoint-connect@0.17.0 config init
+npx -y @sfdxy/anypoint-connect@0.17.0 auth login
+npx -y @sfdxy/anypoint-connect@0.17.0 auth status
 ```
 
 A global install gives you the shorter `anc` command:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.16.3
+npm install -g @sfdxy/anypoint-connect@0.17.0
 anc config init
 anc auth login
 anc auth status
@@ -138,6 +138,105 @@ a report. Keep the same boundary yourself:
   paraphrase and redact them in the output.
 - Exported telemetry belongs outside the repository. Point the agent at a path; do not commit the
   file.
+
+## Approval for mutating tools
+
+Read-only tools (status, logs, metrics, audit, settings reads) are safe to pre-approve. Tools that
+change a running app ask on every call by default: a property write is a full redeploy, and a deploy
+call can keep running after the session ends. In Claude Code, list them under `ask` in the project's
+`.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "ask": [
+      "mcp__anypoint-connect__deploy_app",
+      "mcp__anypoint-connect__deploy_jar",
+      "mcp__anypoint-connect__update_app",
+      "mcp__anypoint-connect__update_app_artifact",
+      "mcp__anypoint-connect__update_app_settings",
+      "mcp__anypoint-connect__restart_app",
+      "mcp__anypoint-connect__rollback_app",
+      "mcp__anypoint-connect__scale_app",
+      "mcp__anypoint-connect__start_app",
+      "mcp__anypoint-connect__stop_app",
+      "mcp__anypoint-connect__delete_app",
+      "mcp__anypoint-connect__publish_app_jar",
+      "mcp__anypoint-connect__smoke_test_api",
+      "mcp__anypoint-connect__create_alert",
+      "mcp__anypoint-connect__update_alert",
+      "mcp__anypoint-connect__set_alert_enabled",
+      "mcp__anypoint-connect__delete_alert"
+    ]
+  }
+}
+```
+
+### Pre-approving when you choose to
+
+You can skip the prompt for some or all of these tools, for example in a sandbox project where an
+agent runs repeated deploys. Move the tools you want under `allow`, ideally in a project or local
+settings file scoped to that workspace rather than in your global settings:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__anypoint-connect__deploy_jar",
+      "mcp__anypoint-connect__update_app",
+      "mcp__anypoint-connect__restart_app"
+    ]
+  }
+}
+```
+
+Pre-approval removes the host prompt only. The skills still preview each change, name the exact app
+and environment before committing it, and anypoint-connect still requires its own explicit
+confirmation for production and refuses artifacts marked not production-deployable. The skills never
+suggest pre-approval or edit your permission settings; that choice is yours.
+
+Other hosts have an equivalent per-tool approval or auto-approve setting; the same list applies.
+
+### Pre-approving production
+
+Production changes need a second confirmation on top of the host prompt: the agent asks you before
+it sends `confirmProduction: true`, and the CLI asks you to type a confirmation. When a team wants
+an agent or pipeline to change production without that second step, for example a scheduled
+restart or an approved release window, pre-approve it with `set_production_preapproval`:
+
+```text
+Ask the agent: pre-approve production environment "<ENV>" for update_app and restart_app until
+<DATE>.
+```
+
+The approval is stored in your user-level anypoint-connect configuration, never in the repository,
+and is bound to the organization and environment IDs. Switching to another organization never
+carries it over; switching profile or credentials within the same organization and environment does,
+so clear it when the identity that should hold it changes. An approval written into a project's `.anypoint-connect.json` is ignored and
+reported, so a branch cannot grant itself production access. Setting it is previewed and confirmed.
+While it is active:
+
+- previews show `productionPreapproved: true` and the agent states that it applied;
+- the agent and CLI skip the second confirmation only for the listed environment and tools;
+- previews, `confirm: true`, bound identifiers such as the expected digest or deployment id, and
+  the production artifact checks still apply;
+- an expired entry is ignored, and clearing it restores the default;
+- `"all-mutating"` covers every mutating tool except `delete_app` and `delete_alert`, which must be
+  named;
+- `thisProjectOnly` limits it to one project directory.
+
+### Artifacts without a build marker
+
+Every production change that selects an artifact checks the build marker inside the jar it will
+run, downloading it from Exchange when needed. Stripped or inconsistent markers are always refused.
+A jar with no marker, from another build pipeline or from before mule-build 3.2, is refused for
+production unless you allow it for that environment with `set_unmarked_artifact_allowance`
+(user-level, organization and environment IDs, optional expiry). If your rollback target predates
+the marker, set the allowance while planning the release rather than during an incident.
+
+Combine these with host pre-approval (above) only when no human should see a prompt at all, and
+scope everything to the workspace that needs it. See the
+[anypoint-connect documentation](https://avinava.github.io/anypoint-connect/) for the exact fields.
 
 ## What the skills do with access
 

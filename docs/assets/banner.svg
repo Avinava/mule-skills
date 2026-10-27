@@ -1,64 +1,55 @@
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 960 300"
-  width="960"
-  height="300"
-  role="img"
-  aria-labelledby="title description"
->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 288" width="960" height="288" role="img" aria-labelledby="title desc">
   <title id="title">Mule Skills</title>
-  <desc id="description">
-    An evidence-backed agent workflow hub connects MuleSoft documentation,
-    development, diagnosis, operations, review, and build validation.
-  </desc>
-
+  <desc id="desc">Mule Skills: one agent hub surrounded by the Mule 4 lifecycle it covers, design, develop, test, review, release and operate, with evidence-backed, privacy-safe, release-ready guidance.</desc>
   <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#07111f" />
-      <stop offset="0.52" stop-color="#10243d" />
-      <stop offset="1" stop-color="#123b46" />
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220" />
+      <stop offset="1" stop-color="#1e293b" />
+    </linearGradient>
+    <radialGradient id="halo" cx="190" cy="158" r="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0.2" />
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#e2e8f0" stroke-opacity="0.04" />
+    </pattern>
+    <clipPath id="card">
+      <rect width="960" height="288" rx="28" />
+    </clipPath>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee" />
+      <stop offset="1" stop-color="#38bdf8" />
     </linearGradient>
     <linearGradient id="core" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#22d3ee" />
       <stop offset="1" stop-color="#0284c7" />
     </linearGradient>
-    <linearGradient id="documentation" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="design" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#7dd3fc" />
       <stop offset="1" stop-color="#8b5cf6" />
     </linearGradient>
-    <linearGradient id="operations" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#34d399" />
-      <stop offset="1" stop-color="#0d9488" />
+    <linearGradient id="develop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbbf24" />
+      <stop offset="1" stop-color="#f97316" />
+    </linearGradient>
+    <linearGradient id="test" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4ade80" />
+      <stop offset="1" stop-color="#16a34a" />
     </linearGradient>
     <linearGradient id="review" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#c084fc" />
       <stop offset="1" stop-color="#ec4899" />
     </linearGradient>
-    <linearGradient id="troubleshooting" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="release" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#fb923c" />
       <stop offset="1" stop-color="#e11d48" />
     </linearGradient>
-    <linearGradient id="code" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fbbf24" />
-      <stop offset="1" stop-color="#f97316" />
+    <linearGradient id="operate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2dd4bf" />
+      <stop offset="1" stop-color="#0e7490" />
     </linearGradient>
-    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
-      <path
-        d="M 48 0 L 0 0 0 48"
-        fill="none"
-        stroke="#dbeafe"
-        stroke-opacity="0.035"
-        stroke-width="1"
-      />
-    </pattern>
     <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow
-        dx="0"
-        dy="8"
-        stdDeviation="10"
-        flood-color="#020617"
-        flood-opacity="0.55"
-      />
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#020617" flood-opacity="0.5" />
     </filter>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="4" result="blur" />
@@ -69,196 +60,87 @@
     </filter>
   </defs>
 
-  <rect width="960" height="300" rx="24" fill="url(#background)" />
-  <rect width="960" height="300" rx="24" fill="url(#grid)" />
-  <path
-    d="M610 0h350v300H500c120-74 85-220 110-300Z"
-    fill="#38bdf8"
-    opacity="0.035"
-  />
+  <g clip-path="url(#card)">
+    <rect width="960" height="288" fill="url(#bg)" />
+    <rect width="960" height="288" fill="url(#grid)" />
+    <rect width="960" height="288" fill="url(#halo)" />
+  </g>
+  <rect x="0.5" y="0.5" width="959" height="287" rx="27.5" fill="none" stroke="#e2e8f0" stroke-opacity="0.08" />
 
-  <g transform="translate(30 29)">
-    <circle cx="0" cy="0" r="7" fill="#fb7185" />
-    <circle cx="23" cy="0" r="7" fill="#fbbf24" />
-    <circle cx="46" cy="0" r="7" fill="#34d399" />
+  <g transform="translate(44 44)">
+    <circle cx="0" cy="0" r="7" fill="#ff5f57" />
+    <circle cx="24" cy="0" r="7" fill="#febc2e" />
+    <circle cx="48" cy="0" r="7" fill="#28c840" />
   </g>
 
-  <g transform="translate(176 155)">
-    <g
-      fill="none"
-      stroke-linecap="round"
-      stroke-width="2.5"
-      opacity="0.72"
-      filter="url(#glow)"
-    >
-      <path d="M-30-12-105-66" stroke="#fbbf24" stroke-dasharray="5 7" />
-      <path d="M-38 12-118 42" stroke="#fb923c" stroke-dasharray="5 7" />
-      <path d="M-10-38 4-91" stroke="#a78bfa" stroke-dasharray="5 7" />
-      <path d="M34-14 112-60" stroke="#c084fc" stroke-dasharray="5 7" />
-      <path d="M36 17 119 49" stroke="#34d399" stroke-dasharray="5 7" />
+  <!-- Hub: the lifecycle runs clockwise from design (left) to operate (lower left) -->
+  <g transform="translate(190 158)">
+    <ellipse cx="0" cy="0" rx="115" ry="80" fill="none" stroke="#7dd3fc" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="4 7" />
+    <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="5 7" opacity="0.7">
+      <path d="M0 0H-115" stroke="#a78bfa" />
+      <path d="M0 0-57-80" stroke="#fbbf24" />
+      <path d="M0 0 57-80" stroke="#4ade80" />
+      <path d="M0 0H115" stroke="#c084fc" />
+      <path d="M0 0 57 80" stroke="#fb923c" />
+      <path d="M0 0-57 80" stroke="#2dd4bf" />
     </g>
 
-    <g filter="url(#shadow)">
-      <rect x="-134" y="-92" width="52" height="52" rx="15" fill="url(#code)" />
-      <path
-        d="m-116-76-8 10 8 10m17-20 8 10-8 10"
-        fill="none"
-        stroke="#fff"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="3"
-      />
-
-      <rect
-        x="-144"
-        y="18"
-        width="48"
-        height="48"
-        rx="14"
-        fill="url(#troubleshooting)"
-      />
-      <path
-        d="m-120 29 14 25h-28Zm0 8v8m0 4v.5"
-        fill="none"
-        stroke="#fff"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="3"
-      />
-
-      <rect
-        x="-22"
-        y="-118"
-        width="52"
-        height="52"
-        rx="15"
-        fill="url(#documentation)"
-      />
-      <path
-        d="M-8-105h17l8 8v19H-8Zm17 0v8h8M-1-90h11m-11 6h11"
-        fill="none"
-        stroke="#fff"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2.6"
-      />
-
-      <rect x="88" y="-86" width="52" height="52" rx="15" fill="url(#review)" />
-      <path
-        d="M119-55l9 9m-7-17a10 10 0 1 1-20 0 10 10 0 0 1 20 0Zm-15 0 3 3 6-7"
-        fill="none"
-        stroke="#fff"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2.7"
-      />
-
-      <rect
-        x="96"
-        y="25"
-        width="52"
-        height="52"
-        rx="15"
-        fill="url(#operations)"
-      />
-      <path
-        d="M107 52h8l5-12 7 24 5-12h7"
-        fill="none"
-        stroke="#fff"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="3"
-      />
+    <g filter="url(#shadow)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6">
+      <!-- Design: API specification -->
+      <g transform="translate(-115 0)">
+        <rect x="-23" y="-23" width="46" height="46" rx="13" fill="url(#design)" stroke="none" />
+        <path d="M-8-11h10l7 7v15H-8ZM2-11v7h7M-4 2h8M-4 7h8" />
+      </g>
+      <!-- Develop: code -->
+      <g transform="translate(-57 -80)">
+        <rect x="-23" y="-23" width="46" height="46" rx="13" fill="url(#develop)" stroke="none" />
+        <path d="M-4-8-11 0l7 8M4-8l7 8-7 8" stroke-width="3" />
+      </g>
+      <!-- Test: flask -->
+      <g transform="translate(57 -80)">
+        <rect x="-23" y="-23" width="46" height="46" rx="13" fill="url(#test)" stroke="none" />
+        <path d="M-5-11H5M-3-11v7l-7 12a2.5 2.5 0 0 0 2.2 3.8H7.8A2.5 2.5 0 0 0 10 8L3-4v-7M-6 4H6" />
+      </g>
+      <!-- Review: magnifier with check -->
+      <g transform="translate(115 0)">
+        <rect x="-23" y="-23" width="46" height="46" rx="13" fill="url(#review)" stroke="none" />
+        <circle cx="-2" cy="-2" r="8" />
+        <path d="m4 4 6 6M-6-2l3 3 5-6" />
+      </g>
+      <!-- Release: rocket -->
+      <g transform="translate(57 80)">
+        <rect x="-23" y="-23" width="46" height="46" rx="13" fill="url(#release)" stroke="none" />
+        <path d="M0-12c5 3 7.5 9 6 16H-6c-1.5-7 1-13 6-16ZM-6 1l-4 6v3l4-2M6 1l4 6v3l-4-2M-2.5 8 0 13l2.5-5" />
+        <circle cx="0" cy="-3" r="2.4" />
+      </g>
+      <!-- Operate: health pulse -->
+      <g transform="translate(-57 80)">
+        <rect x="-23" y="-23" width="46" height="46" rx="13" fill="url(#operate)" stroke="none" />
+        <path d="M-12 1h5l3.5-8L2 8l3.5-7H12" stroke-width="3" />
+      </g>
     </g>
 
-    <circle
-      cx="0"
-      cy="0"
-      r="53"
-      fill="#22d3ee"
-      opacity="0.13"
-      filter="url(#glow)"
-    />
-    <rect
-      x="-40"
-      y="-40"
-      width="80"
-      height="80"
-      rx="22"
-      fill="url(#core)"
-      filter="url(#shadow)"
-      transform="rotate(45)"
-    />
-    <circle cx="0" cy="0" r="27" fill="#082f49" opacity="0.35" />
-    <g
-      fill="none"
-      stroke="#fff"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      stroke-width="2.4"
-    >
-      <path d="M0 0 0-16M0 0l15-5M0 0l9 14M0 0l-9 14M0 0l-15-5" opacity="0.9" />
-      <circle cx="0" cy="-16" r="3.5" fill="#fff" />
-      <circle cx="15" cy="-5" r="3.5" fill="#fff" />
-      <circle cx="9" cy="14" r="3.5" fill="#fff" />
-      <circle cx="-9" cy="14" r="3.5" fill="#fff" />
-      <circle cx="-15" cy="-5" r="3.5" fill="#fff" />
-      <circle cx="0" cy="0" r="4.5" fill="#082f49" />
-    </g>
-
-    <g fill="#e0f2fe">
-      <circle cx="-57" cy="-28" r="3" />
-      <circle cx="51" cy="-40" r="3" />
-      <circle cx="59" cy="31" r="3" />
+    <circle cx="0" cy="0" r="50" fill="#22d3ee" opacity="0.13" filter="url(#glow)" />
+    <rect x="-35" y="-35" width="70" height="70" rx="20" fill="url(#core)" filter="url(#shadow)" transform="rotate(45)" />
+    <circle cx="0" cy="0" r="25" fill="#082f49" opacity="0.35" />
+    <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4">
+      <path d="M0 0V-15M0 0l14-5M0 0l8.5 13M0 0l-8.5 13M0 0l-14-5" opacity="0.9" />
+      <g fill="#fff">
+        <circle cx="0" cy="-15" r="3.3" />
+        <circle cx="14" cy="-5" r="3.3" />
+        <circle cx="8.5" cy="13" r="3.3" />
+        <circle cx="-8.5" cy="13" r="3.3" />
+        <circle cx="-14" cy="-5" r="3.3" />
+      </g>
+      <circle cx="0" cy="0" r="4.2" fill="#082f49" />
     </g>
   </g>
 
-  <g transform="translate(360 125)">
-    <text
-      x="0"
-      y="0"
-      fill="#fff"
-      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
-      font-size="54"
-      font-weight="800"
-      letter-spacing="-1.5"
-    >
-      mule
-      <tspan fill="#38bdf8">-skills</tspan>
-    </text>
-    <text
-      x="2"
-      y="48"
-      fill="#a5c5d8"
-      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
-      font-size="16"
-      font-weight="700"
-      letter-spacing="1.8"
-    >
-      DOCUMENT · DEVELOP · DIAGNOSE · OPERATE · REVIEW
-    </text>
-    <g transform="translate(2 75)">
-      <rect
-        width="470"
-        height="34"
-        rx="17"
-        fill="#e0f2fe"
-        opacity="0.08"
-        stroke="#7dd3fc"
-        stroke-opacity="0.18"
-      />
-      <circle cx="19" cy="17" r="5" fill="#34d399" />
-      <text
-        x="34"
-        y="18"
-        fill="#dbeafe"
-        font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-        font-size="13"
-        font-weight="600"
-        dominant-baseline="middle"
-      >
-        EVIDENCE-BACKED · PRIVACY-SAFE · RELEASE-READY
-      </text>
-    </g>
+  <text x="370" y="150" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="68" font-weight="800" letter-spacing="-1.5"><tspan fill="#f8fafc">Mule</tspan><tspan dx="16" fill="url(#accent)">Skills</tspan></text>
+  <text x="372" y="196" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="16" font-weight="600" letter-spacing="0.3">DESIGN · DEVELOP · TEST · REVIEW · RELEASE · OPERATE</text>
+  <g transform="translate(372 214)">
+    <rect width="412" height="32" rx="16" fill="#e0f2fe" fill-opacity="0.07" stroke="#7dd3fc" stroke-opacity="0.2" />
+    <circle cx="18" cy="16" r="5" fill="#34d399" />
+    <text x="32" y="20.5" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" font-weight="600">EVIDENCE-BACKED · PRIVACY-SAFE · RELEASE-READY</text>
   </g>
 </svg>

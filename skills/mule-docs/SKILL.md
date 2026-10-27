@@ -1,6 +1,6 @@
 ---
 name: mule-docs
-description: Analyze MuleSoft Mule 4 repositories and create or update evidence-backed Markdown documentation with Mermaid diagrams. Use for project overviews, architecture and flow documentation, API contracts, connector and DataWeave documentation, configuration guides, onboarding, deployment, operations, testing, troubleshooting, or documentation-gap audits. Use for full-project documentation and targeted refreshes after Mule XML, RAML/OAS, DataWeave, MUnit, configuration, or deployment changes. Do not use for generic non-Mule repositories or source-code changes unrelated to documentation.
+description: Analyze MuleSoft Mule 4 repositories and create or update evidence-backed Markdown documentation with Mermaid diagrams. Use for project overviews, architecture and flow documentation, documenting existing API contracts, connector and DataWeave documentation, configuration guides, onboarding, deployment, operations, testing, troubleshooting, or documentation-gap audits. Use for full-project documentation and targeted refreshes after Mule XML, RAML/OAS, DataWeave, MUnit, configuration, or deployment changes. Do not use for authoring or redesigning RAML/OAS contracts (mule-api-design), generic non-Mule repositories, or source-code changes unrelated to documentation.
 ---
 
 # Document MuleSoft Project

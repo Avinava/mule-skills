@@ -97,7 +97,10 @@ mismatch fails at deployment or startup with an unresolved property, not with a 
 ### Supplying values without echoing them
 
 Never pass a secret value as a command argument, in a tool call or in chat, because all three are
-recorded. Resolve it on the machine that sends it:
+recorded. To confirm a secret exists, check by key name or by count (the key is listed, the file
+defines N secure keys), never by printing, echoing, or decoding its value. Inject values from a
+file or environment variable outside the conversation, and resolve them on the machine that sends
+them:
 
 - anypoint-connect 0.16 or later: the settings change takes secret sources (a project `.env`,
   `.properties` or flat JSON file, or environment variables) and resolves them on the server, and it
@@ -201,6 +204,7 @@ token endpoint is a shared, rate limited dependency.
 - Every secret key uses one supply model, and its placeholder and declaration match that model.
 - No secret-looking key is stored as a plaintext platform property.
 - No secret value appears in source, history, fixtures, logs, errors, or handoff text.
+- Presence was confirmed by key name or count, never by displaying a value.
 - Decryption keys and encrypted values are stored and delivered separately.
 - Certificate and hostname validation are enabled in every environment.
 - Truststores are narrow; expiry dates have owners.

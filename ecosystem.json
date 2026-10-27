@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "1.12.2",
+  "bundleVersion": "1.13.0",
   "packages": {
     "anypoint-connect": {
       "npm": "@sfdxy/anypoint-connect",
-      "version": "0.16.3",
+      "version": "0.17.0",
       "node": ">=22.0.0",
       "role": "Authorized Anypoint evidence, Design Center workflows, and lifecycle operations",
       "credentials": "Anypoint Platform login",
@@ -13,7 +13,7 @@
     },
     "mule-build": {
       "npm": "@sfdxy/mule-build",
-      "version": "3.1.0",
+      "version": "3.2.0",
       "node": ">=20.19.0",
       "role": "Validate, test, package, run locally, and prepare versioned and tagged Mule artifacts",
       "credentials": "None",
@@ -22,7 +22,7 @@
     },
     "mule-lint": {
       "npm": "@sfdxy/mule-lint",
-      "version": "2.1.1",
+      "version": "2.2.0",
       "node": ">=20.0.0",
       "role": "Canonical standards, Mule static analysis, XML formatting, and RAML/OAS contract validation",
       "credentials": "None",

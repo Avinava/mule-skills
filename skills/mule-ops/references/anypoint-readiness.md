@@ -112,15 +112,15 @@ the detailed administrator setup belongs to
 <https://avinava.github.io/anypoint-connect/credentials/>.
 
 ```bash
-npx -y @sfdxy/anypoint-connect@0.16.3 config init
-npx -y @sfdxy/anypoint-connect@0.16.3 auth login
-npx -y @sfdxy/anypoint-connect@0.16.3 auth status
+npx -y @sfdxy/anypoint-connect@0.17.0 config init
+npx -y @sfdxy/anypoint-connect@0.17.0 auth login
+npx -y @sfdxy/anypoint-connect@0.17.0 auth status
 ```
 
 A global install gives the shorter `anc` form and needs separate approval:
 
 ```bash
-npm install -g @sfdxy/anypoint-connect@0.16.3
+npm install -g @sfdxy/anypoint-connect@0.17.0
 anc auth login
 anc auth status
 ```
@@ -182,6 +182,32 @@ only.
   instead.
 - Never run a mutating Anypoint operation — deploy, rollback, restart, scale, delete, settings, or
   queue publish — as part of establishing readiness.
+- By default, the mutating tools ask for approval on every call: `deploy_app`, `deploy_jar`,
+  `update_app`, `update_app_artifact`, `update_app_settings`, `restart_app`, `rollback_app`,
+  `scale_app`, `start_app`, `stop_app`, `delete_app`, `publish_app_jar`, `smoke_test_api`,
+  `create_alert`, `update_alert`, `set_alert_enabled` and `delete_alert`.
+  A property write is a full redeploy, so settings tools count. A user may pre-approve some or all
+  of them in the host's permission settings, for example for sandbox automation. Respect that
+  choice: pre-approval removes the host prompt, not the workflow. Still preview first and name the
+  exact app and environment before the commit call.
+- Production needs its own confirmation. By default, ask the user in the conversation before
+  sending `confirmProduction: true`. A user can pre-approve production with
+  `set_production_preapproval`, which stores the approval outside the repository, bound to the
+  organization and environment IDs, for named tools and an optional expiry. When the preview reports
+  `productionPreapproved: true`, proceed without asking again, but state in the reply that the
+  pre-approval applied, which environment and tool it covered, and its expiry. A
+  `preapprovalWarning` means an approval found in a project file was ignored; ask as usual. Pre-approval
+  never waives the preview, the bound identifiers, or the artifact checks below.
+- Production artifact checks: every production change that selects an artifact verifies the build
+  marker of the jar it will run, downloaded from Exchange when no local jar is given. A stripped,
+  inconsistent or unknown marker is refused. A jar with no marker (built by another pipeline, or
+  before mule-build 3.2) is refused unless the user allowed unmarked artifacts for that environment
+  with `set_unmarked_artifact_allowance`. Check the rollback target before a release; if it is
+  unmarked, the rollback needs that allowance, so settle it while the release is planned, not during
+  an incident.
+- Never suggest, create, widen, or extend a pre-approval or allowance yourself, and never change host
+  permission settings. Set one only when the user explicitly asks, through the tool's preview and
+  `confirm: true`. The project documentation on Anypoint access shows each setup.
 - Never echo the organization name, organization identifier, user name, email address, or profile
   identifier into a report. Say `the authorized environment` and name the environment only by the
   label the user used.

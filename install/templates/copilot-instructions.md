@@ -16,7 +16,7 @@ When a task matches one of these workflows, follow its instructions:
 | Mule production source, DataWeave, APIKit implementation, or connector changes | `mule-development` |
 | MUnit authoring, repair, fixtures, mocks, and assertions | `mule-testing` |
 | Incident diagnosis and root-cause analysis | `mule-troubleshooting` |
-| Runtime health and operations | `mule-ops` |
+| Runtime health, releases, hotfixes and rollbacks | `mule-ops` |
 | Documentation creation and targeted refreshes | `mule-docs` |
 | Change, project, or release-readiness review | `mule-review` |
 | Latest or compatible connector, plugin, or runtime versions | `mule-dependencies` |

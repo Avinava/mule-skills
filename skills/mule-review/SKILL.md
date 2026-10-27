@@ -1,6 +1,6 @@
 ---
 name: mule-review
-description: Review MuleSoft Mule 4 working changes, commit ranges, branches, pull requests, whole repositories, or release readiness and return prioritized evidence-backed findings with remediation options. Use for code review, PR review, project health audits, architecture and contract consistency checks, incident-prevention reviews, and pre-release gates covering Mule XML, RAML/OAS, DataWeave, connectors, configuration, MUnit, deployment, operations, security, privacy, and documentation. Review and report by default; do not modify source, post comments, approve changes, or perform release actions unless the user explicitly requests them.
+description: Review MuleSoft Mule 4 working changes, commit ranges, branches, pull requests, whole repositories, or release readiness and return prioritized evidence-backed findings with remediation options. Use for code review, PR review, project health audits, architecture and contract consistency checks, incident-prevention reviews, and the release-readiness verdict covering Mule XML, RAML/OAS, DataWeave, connectors, configuration, MUnit, deployment, rollback plans, operations, security, privacy, and documentation. Review and report by default; do not modify source, post comments, approve changes, or perform release actions unless the user explicitly requests them. Route running builds and preparing versions to mule-build.
 ---
 
 # Review MuleSoft Project

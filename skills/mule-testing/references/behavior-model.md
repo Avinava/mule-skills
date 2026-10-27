@@ -3,6 +3,18 @@
 Use this reference after inspecting the production path and existing test conventions. It is the
 bundled fallback for the canonical `MSTD-TEST-001` testing guidance exposed by mule-lint.
 
+## Contents
+
+1. [Behavior ledger](#behavior-ledger)
+2. [Invariant-class mapping](#invariant-class-mapping)
+3. [Fixtures from production shapes](#fixtures-from-production-shapes)
+4. [Pass conditions for intermittent faults](#pass-conditions-for-intermittent-faults)
+5. [Evidence that tests ran](#evidence-that-tests-ran)
+6. [Mock, assert, verify, or spy?](#mock-assert-verify-or-spy)
+7. [Failure classification](#failure-classification)
+8. [Coverage and Test Recorder](#coverage-and-test-recorder)
+9. [Privacy boundary](#privacy-boundary)
+
 ## Behavior ledger
 
 Create one row per material behavior. Omit cases the implementation cannot exercise and record why.
@@ -28,6 +40,30 @@ Create one row per material behavior. Omit cases the implementation cannot exerc
 
 Apply cross-cutting gates whenever relevant: safe configuration, authentication and authorization,
 capacity and lifecycle, transactions and delivery, privacy and observability, and release validation.
+
+## Fixtures from production shapes
+
+Derive each fixture's structure from how the real caller or source sends data, then replace every
+value with synthetic data. A field the producer sends as a present empty key behaves differently
+from an absent field (`default` does not apply to the empty value), so a fixture that omits it can
+pass while production fails. When a fix passed tests and still failed in production, compare the
+fixture's shape to the production shape before writing another fix. Record the shape variants
+(absent, null, empty, alternate nesting) as ledger rows.
+
+## Pass conditions for intermittent faults
+
+For a fix to an intermittent or periodic fault, the pass condition is the fault's own trigger
+occurring and the behavior holding: for example, surviving the reconnect, token expiry, or
+redelivery that caused it. A run with no errors at low volume, or before the trigger has fired, is
+not evidence. Where MUnit cannot reproduce the trigger, state the condition to observe after
+release and leave the case open until it is met.
+
+## Evidence that tests ran
+
+Before trusting a result, confirm MUnit booted and executed a nonzero number of tests for the
+selection, on the JDK the project targets, with one MUnit version across plugin, runner, and tools.
+When tests cannot run, record the substitute evidence (DataWeave fixture tests, a harness that runs
+the changed flow against a stub) as such; it does not make the change tested.
 
 ## Mock, assert, verify, or spy?
 

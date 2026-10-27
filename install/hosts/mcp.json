@@ -4,7 +4,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/anypoint-connect@0.16.3",
+        "@sfdxy/anypoint-connect@0.17.0",
         "mcp"
       ]
     },
@@ -12,7 +12,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/mule-build@3.1.0",
+        "@sfdxy/mule-build@3.2.0",
         "mcp"
       ]
     },
@@ -20,7 +20,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@sfdxy/mule-lint@2.1.1",
+        "@sfdxy/mule-lint@2.2.0",
         "mcp"
       ]
     }

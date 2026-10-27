@@ -58,6 +58,8 @@ Prioritize by credible project impact and evidence; do not infer severity from t
   representative target-runtime serialization test when the representation changes.
 - Test normal production shape and relevant adverse/alternate shapes; mocks must be capable of
   failing the changed mechanism.
+- Take status, picklist, and type selector values from production data, not field defaults, and
+  run the exact query or condition against representative data before release.
 - Validate query inputs, bind/escape user-derived values, select every downstream-consumed field,
   and handle empty/null results and pagination.
 - Verify scatter-gather indexes and preserve the original message when later work needs it.
@@ -105,6 +107,9 @@ Prioritize by credible project impact and evidence; do not infer severity from t
 - Classify changed failures as permanent, retryable, or explicitly context-dependent before retry.
 - Do not retry permanent validation/client/business failures. Retry 401 only when every attempt can
   refresh auth material; validate actual connector error types.
+- Map an expired or invalidated session, or a transient login refusal, to a retryable
+  caller-facing status; keep re-login single-flight with a cooldown; write records off only on a
+  permanent status.
 - Honor idempotency, total caller deadline, dependency quota, and `Retry-After`/backoff guidance.
 - For app-driven re-selection:
   - permanent/poison records leave the eligible loop through terminal, quarantine/error-store, or
@@ -118,6 +123,8 @@ Prioritize by credible project impact and evidence; do not infer severity from t
   swallowing errors.
 - For `until-successful`, catch only permanent types inside and turn them into a classified successful
   scope result; let retryable types escape for retry. Handle permanent disposition after the scope.
+- Confirm no inner `try`/`on-error-continue` around an outbound call catches a retryable type, which
+  would skip every retry and mark work failed after the target may have committed it.
 - Preserve diagnostics through failed-attempt resets with in-attempt logging, durable capture, or
   verified nested cause—not only ordinary variables.
 - Attribute the operation actually reached and failed in multi-hop Try scopes; gate success messages
@@ -149,11 +156,16 @@ Prioritize by credible project impact and evidence; do not infer severity from t
   separately.
 - Verify event wrapper nesting, continuous reconnection, replay, and duplicate behavior.
 - Keep create/upsert side effects idempotent across retry, redelivery, and failed writeback.
+- Send an external identifier on creates; after an ambiguous failure, look the record up by it and
+  reuse it when found.
 
 ## 7. Cross-cutting runtime and delivery gates
 
 - Calculate effective concurrency across source consumers, `maxConcurrency`, parallel scopes, batch,
   replicas, pools, and dependency limits. Derive numbers from current evidence.
+- Cap concurrency where work starts (source, batch, `parallel-foreach`), not with the connection
+  pool; operations such as paged searches hold connections across calls. Never shrink a pool
+  without a worst-case test.
 - Treat batch block size as memory/scheduling, not request concurrency; bound streaming,
   materialization, variables, and payload logging for memory safety.
 - Budget connect, response/read, idle, proxy, retry, and total caller deadlines correctly; idle
@@ -167,12 +179,18 @@ Prioritize by credible project impact and evidence; do not infer severity from t
 - For GET, HEAD, and OPTIONS, use verified connector body behavior or an explicit no-body mode when
   required by contract.
 - Verify inbound correlation adoption and outbound propagation before claiming end-to-end tracing.
-- Match operational version metadata to the packaged artifact.
+- Match operational version metadata to the packaged artifact: the logged version is derived from
+  the build, not a hand-maintained property, and a fresh package logs the `pom.xml` version.
 
 ## 8. Build, tests, and documentation
 
 - Run the embedded-expression checker for XML changes, then project formatter/linter, focused MUnit,
   and the required integration/package gate.
+- In the mule-lint results, resolve or explain every finding from the configuration parity rules:
+  `CFG-004` unresolved property placeholders, `PROJ-003` a namespace used without its dependency,
+  `ERR-005` undefined error types, `TEST-002` MUnit version parity, and `LOG-007` DEBUG loggers on
+  sensitive connector or transport packages.
+- For a runtime or Java upgrade, follow [Runtime and Java upgrade plan](upgrade-plan.md).
 - Cover success and meaningful failure/disposition paths with assertions that can detect the actual
   mechanism.
 - Re-run contract/schema validation and route/event mapping checks; packaging alone is insufficient.

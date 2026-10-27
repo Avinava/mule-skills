@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.svg" alt="Mule Skills — evidence-backed MuleSoft agent workflows" width="960" />
+  <img src="docs/assets/banner.svg" alt="Mule Skills: evidence-backed MuleSoft agent workflows from design to release and operations" width="960" />
 </p>
 
 <p align="center">
@@ -81,7 +81,7 @@ Then give the agent context about your project by following
 | [`mule-development`](skills/mule-development/) | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch, and configuration | Implemented source change with proportionate validation |
 | [`mule-testing`](skills/mule-testing/) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration | Faithful tests with focused and full validation evidence |
 | [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or ranked hypotheses, confidence, evidence gaps, and fix plan |
-| [`mule-ops`](skills/mule-ops/) | Runtime health, deployments, logs, metrics, recurring checks, and multi-application correlation | Health assessment, evidence coverage, risks, and recommended actions |
+| [`mule-ops`](skills/mule-ops/) | Runtime health, releases and hotfixes, deployments, logs, metrics, recurring checks, and multi-application correlation | Health assessment, evidence coverage, release record and rollback plan, risks, and recommended actions |
 | [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings, fix options, coverage limits, and readiness verdict when applicable |
 | [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags | Exact checks, test totals, artifact or failure evidence, and release actions performed |
 | [`mule-dependencies`](skills/mule-dependencies/) | Latest and compatible connector, plugin, and runtime versions, release-note feature lookups, and pom upgrade checks | Newest and newest compatible release per dependency, with source and fetch time |
@@ -100,7 +100,9 @@ Then give the agent context about your project by following
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
 | Find the latest or compatible connector, plugin, or runtime version | `mule-dependencies` | `mule-development` to apply the upgrade; `mule-build` to verify it |
 | Switch a connector's authentication, integration user, or subscription settings | `mule-connectors` | `mule-development` for the change; `mule-ops` safe change to deploy and verify it |
-| Prepare a release | `mule-build` | `mule-review` before commit/tag; `mule-ops` for separately approved publish/deploy |
+| Prepare a release | `mule-build` | `mule-review` before commit; `mule-ops` for separately approved publish/deploy, the watch, and the tag after production proves it |
+| Ship a hotfix or roll back | `mule-ops` | `mule-build` for the qualified hotfix version and package; `mule-troubleshooting` when the cause is still open |
+| Upgrade the Mule runtime or Java | `mule-development` | `mule-dependencies`, `mule-testing` and `mule-build` to prove it; `mule-ops` to roll it out |
 
 Documentation and review questions are optional and non-blocking. When business information would
 materially improve the result, the skill offers concise choices plus `Other` and `Not sure / Skip`,
@@ -156,9 +158,9 @@ Credential-free launch configuration for three pinned MCP servers:
 
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.16.3`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.16.3) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.1.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.1.0) | Mule validation, testing, packaging, local runtime, versioning, tagging, and secure-reference preconditions |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.1.1`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.1.1) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.17.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.17.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.2.0) | Mule validation, testing, packaging, local runtime, versioning, tagging, and secure-reference preconditions |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.2.0) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
 
 Source links come from each published package's repository metadata. Package links resolve to the
 exact registry version used by the checked-in configuration rather than an unpinned latest release.
@@ -167,8 +169,8 @@ Node.js `>=22.0.0` satisfies all three. Node.js 24 LTS is recommended for a new 
 `mule-build` and `mule-lint` need no credentials. `anypoint-connect` idles until you authenticate;
 see [docs/anypoint-access.md](docs/anypoint-access.md).
 
-Skills that need authorized platform evidence — `mule-api-design`, `mule-ops`, `mule-troubleshooting`,
-and `mule-review` — probe the requested Anypoint capability before their first connector call. When
+Skills that need authorized platform evidence (`mule-api-design`, `mule-ops`, `mule-troubleshooting`,
+and `mule-review`) probe the requested Anypoint capability before their first connector call. When
 it is missing they say which state they found and offer setup, exported logs and metrics
 you supply, or a repository-only scope with the gap labeled. Nothing blocks on authentication, and a
 tool error is never reported as an environment finding. The shared workflow is

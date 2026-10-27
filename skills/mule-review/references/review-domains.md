@@ -67,6 +67,18 @@ Perform project coverage plus these gates:
 - configuration inputs, secret boundaries, and deployment automation are complete
 - changed asynchronous paths have safe acknowledgement, retry, idempotency, and recovery behavior
 - required documentation, operations guidance, rollback, and verification signals are current
+- the release record and rollback plan in
+  [Release lifecycle](../../mule-ops/references/release-lifecycle.md#before-the-release) exist: the
+  running artifact by name and digest, a rollback target that needs no property write where possible,
+  a never-deploy list, and the accepted loss for the start
+- every property key the candidate reads is supplied by the target (packaged files, secure file and
+  platform properties), including keys that moved between `${secure::key}` and `${key}`
+- the candidate is a production build: no stripped secure prefixes, and MUnit actually booted on the
+  release path
+- when authorized runtime evidence is available, API Manager policies are inventoried per instance
+  (`list_api_instances`, `get_api_policies`) and governance conformance is read
+  (`get_api_governance_conformance`); a platform change that was accepted asynchronously counts as
+  pending until it reports a final state
 
 Do not perform version changes, commits, tags, publishing, deployment, or approvals.
 
@@ -232,7 +244,14 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
   deployment. A secret-looking key stored as a plaintext platform property is a finding even when
   the code is correct. Do not report a correct platform-property reference as missing `secure::`.
 - Check `log4j2.xml` and runtime log-level overrides for connector-internal categories at DEBUG or
-  TRACE that write credentials or session identifiers; `mule-connectors` profiles list them.
+  TRACE that write credentials or session identifiers; `mule-connectors` profiles list them, and
+  mule-lint flags the known categories (`LOG-007`).
+- Run mule-lint's configuration parity rules and cite their findings: placeholders no file or
+  declared runtime input supplies (`CFG-004`), namespaces without a pom dependency (`PROJ-003`),
+  error types nothing defines (`ERR-005`), and MUnit plugin, runner and tools versions that differ
+  (`TEST-002`).
+- Check selectors (status, type or picklist filters) against values the target actually writes, not
+  field defaults. A filter that matches nothing passes every test built from defaults.
 - Check that non-production configuration cannot reach a live or production system through a
   hard-coded endpoint, a copied properties file, or a shared credential.
 
@@ -253,6 +272,8 @@ Apply **state and idempotency** mechanisms (Class E) alongside concurrency and l
 - Check artifact version surfaces (including logger/app version properties), deployment inputs,
   rollback path, and current-vs-desired version interpretation when relevant.
 - Treat deployment overlap as a hypothesis until lifecycle, replica, or before/after evidence supports it.
+- Check that a reduced connection pool is not standing in for a concurrency limit. Paged or
+  streaming operations hold connections across calls; the cap belongs where work starts.
 - Check pipeline gate bypasses: a gate skipped or marked non-blocking, tests or lint excluded from the
   required path, secrets echoed into pipeline logs, deploy steps that run without the packaged
   artifact the gates approved, and a manual path that reaches the target without the same checks.
