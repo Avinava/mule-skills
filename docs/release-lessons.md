@@ -37,7 +37,7 @@ Numbers are what we observed; set your own thresholds from your app's baseline.
    shrink a pool without a test of the worst case.
 9. **Keep the logged application version equal to the build version.** One release logged a
    version months old, so before-and-after comparisons were wrong. Use semantic versions with a
-   qualifier for hotfixes (`1.4.2-hotfix.1`); the Mule Maven plugin rejects `1.4.2.1`.
+   qualifier for hotfixes (`2.3.0-hotfix.1`); the Mule Maven plugin rejects `2.3.0.1`.
 10. **Make MUnit boot before trusting it.** In our case, the committed toolchain never booted:
     `munit-runner` and `munit-tools` were hardcoded to an old MUnit 2.x release while the plugin
     property moved. The run failed with the MUnit extension refusing Java 17, and zero tests ran.
