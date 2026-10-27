@@ -29,7 +29,10 @@
 - Pin `mule-lint@2.2.0` (configuration parity rules `CFG-004`, `PROJ-003`, `ERR-005`, `TEST-002`,
   `LOG-007`), `mule-build@3.2.0` (build-info marker, MUnit version parity, prerelease versions,
   test JDK), and `anypoint-connect@0.17.0` (stripped-artifact refusal for production, audit actor
-  classes, `scan_logs_for_credentials`, production pre-approval).
+  classes, `scan_logs_for_credentials`, production pre-approval, and alert management:
+  `list_alerts`, `get_alert`, `create_alert`, `update_alert`, `set_alert_enabled`, `delete_alert`).
+- Ops alert reviews read existing rules with `list_alerts`, and authorized alert changes preview
+  first, name explicit recipients, start disabled, and report pending results as pending.
 - Skill descriptions state their boundaries: ops covers health, releases and authorized change,
   troubleshooting covers causal diagnosis, review owns the readiness verdict, build owns execution
   and version preparation, and connectors is read-only.

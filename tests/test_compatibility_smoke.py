@@ -290,7 +290,8 @@ class ReferencedToolTests(unittest.TestCase):
             list_store_keys get_store_value put_store_value delete_store_value update_app
             list_runtime_versions suggest_asset_name compare_deployed_artifact list_api_contracts
             get_client_application smoke_test_api scan_logs_for_credentials
-            set_production_preapproval set_unmarked_artifact_allowance
+            set_production_preapproval set_unmarked_artifact_allowance list_alerts get_alert
+            create_alert update_alert set_alert_enabled delete_alert
         """.split()
         references = smoke.referenced_anypoint_tools(ROOT)
         self.assertIn("get_runtime_metrics", references)

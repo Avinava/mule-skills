@@ -162,7 +162,11 @@ call can keep running after the session ends. In Claude Code, list them under `a
       "mcp__anypoint-connect__stop_app",
       "mcp__anypoint-connect__delete_app",
       "mcp__anypoint-connect__publish_app_jar",
-      "mcp__anypoint-connect__smoke_test_api"
+      "mcp__anypoint-connect__smoke_test_api",
+      "mcp__anypoint-connect__create_alert",
+      "mcp__anypoint-connect__update_alert",
+      "mcp__anypoint-connect__set_alert_enabled",
+      "mcp__anypoint-connect__delete_alert"
     ]
   }
 }
@@ -217,7 +221,8 @@ While it is active:
 - previews, `confirm: true`, bound identifiers such as the expected digest or deployment id, and
   the production artifact checks still apply;
 - an expired entry is ignored, and clearing it restores the default;
-- `"all-mutating"` covers every mutating tool except `delete_app`, which must be named;
+- `"all-mutating"` covers every mutating tool except `delete_app` and `delete_alert`, which must be
+  named;
 - `thisProjectOnly` limits it to one project directory.
 
 ### Artifacts without a build marker

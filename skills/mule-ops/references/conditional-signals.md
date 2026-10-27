@@ -65,3 +65,11 @@ real traffic, not by its wording:
 - **Tag probes** so smoke tests and watch traffic neither page nor skew the counts.
 - **Prove the rule can fire.** A rule or watch script that cannot match reports green forever; test
   it against live data.
+
+To review the alerts an app or API already has, read them with `list_alerts` (and `get_alert` for
+one rule) and judge each against the points above; recipients are masked unless the user asks to
+see them. When the user asks for a change, use `create_alert`, `update_alert`, `set_alert_enabled`
+or `delete_alert`: preview first, name explicit recipients (there are no defaults), create new
+rules disabled until the user confirms they should page, and report a `PENDING` result as pending,
+not done. The alerts API behind these tools is not publicly documented, so treat an `unsupported`
+result as a coverage gap rather than "no alerts".

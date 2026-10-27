@@ -184,7 +184,8 @@ only.
   queue publish — as part of establishing readiness.
 - By default, the mutating tools ask for approval on every call: `deploy_app`, `deploy_jar`,
   `update_app`, `update_app_artifact`, `update_app_settings`, `restart_app`, `rollback_app`,
-  `scale_app`, `start_app`, `stop_app`, `delete_app`, `publish_app_jar` and `smoke_test_api`.
+  `scale_app`, `start_app`, `stop_app`, `delete_app`, `publish_app_jar`, `smoke_test_api`,
+  `create_alert`, `update_alert`, `set_alert_enabled` and `delete_alert`.
   A property write is a full redeploy, so settings tools count. A user may pre-approve some or all
   of them in the host's permission settings, for example for sandbox automation. Respect that
   choice: pre-approval removes the host prompt, not the workflow. Still preview first and name the
