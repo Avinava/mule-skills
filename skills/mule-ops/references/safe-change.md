@@ -5,6 +5,7 @@
 - [When to use](#when-to-use)
 - [Before the change](#before-the-change)
 - [Choose the deployment mode](#choose-the-deployment-mode)
+- [What a start loses](#what-a-start-loses)
 - [Apply the change](#apply-the-change)
 - [After the change](#after-the-change)
 - [Report](#report)
@@ -15,8 +16,10 @@ Read this when the user has authorized a change to a deployed application: a new
 version, a property or secret change, a runtime upgrade, a switch of authentication flow or
 integration user, or a first start of an app in a new environment. It complements
 [Artifact identity handoff](../../mule-build/references/artifact-handoff.md), which covers what is
-deployed; this covers how to change it without losing or duplicating work. Analysis alone never
-authorizes a change. Confirm the environment, and its production flag, before any write.
+deployed; this covers how to change it without losing or duplicating work. For a release, hotfix
+or rollback, also follow [Release lifecycle](release-lifecycle.md) for the record, watch, health
+definition and tagging around the change. Analysis alone never authorizes a change. Confirm the
+environment, and its production flag, before any write.
 
 ## Before the change
 
@@ -51,7 +54,7 @@ authorizes a change. Confirm the environment, and its production flag, before an
 
 | The app has | Use | Why |
 | --- | --- | --- |
-| Subscription, streaming or polling sources, or schedulers | `mode: stopStart` for the change, and `updateStrategy: recreate` persisted on the app | Old and new replicas never process events together. A rolling update processes every event of the overlap twice |
+| Subscription, streaming or polling sources, or schedulers | `mode: stopStart` for the change, and `updateStrategy: recreate` persisted on the app | Old and new replicas never process events together. During a rolling overlap both generations subscribe to every channel and poll every source, so events are processed twice and their combined calls can exceed a backend's concurrency limit |
 | Only request-driven listeners | Default in-place (rolling) update | No downtime; requests drain normally |
 | A replay position held in memory only | Stop-start, then confirm the start position | A "new events only" start loses everything published while stopped |
 
@@ -76,14 +79,38 @@ time from the old generation's last tick to the new one's first; negative means 
 - These are single measurements on one target and runtime. Re-measure on a private space or Runtime
   Fabric before relying on the numbers there.
 
+## What a start loses
+
+Every start loses something: a deployment, a property write, a restart, a scale, a rollback, a
+platform runtime patch, and a replica the platform replaces. Before each one, write down what will
+be lost and how it will be reconciled:
+
+- **In memory:** replay positions held only in memory, in-flight `until-successful` retries, and work
+  queued in non-persistent queues.
+- **Per replica:** check where persistent VM queues are stored on the target. When they are held on
+  the replica rather than in a store shared across replicas, their messages stay with the replica
+  that is replaced; this was observed on CloudHub 2.0 production apps. Confirm the store from the
+  start-up log and the deployment settings before counting queued work as safe.
+- **In stores:** Object Store entries and polling watermarks survive only on a persistent,
+  platform-managed store. Prove it from the logs, not from the store listing, which can look the
+  same whether or not positions survived: the start-up log names the store in use, and the first
+  poll after the start should resume from a stored position rather than report that none exists.
+- **Where positions are not durable**, pin the listener or poll start in the same update as the
+  redeploy, for example a start value of "now minus a margin", and reconcile the gap afterwards.
+- **Schedules:** fixed-frequency schedulers re-anchor at every start, so run times move after each
+  deploy and platform patch. Watch them in time windows, and use cron where wall-clock timing
+  matters.
+
+A platform runtime patch is still a start. Run the same after-change checks below for it.
+
 Read the replay and duplicate rules in Class E
 ([Subscription sources](../../mule-development/references/invariant-classes.md#subscription-sources))
 before changing a subscription app.
 
 ## Apply the change
 
-- Make the whole change one previewed update: `update_app` with the version, runtime, settings and
-  mode together. Read the preview's steps and diff, then confirm. Production needs its own explicit
+- A property write is a full redeploy. Make the whole change one previewed update: `update_app`
+  with the version, runtime, settings and mode together, so the app starts once. Read the preview's steps and diff, then confirm. Production needs its own explicit
   confirmation.
 - Supply secret values from a file or environment variable source (`securePropertiesFrom`), and
   move existing plaintext secrets with `moveToSecure`, so no value enters the conversation.

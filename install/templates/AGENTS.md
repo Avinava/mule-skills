@@ -102,9 +102,10 @@ Use only commands verified in this repository:
 
 Do not assume configuration is deployed separately, tests should be skipped, or a build implies a
 release. Use `mule-testing` for MUnit authoring and repair, and `mule-build` for local test execution,
-validation, packaging, local runtime work, versioning, and tags. Route separately approved Exchange
-publishing or Anypoint deployment through `mule-ops` and the authenticated Anypoint connector. Use
-the repository's release policy.
+validation, packaging, local runtime work, and versioning. Route separately approved Exchange
+publishing, Anypoint deployment, release watches, rollbacks, and the release tag after production
+proves the release through `mule-ops` and the authenticated Anypoint connector. Use the repository's
+release policy.
 
 ## Operational checks
 

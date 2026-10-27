@@ -4,6 +4,7 @@
 
 - [Conditional signals](#conditional-signals)
 - [Focused retrieval](#focused-retrieval)
+- [Alert design](#alert-design)
 
 Read this after broad collection when a specific signal (latency, replica imbalance, error burst,
 memory, CPU, back pressure, warnings) needs a deeper check, or when focused log or time-series
@@ -47,3 +48,20 @@ returns at most 2000 rows.
 
 Search with the least sensitive stable term that identifies the flow or operation. Do not expose
 raw results when a count and sanitized pattern are sufficient.
+
+## Alert design
+
+When a health review recommends or reviews alerts, judge each rule by how it behaves at the app's
+real traffic, not by its wording:
+
+- **Ratio plus a floor, evaluated often.** A pure count rule over a long window pages a total outage
+  late at low volume. Evaluate every few minutes on a minimum count and a failure ratio.
+- **Alert on silence.** Add a "no successful call for N minutes" rule, with N above the longest
+  natural gap in traffic. Silence is how a stalled source or a lost subscription shows up.
+- **Do not page on benign lines.** A periodic connector reconnect ERROR is expected; alert on its
+  rate changing or on a missing recovery instead.
+- **Memory on sustained old-generation use.** A threshold near the GC sawtooth flaps. Check whether
+  the threshold field is a fraction or a percentage.
+- **Tag probes** so smoke tests and watch traffic neither page nor skew the counts.
+- **Prove the rule can fire.** A rule or watch script that cannot match reports green forever; test
+  it against live data.

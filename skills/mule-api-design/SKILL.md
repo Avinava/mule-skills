@@ -1,6 +1,6 @@
 ---
 name: mule-api-design
-description: Design, author, revise, or assess consumer-facing MuleSoft HTTP API contracts in RAML 1.0 or OpenAPI 3.0 using explicit resource, method, URI, data, error, security, compatibility, and governance decisions. Use for API design workshops, URL and naming guidance, new RAML/OAS contracts, contract-first changes, and contract-only reviews. Maintain RAML 0.8 or OAS 2.0 when required, but do not use for AsyncAPI, event schemas, Mule implementation, MUnit authoring, or general project review.
+description: Design, author, revise, or assess consumer-facing MuleSoft HTTP API contracts in RAML 1.0 or OpenAPI 3.0 using explicit resource, method, URI, data, error, security, compatibility, and governance decisions. Use for API design workshops, URL and naming guidance, new RAML/OAS contracts, contract-first changes, contract-only reviews, and checking a contract against an existing governance ruleset. Maintain RAML 0.8 or OAS 2.0 when required, but do not use for authoring governance rulesets, AsyncAPI, event schemas, Mule implementation, MUnit authoring, documentation, or general project review.
 ---
 
 # Mule API Design

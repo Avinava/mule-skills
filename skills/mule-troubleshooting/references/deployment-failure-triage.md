@@ -6,6 +6,8 @@
 - [Pod and replica failure signals](#pod-and-replica-failure-signals)
 - [Deployment failure cause checklist](#deployment-failure-cause-checklist)
 - [Decoded common error messages](#decoded-common-error-messages)
+- [Platform-initiated restarts](#platform-initiated-restarts)
+- [Release or not](#release-or-not)
 
 Read this when a deployment does not reach a running state, a replica restarts repeatedly, or an
 application starts and then fails. Treat every signal as a hypothesis starter. Confirm with source,
@@ -50,6 +52,11 @@ Work through these as hypotheses, not a sequence of fixes.
 - **Runtime and Java:** the runtime version and Java level match the artifact's declared minimums and
   every connector's requirements. Use [`mule-dependencies`](../../mule-dependencies/SKILL.md) rather
   than memory for compatibility.
+- **Effective configuration:** platform properties override packaged files. Read the effective
+  settings (`get_app_settings`) before reasoning from the repository; a stale platform property keeps
+  overriding until it is removed.
+- **Stripped build:** a jar built with secure prefixes stripped for a local or sandbox run fails at
+  start where values exist only as secure properties. Check the build's production-deployable marker.
 - **Properties:** every referenced property key exists in the target environment, secrets resolve,
   and the secure-properties key is supplied. Check key presence, never values. Check that each
   secret's placeholder matches its supply model (`${secure::key}` for the encrypted file, `${key}`
@@ -90,3 +97,37 @@ Messages vary by runtime and connector. Read each as the mechanism it names, the
 
 Record each match as Hypothesis until a discriminating check, such as comparing with the last
 successful deployment, separates it from the alternatives.
+
+## Platform-initiated restarts
+
+An app can restart when nobody deployed. Classify every unexplained restart before treating it as an
+application fault. Query the audit log filtered to `objectTypes: ["Application"]` and the mutating
+actions; an unfiltered multi-day query can overflow the response. `get_audit_log` labels each entry
+with an `actorClass` (`platform-patch`, `platform-replica`, `platform-infrastructure`,
+`user-or-pipeline`) and the rule that matched; treat the label as a lead and confirm it with the
+artifact, properties and runtime patch before and after.
+
+| Audit evidence | Meaning |
+| --- | --- |
+| Modify by a platform service identity, many apps in the same window, artifact and properties unchanged, runtime patch version moved | Platform runtime patch |
+| Replica restarted or moved by a platform identity | The platform restarted or relocated a replica |
+| Fabric or network patch entries | Infrastructure maintenance |
+| A team member or pipeline identity, with a changed artifact or properties | Your own change |
+
+A platform patch is still a start: reconcile the listener gap, re-read scheduler times, and confirm
+the runtime version, as after any change
+([what a start loses](../../mule-ops/references/safe-change.md#what-a-start-loses)).
+
+## Release or not
+
+- **Compare with the previous version.** When the old and new versions fail the same way, the code
+  change is unlikely to be the cause. Check what else the release changed that both versions share,
+  such as platform properties, credentials, or state written by the new version, and the target
+  system and platform. When none of those trace back to the release, a rollback only adds a start
+  and its loss; when one does, fix or revert that shared change.
+- **Separate shutdown noise from start-up failure.** A burst of "is stopped" lifecycle errors seconds
+  after the old replicas stop is shutdown noise. The same errors after the new replicas start are not.
+- **Check desired against last-successful.** A failed update leaves them different while the old
+  version keeps serving; the app looks healthy and the release has not happened.
+- **Re-derive any rollback from the observed cause.** Rolling back with a property write that was not
+  the cause can reproduce the failure on the old artifact.

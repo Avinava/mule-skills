@@ -29,6 +29,7 @@ cross-cutting gate:
 | RAML/OAS, APIKit routes, event schemas, flow reachability | Class C |
 | Error handlers, retries, fallback, batch/loop failures, acknowledgement | Class D |
 | Object Store, caches, sources, watermarks, hashes, replay, creates/upserts | Class E |
+| Mule 4 runtime or Java upgrade | [Runtime and Java upgrade plan](references/upgrade-plan.md) |
 | Any source change | Applicable cross-cutting gates |
 
 After editing, read and complete
@@ -93,7 +94,16 @@ the Mule/APIKit implementation changes required to realize an approved contract.
 5. Identify which invariant classes and cross-cutting gates apply.
 6. Decide the focused and integration validation before editing.
 
-### 2. Implement the smallest coherent change
+### 2. Agree the plan for wide changes
+
+When the change spans flows, alters an API or event contract, adds or changes a connector, or
+touches state or delivery (stores, watermarks, queues, acknowledgement, replay), state the plan in
+the reply before editing: the files and flows to change, the invariant classes and gates in play,
+the validation, and the rollback. Wait for the user's confirmation. Keep the plan in the
+conversation; do not write temporary design or plan files into the project. Smaller changes go
+straight to step 3.
+
+### 3. Implement the smallest coherent change
 
 - Preserve public contracts unless the user explicitly requests and coordinates a breaking change.
 - Match each value to its next consumer and validate required data before side effects.
@@ -105,7 +115,7 @@ the Mule/APIKit implementation changes required to realize an approved contract.
 - Preserve idempotency and recovery across retries, redelivery, failed writeback, and deployment.
 - Apply all relevant cross-cutting gates and preserve unrelated formatting and user-authored work.
 
-### 3. Validate behavior and evidence
+### 4. Validate behavior and evidence
 
 1. Run `python3 <skill-root>/scripts/check_embedded_expressions.py .` whenever
    Mule XML changes in an installed project. `<skill-root>` is this skill's own directory:

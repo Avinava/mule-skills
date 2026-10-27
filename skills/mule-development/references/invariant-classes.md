@@ -87,6 +87,17 @@ the changed mechanism. Do not let convenient Studio metadata or mocks hide empty
 alternate nesting, connector-specific values, or serialization boundaries. A fixture must be able
 to fail the behavior it claims to test.
 
+### Selector values
+
+A filter, query condition, or routing choice keyed on a status, picklist, or type value is a value
+contract with the system that writes the data. A field's declared default is not evidence of what
+production writes; a selector built from it can match nothing and still pass every mock.
+
+- Take selector values from recent production records or the owning system's documented writes.
+- Before release, run the exact query or condition against representative data in a non-production
+  environment that mirrors production writes, and confirm it selects the records it must.
+- Record the observed value set in the handoff so a later change in the writer is detectable.
+
 ### DataWeave and router details
 
 - Save the original Mule message before scatter-gather when later processors need it. Results are
@@ -188,6 +199,12 @@ Governed does not always mean terminal or numerically bounded.
 
 - Retry 401 only when each attempt can refresh the credential, token, signature, or other auth
   material. Static invalid or revoked credentials are permanent.
+- A target that refuses an expired or invalidated session, or rejects a login transiently, has not
+  acted on the request. Map that refusal to a retryable status for callers (a 503-class answer, not
+  a 4xx that consumers treat as permanent), make re-login single-flight with a cooldown so a burst
+  does not stampede the login endpoint, and write a record off only on a permanent status. Check:
+  trace the refusal from the connector error type to the caller-facing status and to the
+  consumer's write-off rule.
 - Respect dependency guidance such as `Retry-After` when available, and apply backoff/jitter where
   concurrent records or replicas could amplify load.
 - Retry only when the operation is idempotent, uses an idempotency key, or has another evidenced
@@ -253,6 +270,12 @@ Skeleton—replace error types and disposition with evidenced project behavior:
 
 Do not include 401 in the permanent list if attempts refresh auth, or in the retryable list if they
 do not. Validate actual connector error types for the installed version.
+
+A `try` with `on-error-continue` that catches retryable types around the outbound call consumes the
+error before the retry mechanism sees it. The scope then succeeds on the first attempt, no retry
+runs, and the record is marked failed although the target may already have committed the write. Check: for every retry wrapper, list the error types each inner
+handler catches and confirm none of them is retryable. For creates, pair the retry with an
+ambiguous-outcome lookup (Class E).
 
 ### Outcome and attribution
 
@@ -356,6 +379,10 @@ Record project-specific hash registries in that project's `AGENTS.md`, not in th
 - For continuous streams, select and verify a connector-version-supported reconnection strategy.
 - Prefer natural/external identifiers, upsert, idempotency keys, or duplicate detection so a
   successful remote create followed by failed writeback does not duplicate on retry.
+- Treat a timeout, dropped connection, or swallowed error after a create as an ambiguous outcome,
+  not a failure. Send an external identifier on the create, look the record up by it after an
+  ambiguous failure, and reuse the found record instead of creating again or marking the work
+  failed. Check: a test where the target commits and the response is lost ends with one record.
 - Make replay behavior explicit for every non-idempotent side effect.
 
 ## Cross-cutting gates
@@ -373,6 +400,12 @@ Record project-specific hash registries in that project's `AGENTS.md`, not in th
 
 - Calculate effective concurrency from sources, `maxConcurrency`, parallel scopes, batch settings,
   replicas, connection pools, and dependency quotas.
+- A connection pool is not a concurrency limit. Some operations hold a connection across several
+  calls (a paged search keeps its connection between page requests), so a smaller pool fails with
+  exhausted-connection errors instead of queueing work. To respect a dependency's concurrency
+  limit, cap concurrency where work starts: the source, the batch job, or the `parallel-foreach`.
+  Never shrink a pool without a test of the worst case: the largest paged operation running at the
+  highest concurrency the app allows.
 - Treat `maxConcurrency < numberOfConsumers` as deliberate back pressure or a review signal, not an
   automatic defect. Treat batch block size as memory/scheduling, not direct request concurrency.
 - Distinguish connect, response/read, connection-idle, proxy, retry, and total upstream deadlines.
@@ -414,6 +447,10 @@ Record project-specific hash registries in that project's `AGENTS.md`, not in th
 - Verify inbound correlation adoption and outbound propagation before claiming end-to-end tracing.
 - Match logger flow/operation names and application version metadata to the executing flow and
   packaged artifact.
+- The version the app logs must equal the build version. Derive it from the build (the project
+  version filtered into a resource or read from the artifact), not from a hand-maintained property
+  that drifts, or before-and-after release comparisons read the wrong version. Check: the start-up
+  or first log line of a fresh package shows the `pom.xml` version.
 - Use ERROR for failed transactions, WARN for evidenced degradation/retry, INFO for useful business
   milestones, and DEBUG for detailed non-production diagnostics, adapted to project policy.
 
@@ -433,14 +470,20 @@ Record project-specific hash registries in that project's `AGENTS.md`, not in th
 | Ambiguous mixed-media output | Explicit output chosen for the next consumer | A |
 | Empty treated as `default`; required data silently nulled | First-non-empty only when allowed; validate required data | A |
 | Convenient mocks that hide production variants | Normal and representative adverse fixtures | A |
+| Selector values taken from field defaults | Values from production data; exact query run before release | A |
 | Truncated `#[…]` in CDATA | Expression `]` before `]]>` plus deterministic check | B |
 | Unbound file treated as runtime authority | Bound contract/schema and bidirectional mapping | C |
 | APIKit-unbound flow called dead without reachability | Inspect sources and all call edges | C |
 | Retry permanent, poison, or unclassified failures | Classify, selectively retry, and govern disposition | D |
 | Indefinite retry without ownership or recovery | Backoff, monitoring, escalation, and replay/manual recovery | D |
 | Failure attribution hardcoded to the last hop | Attribute the operation actually reached and failed | D |
+| Session refusal answered as a permanent 4xx | Retryable status, single-flight re-login, write-off only on permanent status | D |
+| Inner `on-error-continue` swallowing retryable errors | Catch only permanent types inside the retry scope | D |
+| Ambiguous create retried or written off blindly | External id, lookup after ambiguous failure, reuse if found | E |
 | All Object Store errors treated as misses | Separate miss, availability, invalid input, and configuration failures | E |
 | Assuming deployment replays watermarked records | Document re-emission and recovery | E |
 | Hash fields drift from outbound transform | Keep hash inputs and consumed fields aligned | E |
 | Numeric tuning copied from another project | Derive from current capacity and measured workload | Capacity |
+| Pool size used as a concurrency limit | Cap concurrency at the source, batch, or parallel scope | Capacity |
+| Hand-maintained logged version | Version derived from the build | Observability |
 | Handler added without delivery proof | Verify acknowledgement, transaction, redelivery, and loss | Delivery |

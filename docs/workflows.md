@@ -83,7 +83,7 @@ Validate and package this Mule application. Run the established security, lint, 
 report the exact artifact. Do not skip tests or perform release actions.
 ```
 
-`mule-build` uses repository commands first and the pinned `mule-build@3.1.0` tool when configured.
+`mule-build` uses repository commands first and the pinned `mule-build@3.2.0` tool when configured.
 The normal sequence is read-only readiness, static/security checks, MUnit, package, then artifact
 verification. A package result should make these visible. This is a handoff template, not captured
 output from a bundled sample:

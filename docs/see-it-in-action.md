@@ -3,7 +3,7 @@
 These two journeys show what a Mule developer actually receives. They are grounded in the sample
 projects shipped by [`mule-build` at `5b252ed`](https://github.com/Avinava/mule-build/tree/5b252edd1d36b1d91d9f1f8b682fbc6038eaf0f1/examples/sample-orders-system-api)
 and [`mule-lint` at `b828113`](https://github.com/Avinava/mule-lint/tree/b8281135ced9d68846b39e19b578710b0fe8e8e0/examples/sample-orders-system-api),
-using `mule-lint@2.1.1` and `mule-build@3.1.0`, re-measured on 2026-10-26 with Maven on Java 17.
+using `mule-lint@2.2.0` and `mule-build@3.2.0`, re-measured on 2026-10-27 with Maven on Java 17.
 The samples remain at these exact commits; tool upgrades do not silently change the source baseline.
 
 This is not a gallery where every skill is forced to produce a file. Some skills change source or
@@ -54,13 +54,13 @@ is releasable.
 | --- | --- | --- |
 | Project inventory | 1 flow, 1 MUnit suite, 1 test, now 3 assertions | The change has a focused test target |
 | Embedded-expression check | Passed | No malformed embedded expression was found |
-| Build doctor for `test` | Passed on Java 17, with two optional toolchain notes (`MB-TC-006` plugin version, `MB-TC-004` no JDK pin) | Maven, the POM, Mule/MUnit plugins, source layout, and a compatible local runtime were detected. With Maven on an unsupported JDK the same check fails with `MB-TC-005` before any test runs |
+| Build doctor for `test` | Passed on Java 17, with two optional toolchain notes (`MB-TC-006` plugin version, `MB-TC-004` no JDK pin) | Maven, the POM, Mule/MUnit plugins, source layout, and a compatible local runtime were detected. With Maven on an unsupported JDK the same check fails with `MB-TC-001` and `MB-TC-005` before any test runs |
 | Artifact compatibility (`compat`) | No compatibility errors; same two optional notes | Connector minimum Mule versions and Java support fit the declared target |
 | Secret enforcement | Passed; 2 files checked | No unsecured references, literal secrets or plaintext config secrets matched; this is not a complete security assessment |
-| `mule-lint@2.1.1` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
+| `mule-lint@2.2.0` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
 | Focused MUnit selector | Exit `1`: no matching suite found | The requested suite/test selector was not resolved; the full run below executed the test |
-| Full MUnit run | Passed: 1 run, 0 failures, 0 errors, 0 skipped | The test, including the added currency assertion, executed successfully |
-| Normal package | Passed with tests enabled; 1 test passed and a JAR was produced | Local test and packaging evidence is available; lint findings still need review |
+| Full MUnit run | Passed on Java 17: 1 run, 0 failures, 0 errors, 0 skipped | The test, including the added currency assertion, executed successfully on the reported JDK |
+| Normal package | Passed with tests enabled; 1 test passed and a JAR was produced with a build-info marker (`stripped: false`, `productionDeployable: true`) | Local test and packaging evidence is available; lint findings still need review |
 
 The focused command used `--suite orders-test-suite --test list-orders-flow-returns-an-order`.
 It did not select a suite. Running `test` without selectors and then `package` both succeeded with
@@ -81,7 +81,8 @@ Evidence:
 - Embedded-expression, secret and artifact compatibility checks passed.
 - mule-lint is non-clean: 1 error, 6 warnings, 5 information findings.
 - Focused MUnit selection found no suite; the full run passed 1 test with no failures or skips.
-- Normal packaging passed with tests enabled and produced a JAR with embedded coordinates and SHA-256.
+- Normal packaging passed with tests enabled and produced a JAR with embedded coordinates, SHA-256 and
+  a build-info marker that records it was not secure-stripped.
 
 Review verdict: Not ready to release. Test and packaging evidence passed; clear or disposition the
 lint findings before treating the artifact as a release candidate.
@@ -107,14 +108,15 @@ perfect result.
 
 ### Observed tool evidence
 
-`mule-lint@2.1.1` returned a complete report-v1 scan of three Mule files and exited `1` with:
+`mule-lint@2.2.0` returned a complete report-v1 scan of three Mule files and exited `1` with:
 
 ```text
 Errors: 1    Warnings: 10    Info: 9
 ```
 
 No configured quality gate was evaluated in this default scan. The non-zero exit reflects the
-error finding; execution completeness is reported separately.
+error finding; execution completeness is reported separately. The rules added in 2.2.0 (`CFG-004`, `PROJ-003`, `ERR-005`, `TEST-002`, `LOG-007`) were enabled and reported
+nothing for this sample, so the counts match the previous release.
 
 The release-blocking error is at `src/main/mule/orders-api.xml:31`: flow
 `get-order-by-id-flow` has no error handler (`MULE-003`). Warnings also cover correlation

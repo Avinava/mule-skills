@@ -71,3 +71,11 @@ coverage cannot support attribution.
   exceptional; confirm miss policy before scaling infrastructure.
 - Do not recommend concurrency or pool numbers without measured traffic, replica count, and
   dependency capacity for this environment.
+- Zero errors at low volume is weak evidence. A delayed event is not a failed one, so success-rate
+  dashboards can read 100% while a channel delivers late; measure delay per record where timing
+  matters.
+- Classify every unexplained restart with the audit log before reading it as an application fault;
+  platform runtime patches and replica moves restart apps that nobody deployed.
+- For a release window, judge health with the positive definition in
+  [Release lifecycle](release-lifecycle.md#healthy-defined-positively), not with the absence of
+  errors.

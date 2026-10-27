@@ -11,7 +11,9 @@ misleading answers.
 
 ## Look up, then answer
 
-Run the bundled script. It is read-only, standard library only, and prints JSON on stdout:
+Run the bundled script. It never changes project files, uses the standard library only, and prints
+JSON on stdout. It caches responses under the user cache directory (`$XDG_CACHE_HOME` or
+`~/.cache`); pass `--no-cache` to bypass it or `--offline` to read only the bundled snapshot:
 
 ```bash
 python3 <skill-root>/scripts/mule_versions.py connector salesforce sftp --mule 4.9.0 --java 17

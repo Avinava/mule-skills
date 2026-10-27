@@ -73,5 +73,24 @@ From mule-lint 2.1 the secret rules follow both
   DEBUG or TRACE, and [`SF-003`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#sf-003-salesforce-replay-listener-loses-events) for a Salesforce
   replay listener that loses events on restart.
 
+## Configuration parity in lint
+
+From mule-lint 2.2, five rules catch configuration that packages cleanly and then fails at start or
+in production. Messages name keys, types, categories and files, never values:
+
+- [`CFG-004`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#cfg-004-unresolved-property-placeholder): a plain `${key}` that no
+  loaded file or declared runtime input defines, a key missing from one `${mule.env}` file, or a key
+  referenced both with and without `secure::`. Unresolved `secure::` references stay with `SEC-018`.
+- [`PROJ-003`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#proj-003-namespace-without-dependency): a connector or module namespace whose
+  Maven dependency is missing from the POM.
+- [`ERR-005`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#err-005-undefined-error-type): an error type in a handler, mapping or
+  `raise-error` that nothing in the project defines.
+- [`TEST-002`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#test-002-munit-version-parity): MUnit plugin, runner and tools versions that
+  differ, or an MUnit too old for the declared Java (mule-build `MB-TC-007` for skew and
+  `MB-TC-002` for the Java 17 minimum).
+- [`LOG-007`](https://avinava.github.io/mule-lint/best-practices/rules-catalog/#log-007-sensitive-connector-logger): a connector or transport category known to
+  write credentials or session data enabled at DEBUG or TRACE, resolved the way log4j2 resolves
+  levels. It takes over those categories from `LOG-006`.
+
 With an older pinned mule-lint, `SEC-007` still asks for `${secure::key}` on every credential.
 Treat that as a known false positive for platform-supplied keys and keep the `${key}` reference.

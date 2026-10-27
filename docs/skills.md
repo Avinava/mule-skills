@@ -11,7 +11,7 @@ describing the task is usually enough.
 | [`mule-development`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-development) | Implement Mule XML, DataWeave, APIKit, connector, or configuration behavior | Changes production source/configuration inside the requested scope | Implemented behavior, changed-file summary, validation evidence, and remaining gaps |
 | [`mule-testing`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-testing) | Author or repair behavior-focused MUnit coverage | Changes tests, fixtures, mocks, and test-only configuration | Test intent, focused/full results, and any unproven behavior |
 | [`mule-troubleshooting`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-troubleshooting) | Diagnose incidents and failures | Read-only diagnosis by default | Root-cause assessment or ranked hypotheses, confidence, evidence gaps, and fix plan |
-| [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Assess runtime health and deployment evidence | Read-only telemetry analysis by default | Health assessment, evidence coverage, risks, and recommended actions |
+| [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Assess runtime health, and plan and watch authorized releases and changes | Read-only telemetry analysis by default; mutations only when authorized | Health assessment, evidence coverage, release record and rollback plan, watch checkpoints, and recommended actions |
 | [`mule-review`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-review) | Review changes, repositories, PRs, or release readiness | Read-only; no implementation, comment, or PR-state change unless requested | Prioritized findings, fix options, coverage limits, and a readiness verdict when applicable |
 | [`mule-dependencies`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-dependencies) | Look up current connector, plugin, and runtime versions and their compatibility | Read-only lookup; no project files are changed | Newest and newest compatible release per dependency, constraints used, source, and fetch time |
 | [`mule-connectors`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-connectors) | Answer connector-specific behavior: authentication by version, token rules, run-as identity, subscription sources, benign signatures, sensitive loggers | Read-only; builds a transient profile from live sources when none is curated | Version-scoped claims with documented or observed evidence, and what was re-verified |
@@ -34,7 +34,9 @@ tests-skipped package as a successful release.
 | Review a change or repository | `mule-review` | `mule-ops` only for authorized, material runtime verification |
 | Find the latest or compatible connector, plugin, or runtime version | `mule-dependencies` | `mule-development` to apply the upgrade; `mule-build` to verify it |
 | Switch a connector's authentication, integration user, or subscription settings | `mule-connectors` | `mule-development` for the change; `mule-ops` safe change to deploy and verify it |
-| Prepare a release | `mule-build` | Release-readiness review before commit/tag; `mule-ops` for separately approved publish/deploy |
+| Prepare a release | `mule-build` | Release-readiness review before commit; `mule-ops` for separately approved publish/deploy, the watch, and the tag after production proves it |
+| Ship a hotfix or roll back | `mule-ops` | `mule-build` for the qualified hotfix version and package; `mule-troubleshooting` when the cause is still open |
+| Upgrade the Mule runtime or Java | `mule-development` | `mule-dependencies` for the target pair; `mule-testing` and `mule-build` to prove it; `mule-ops` to roll it out |
 
 ## What they read
 

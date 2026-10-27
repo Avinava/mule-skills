@@ -1,6 +1,6 @@
 ---
 name: mule-ops
-description: Analyze MuleSoft runtime health across one or more applications using Anypoint logs, metrics, deployment state, and cross-system correlation. Use for production or non-production health checks, incident windows, error spikes, latency or memory investigations, deployment-impact checks, and recurring operational reviews. Also use to plan and verify an authorized change to a running app (version, settings, secrets, runtime, integration identity) without losing or duplicating events. Use the available Anypoint connector when configured, or apply the same evidence workflow to exported telemetry. Do not use for source-code changes unless the user also requests a fix.
+description: Assess MuleSoft runtime health across one or more applications from Anypoint logs, metrics, deployment state, audit history, and cross-system correlation, and plan, apply, and watch an authorized release, hotfix, rollback, or change to a running app (version, settings, secrets, runtime, integration identity) without losing or duplicating events. Use for health checks, incident-window evidence, error spikes, deployment-impact checks, release watches and health definitions, hypercare, and recurring operational reviews. Use the configured Anypoint connector, or apply the same evidence workflow to exported telemetry. Route causal root-cause analysis of a specific symptom to mule-troubleshooting, source changes to mule-development, and local packaging to mule-build.
 ---
 
 # Mule Operations Analysis
@@ -56,6 +56,11 @@ For any authorized change to a running app (version, settings or secrets, runtim
 flow or integration user), follow [Safe change](references/safe-change.md): compare the deployed
 artifact with the repository first, check the environment boundary and identity dependents, deploy
 subscription apps with stop-start rather than rolling, and verify with side-effect-free probes.
+
+For a release, hotfix, rollback, or hypercare period, also follow
+[Release lifecycle](references/release-lifecycle.md): record what runs and the rollback plan
+first, watch at fixed checkpoints, call the release healthy only on its positive definition, and
+tag only after production proves the release.
 
 ## Evidence states
 
@@ -224,3 +229,7 @@ dependency capacity for this environment.
   counting them as errors.
 - Do not use a collection tool as the readiness probe, and do not treat a mid-collection tool error
   as an environment finding.
+- Platform properties override packaged files. Read the effective settings before reasoning from
+  the repository's property files.
+- Every start loses something, including a platform patch nobody requested. Classify unexplained
+  restarts with the audit log and run the post-start checks for them too.

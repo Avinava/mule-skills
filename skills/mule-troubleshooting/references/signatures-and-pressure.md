@@ -33,6 +33,11 @@ capacity/lifecycle, delivery/transactions, privacy/observability, and validation
 | Same events processed twice around a deployment | E — Subscription sources | Rolling update or uncoordinated replicas on a subscription source; compare replica start and stop times with duplicate timestamps |
 | Events missing after a restart, with no errors | E — Subscription sources | Replay option resumes at "new events only"; compare the stop-start window with publisher timestamps |
 | Periodic connector reconnect ERROR with no functional impact | Connector signature | Match it against the `mule-connectors` profile, then confirm its benign criteria still hold (events keep arriving, reconnect succeeds) |
+| A connected subscription channel delivers nothing, then a backlog arrives late after a re-handshake; success logs stay at 100% | E — Subscription sources | Measure delay per record (created to processed), not only failures; keep a reconciliation sweep for business-critical events |
+| Event processed but its record lookup finds nothing; a guard skips a valid record | A or D | The event can arrive before the record is readable. Retry a not-found lookup briefly, treat a failed lookup as an error, and make every skip visible |
+| A listener is quiet and an event is presumed lost | E — Subscription sources | Each event or topic publishes only on its own condition. Confirm the publishing trigger fired before calling the event lost |
+| Login or session refusal right after a credential or token change, failing identically on old and new versions | Connector signature | A target can refuse fresh tokens for a window. Compare with the previous version before rolling back; map the refusal to a retryable status (Class D) |
+| Max connections exceeded after a pool was reduced | Capacity | Operations such as paged searches hold connections across calls. A pool is not a concurrency limit; cap concurrency where work starts |
 
 When the signature matches Class D disposition gaps, fix classification first: permanent/poison
 must leave the eligible loop through terminal, quarantine, error-store, or manual-recovery

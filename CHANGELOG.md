@@ -1,5 +1,50 @@
 # Changelog
 
+## 1.13.0 — 2026-10-27
+
+### Added
+
+- `mule-ops/references/release-lifecycle.md`: record the running artifact, runtime patch and
+  versions before a release; write the rollback plan and a never-deploy list; diff every property
+  key against what the target supplies; start hotfixes from the running artifact's source with a
+  prerelease qualifier; watch at fixed checkpoints across both replica generations; a positive
+  definition of a healthy release; rollback and hold rules; hypercare as a freeze with measured
+  exit criteria; and tagging only after production proves the release.
+- `mule-development/references/upgrade-plan.md`: Mule 4 runtime and Java upgrades with a baseline
+  first, a live-checked target pair, a project-specific impact inventory, a plan gate, pins before
+  source, and stop-on-repeat failure handling.
+- `mule-testing/references/api-functional-tests.md`: runner-agnostic black-box API tests with an
+  endpoint allowlist, environment-supplied credentials, and an explicit side-effect boundary.
+- Production pre-approval: per-call approval stays the default, and users can opt in to host
+  pre-approval and to anypoint-connect's `set_production_preapproval` (user-level, bound to
+  organization and environment IDs, named tools, optional expiry). Previews, bound identifiers and
+  the production artifact checks still apply. Rollback plans now cover targets without a build
+  marker, which need `set_unmarked_artifact_allowance`.
+- Ten eval cases: release and rollback plan, hotfix from an untagged artifact, platform restart
+  classification, tests that cannot run, pool versus concurrency, healthy release, review change
+  mode, ops versus troubleshooting routing, Java 17 upgrade plan, and production pre-approval.
+
+### Changed
+
+- Pin `mule-lint@2.2.0` (configuration parity rules `CFG-004`, `PROJ-003`, `ERR-005`, `TEST-002`,
+  `LOG-007`), `mule-build@3.2.0` (build-info marker, MUnit version parity, prerelease versions,
+  test JDK), and `anypoint-connect@0.17.0` (stripped-artifact refusal for production, audit actor
+  classes, `scan_logs_for_credentials`, production pre-approval).
+- Skill descriptions state their boundaries: ops covers health, releases and authorized change,
+  troubleshooting covers causal diagnosis, review owns the readiness verdict, build owns execution
+  and version preparation, and connectors is read-only.
+- Safe change lists what every start loses and how to prove store persistence from the logs.
+- Troubleshooting classifies platform-initiated restarts and separates release failures from
+  external ones. New signatures cover late delivery, events that arrive before their record is
+  readable, fresh-token refusals, and shrunken pools.
+- Development adds a plan gate for wide changes, retryable mapping of session refusals, external
+  ids after ambiguous failures, pool versus concurrency, selector values from production data, and
+  logged version identity. Testing requires proof that MUnit booted and honest substitute evidence.
+- `mule-build` no longer tags at release preparation by default; tag after production proves it.
+- Ops alert design: ratio plus floor, silence rules, benign-line rates, and probe tagging.
+- `mule-dependencies` documents that its script writes a user cache, with `--no-cache` and
+  `--offline`.
+
 ## 1.12.2 — 2026-10-26
 
 ### Changed

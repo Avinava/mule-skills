@@ -1,12 +1,12 @@
 <div class="hero" markdown>
 
-![Mule Skills](assets/banner.svg){ width="760" }
+![Mule Skills: agent skills to design, develop, test, review, release, and operate Mule 4 apps](assets/banner.svg){ width="760" }
 
 # Give your coding agent a MuleSoft engineering playbook
 
 Mule Skills helps Codex, Claude, Copilot, Gemini, Cursor, and similar agents work with Mule 4
 projects using the same lifecycle your team already knows: design, develop, test, package, review,
-operate, and troubleshoot.
+release, operate, and troubleshoot.
 
 [Install in a Mule project](getting-started.md){ .md-button .md-button--primary }
 [See it in action](see-it-in-action.md){ .md-button }
@@ -34,8 +34,8 @@ documentation, MUnit, build, and review.
 
 ### Test or release engineer
 
-Use behavior-focused MUnit guidance, repeatable build gates, artifact evidence, and a separate
-approval boundary for Anypoint publishing or deployment.
+Use behavior-focused MUnit guidance, repeatable build gates, artifact evidence, a written rollback
+plan, and a separate approval boundary for Anypoint publishing or deployment.
 
 [Follow a workflow](workflows.md)
 
@@ -62,12 +62,14 @@ flowchart LR
     I --> T[Test<br/>mule-testing]
     T --> B[Check and package<br/>mule-build + mule-lint]
     B --> R[Review<br/>mule-review]
-    R --> A[Publish or deploy<br/>mule-ops + anypoint-connect]
+    R --> A[Release and deploy<br/>mule-ops + anypoint-connect]
     A --> O[Operate<br/>mule-ops]
     O --> X[Troubleshoot<br/>mule-troubleshooting]
     Docs[mule-docs] -. refreshes evidence .-> D
     Docs -.-> I
     Docs -.-> O
+    Conn[mule-connectors] -. connector facts .-> I
+    Deps[mule-dependencies] -. versions .-> I
 ```
 
 `mule-build` owns local checks, MUnit execution, packaging, local runtime work, and version/tag
@@ -86,20 +88,20 @@ commit or authenticate to Anypoint unless I approve it.
 ```
 
 The agent inspects first, detects an existing install, previews file and MCP changes, avoids
-duplicate configuration, installs all nine skills, validates the result, and leaves commit and
+duplicate configuration, installs all ten skills, validates the result, and leaves commit and
 authentication decisions with you. [Walk through the result](getting-started.md).
 
 ## What gets installed
 
 | Layer | Purpose | Credentials |
 | --- | --- | --- |
-| Nine `mule-*` skills | Decide how to design, implement, test, document, build, review, operate, diagnose, and keep dependencies current | None |
-| `mule-lint@2.1.1` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
-| `mule-build@3.1.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
-| `anypoint-connect@0.16.3` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
+| Ten `mule-*` skills | Decide how to design, implement, test, document, build, review, release, operate, diagnose, answer connector questions, and keep dependencies current | None |
+| `mule-lint@2.2.0` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
+| `mule-build@3.2.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
+| `anypoint-connect@0.17.0` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
 
 Use Node.js `>=22.0.0` for the MCP servers; Node.js 24 LTS is recommended. The skills
-themselves are instructions and remain useful when an MCP server is unavailable—the missing tool
+themselves are instructions and remain useful when an MCP server is unavailable; the missing tool
 becomes a visible validation gap.
 
 ## Safety you can predict
@@ -109,7 +111,7 @@ becomes a visible validation gap.
 | Review or diagnose | Read-only findings; no source or PR changes |
 | Develop or repair tests | Implement only the requested scope and run focused plus proportionate checks |
 | Build | Validate, run MUnit, and package; no version, tag, publish, or deploy |
-| Release preparation | Preview/check first; version, commit, tag, or push only when explicitly requested |
+| Release preparation | Preview/check first; version, commit, or push only when explicitly requested; tag after production proves the release |
 | Publish, deploy, restart, scale, or rollback | Separate Anypoint scope, readiness probe, and explicit approval |
 
 Project facts stay in the Mule repository's `AGENTS.md`; reusable skill files stay neutral. Private
