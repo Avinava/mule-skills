@@ -79,6 +79,7 @@ nav:
       - Project setup: project-setup.md
       - See it in action: see-it-in-action.md
       - Workflow examples: workflows.md
+      - Release lessons: release-lessons.md
       - Skill catalog: skills.md
   - Tools and access:
       - Ecosystem and versions: ecosystem.md
