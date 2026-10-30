@@ -1,6 +1,6 @@
 # See Mule Skills in action
 
-These two journeys show what a Mule developer actually receives. They are grounded in the sample
+These four journeys show what a Mule developer actually receives. The first two are grounded in the sample
 projects shipped by [`mule-build` at `5b252ed`](https://github.com/Avinava/mule-build/tree/5b252edd1d36b1d91d9f1f8b682fbc6038eaf0f1/examples/sample-orders-system-api)
 and [`mule-lint` at `b828113`](https://github.com/Avinava/mule-lint/tree/b8281135ced9d68846b39e19b578710b0fe8e8e0/examples/sample-orders-system-api),
 using `mule-lint@2.2.0` and `mule-build@3.2.0`, re-measured on 2026-10-27 with Maven on Java 17.
@@ -11,6 +11,10 @@ tests; some return a decision, review, diagnosis, or operational assessment. Eac
 was observed from the tools and shows the representative handoff a developer should expect.
 
 ## Journey 1: make a small Mule change and prove what is ready
+
+![Recorded development evidence: a currency change, passing full tests and packaging, and unresolved lint findings](assets/showcase/development.png)
+
+This capture renders the recorded 2026-10-27 evidence below, not a new test run or an agent chat screenshot.
 
 **Developer request**
 
@@ -95,6 +99,10 @@ for a developer to know exactly what passed, what did not, and what decision rem
 
 ## Journey 2: review a deliberately flawed Mule project without changing it
 
+![Review handoff showing a missing error handler, its impact, fix direction, and evidence limits](assets/showcase/review.png)
+
+This capture renders a representative handoff from the recorded 2026-10-27 tool evidence.
+
 **Developer request**
 
 ```text
@@ -146,10 +154,88 @@ demonstrated runtime defects, and state its coverage: repository XML and static 
 runtime logs, metrics, deployment state, and API contract behavior were not available. No source,
 comment, commit, PR, or runtime state is changed by the review.
 
+## Journey 3: document the sample project
+
+```text
+Use mule-docs to document this sample's architecture and flow catalog.
+Distinguish source evidence from assumptions and show any missing API or runtime evidence.
+```
+
+![Source-grounded documentation showing the MUnit invocation, list-orders flow, static JSON result, and evidence gaps](assets/showcase/documentation.png)
+
+On 2026-10-30, the bundled `inventory_mule_project.py` was run against the public
+`mule-build` sample at revision `01169916ec50e64e31ed15afa64f709b1c2c8c9a`.
+Source inspection confirmed one flow and one MUnit test. The architecture is:
+
+```mermaid
+flowchart LR
+    Test[MUnit test] -->|flow-ref| Flow[list-orders-flow]
+    Flow --> Payload[set-payload: static order array]
+```
+
+| Item | Verified behavior | Source |
+| --- | --- | --- |
+| `list-orders-flow` | Returns one static order with id, status, and total | `src/main/mule/orders.xml:6-10` |
+| MUnit invocation | Calls the flow and asserts its payload | `src/test/munit/orders-test-suite.xml` |
+| Boundaries | No listener, external request, explicit error handler, or API specification | Source inspection and inventory |
+
+The HTTP connector dependency does not establish an actual backend call. Business ownership,
+deployment topology, and runtime health remain unknown. This is a fresh documentation artifact
+created from static evidence, not a runtime execution report.
+
+Reproduce from a checkout of this repository and the public sample:
+
+```bash
+python3 skills/mule-docs/scripts/inventory_mule_project.py /path/to/mule-build/examples/sample-orders-system-api --pretty
+```
+
+## Journey 4: design an orders API
+
+```text
+Use mule-api-design to author a RAML 1.0 contract for retrieving an order by ID.
+Return id, status, total, and currency; define a not-found response and require a bearer token.
+Keep this contract-only and validate locally. Do not publish or deploy.
+```
+
+![RAML contract excerpt with successful functional validation, zero findings, and governance explicitly not run](assets/showcase/api-design.png)
+
+The complete [orders.raml](assets/showcase/orders.raml) is a new synthetic contract, separate from
+the implementation sample. Decisions: `GET /orders/{orderId}`, JSON responses, HTTPS, an explicit
+bearer header, typed order fields, and a typed `404` error. The `401` response documents missing or
+invalid credentials. This example's bearer scheme describes the header contract; token verification
+must be implemented and reviewed downstream.
+
+| Operation | Successful response | Error response |
+| --- | --- | --- |
+| `GET /orders/{orderId}` | `200`, Order | `404`, Error; `401`, unauthorized |
+
+Local validation on 2026-10-30 used the built `mule-lint` 2.3.0 checkout at
+`b8b85a94d7cd43bd0257ddff43aa501265e72481` (not the bundled 2.2.0 pin):
+
+```bash
+node /path/to/mule-lint/dist/bin/mule-lint.js api validate docs/assets/showcase --main orders.raml --format json
+```
+
+Observed result, omitting the machine-local absolute path and duration:
+
+```json
+{"mainFile":"orders.raml","format":"raml-1.0","functionalConforms":true,"governanceConforms":"not-run","findings":[]}
+```
+
+No governance profile was supplied. Functional conformance is not proof of implementation,
+authorization enforcement, governance approval, or deployment.
+
+### Reproducing the captures
+
+The four PNGs are browser captures of [showcase.html](assets/showcase/showcase.html), a compact
+rendered presentation of these artifacts and evidence. They are not screenshots of a particular
+agent product. Serve `docs/assets/showcase/` locally, open `showcase.html`, and use PinchTab's
+`screenshot --selector` with `#development`, `#review`, `#documentation`, or `#api-design`.
+Update the source and its corresponding PNG together when the evidence changes.
+
 ## What these journeys do not claim
 
-- They do not demonstrate API contract design because neither selected journey contains an API
-  specification that needs a product decision.
+- The contract-only design example does not add APIKit routing to the implementation sample.
 - They do not invent an operational health report or root-cause analysis without runtime evidence.
 - They do not treat a generated JAR as proof that tests passed or a deployment was authorized.
 - They do not imply that every skill creates a file. See the [skill catalog](skills.md) for each

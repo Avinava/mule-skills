@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mule Skills output examples</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef2f5;color:#182b3b;font:18px/1.5 system-ui,sans-serif}article{width:1040px;padding:44px;background:#fff;border-top:7px solid #007f8b;margin:24px}header{font-size:14px;letter-spacing:2px;color:#007680;font-weight:700}h1{font-size:36px;line-height:1.2;margin:12px 0 24px}h2{font-size:21px;margin:24px 0 10px}pre{font:17px/1.65 ui-monospace,monospace;background:#142b3b;color:#e2f3f7;padding:22px;border-radius:8px;white-space:pre-wrap}table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:12px;border-bottom:1px solid #dbe3e8}th{font-size:14px;color:#526675}.note{border-left:4px solid #d49128;background:#fff7e9;padding:14px 18px}.meta{font-size:14px;color:#627582;margin-top:26px}.flow{display:flex;align-items:center;gap:12px;margin:30px 0}.box{border:1px solid #81aeb5;border-radius:8px;padding:18px;text-align:center;background:#edf8f8;flex:1}.arrow{color:#007680}.tag{color:#a33f24;font-weight:700}code{font-family:ui-monospace,monospace;font-size:.9em}
+</style>
+<article id="development"><header>01 / DEVELOPMENT + TESTING + BUILD + REVIEW</header><h1>A small change. A clear readiness verdict.</h1><pre>output application/json
+---
+[{ id: "ORD-1001", status: "READY",
+   total: 42.50, currency: "USD" }]
+
+Assert: payload[0].currency == "USD"</pre><table><tr><th>CHECK</th><th>OBSERVED RESULT</th></tr><tr><td>Full MUnit run</td><td>1 passed · 0 failed · 0 skipped</td></tr><tr><td>Normal package</td><td>JAR produced, tests enabled</td></tr><tr><td>Static lint</td><td>1 error · 6 warnings · 5 information findings</td></tr><tr><td>Focused selector</td><td>No matching suite; full run executed the test</td></tr></table><p class="note"><b>Not ready to release.</b> Clear or disposition lint findings. No commit, tag, publish, or deployment performed.</p><p class="meta">Rendered evidence summary · recorded 2026-10-27 · mule-build 3.2.0 / mule-lint 2.2.0</p></article>
+<article id="review"><header>02 / READ-ONLY REVIEW</header><h1>From a lint finding to a fix direction.</h1><p class="tag">HIGH · Missing error-handling contract</p><pre>src/main/mule/orders-api.xml:31
+get-order-by-id-flow
+
+MULE-003: flow has no error handler</pre><h2>Why it matters</h2><p>Connector, transformation, or lookup failures can escape without the API's intended status, payload, logging, and correlation behavior.</p><h2>What to do next</h2><p>Define or reference the approved error handler. Add MUnit coverage for the expected error event, then rerun lint and tests.</p><p class="note"><b>Coverage:</b> repository XML and static rules. Runtime logs, metrics, deployment state, and API contract behavior were not available.</p><p class="meta">Representative handoff from recorded tool evidence · 2026-10-27 · mule-lint 2.2.0<br>Complete scan: 1 error, 10 warnings, 9 information findings · no source changed</p></article>
+<article id="documentation"><header>03 / SOURCE-GROUNDED DOCUMENTATION</header><h1>Explain the flow the repository actually has.</h1><div class="flow"><div class="box">MUnit test<br><code>flow-ref</code></div><span class="arrow">→</span><div class="box"><code>list-orders-flow</code><br>set-payload</div><span class="arrow">→</span><div class="box">JSON array<br>one sample order</div></div><h2>Flow catalog</h2><table><tr><th>FLOW</th><th>BEHAVIOR</th><th>EVIDENCE</th></tr><tr><td>list-orders-flow</td><td>Returns a static order array</td><td>orders.xml:6–10</td></tr><tr><td>Test invocation</td><td>Calls the flow and checks its payload</td><td>orders-test-suite.xml</td></tr></table><h2>What is not established</h2><p>No HTTP listener, API contract, backend request, or explicit error handler is defined in this flow. A connector dependency alone does not establish an integration.</p><p class="note"><b>Documentation scope:</b> static source inventory and inspection. No deployed runtime behavior is claimed.</p><p class="meta">Generated from the public mule-build orders sample · inventory and source inspected 2026-10-30</p></article>
+<article id="api-design"><header>04 / API CONTRACT DESIGN</header><h1>Consumer requirement → validated RAML.</h1><p>Retrieve an order by ID. Return a typed order or a defined not-found error. Require a bearer token.</p><pre>#%RAML 1.0
+title: Sample Orders API
+securedBy: [ bearer ]
+/orders/{orderId}:
+  get:
+    responses:
+      200: # Order: id, status, total, currency
+      404: # Error: code, message</pre><table><tr><th>LOCAL VALIDATION</th><th>OBSERVED RESULT</th></tr><tr><td>AMF functional conformance</td><td>true</td></tr><tr><td>Findings</td><td>0</td></tr><tr><td>Governance conformance</td><td>not-run</td></tr></table><p class="note">Contract-only synthetic example. APIKit implementation, token validation, governance, and deployment remain downstream work.</p><p class="meta">Abbreviated contract; full source: orders.raml · local mule-lint 2.3.0 build · 2026-10-30</p></article>
+</html>

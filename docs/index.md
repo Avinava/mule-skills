@@ -54,6 +54,23 @@ turning missing telemetry into a confident conclusion.
 
 </div>
 
+## See the outputs
+
+Four concrete examples show a change with test evidence, a prioritized review finding,
+source-grounded documentation, and a locally validated API contract.
+
+![Development evidence and release-readiness verdict](assets/showcase/development.png)
+
+![Review finding with impact and remediation](assets/showcase/review.png)
+
+![Architecture and flow catalog derived from sample source](assets/showcase/documentation.png)
+
+![RAML contract and local validation evidence](assets/showcase/api-design.png)
+
+These are rendered artifact captures. The development and review examples retain their recorded
+2026-10-27 evidence; documentation and API design were produced on 2026-10-30.
+[Read the prompts, sources, and limitations](see-it-in-action.md).
+
 ## The Mule lifecycle, with clear ownership
 
 ```mermaid
