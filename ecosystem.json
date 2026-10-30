@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "1.13.0",
+  "bundleVersion": "1.13.1",
   "packages": {
     "anypoint-connect": {
       "npm": "@sfdxy/anypoint-connect",

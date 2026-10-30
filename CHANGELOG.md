@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.13.1 — 2026-10-30
+
+### Changed
+
+- Pin `mule-lint@2.3.0`, which redesigns the offline HTML report; findings are unchanged. The
+  worked-example lint counts were re-run against it and match the previous release.
+- Show four worked outputs in the README and docs home, rendered as 2x captures of a single source
+  page. `tools/capture_showcase.py` regenerates them.
+- Align the documentation site with the banner palette in light and dark modes.
+- Give each topic one home: the copyable install instruction lives in getting-started, and the
+  README no longer repeats the lifecycle diagram or the per-skill handoff column.
+- Fix the stale skill count in the install preview, order the skill catalog by lifecycle, and name
+  Cursor in the host reference.
+
 ## 1.13.0 — 2026-10-27
 
 ### Added
