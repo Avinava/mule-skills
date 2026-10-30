@@ -21,8 +21,18 @@ them.
 | Codex, Copilot, Gemini, Cursor | [Agent or script install](install-other-agents.md) | `.agents/skills/`, host instructions, selected MCP config |
 | Another agent or no shell | [Agent-driven runbook](agent-install.md) | Only the files its host supports, after preview |
 
-If you are unsure, use the copyable instruction on the [home page](index.md#paste-one-instruction).
-The runbook detects the host and existing configuration before changing anything.
+If you are unsure, open your Mule repository in the agent and paste:
+
+```text
+Fetch and follow https://raw.githubusercontent.com/Avinava/mule-skills/main/docs/agent-install.md
+to install or update Mule Skills in this Mule repository. Detect the agent host and existing
+configuration, preview the changes, preserve customized files, run the validation, and do not
+commit or authenticate to Anypoint unless I approve it.
+```
+
+The runbook detects the host and existing configuration, previews file and MCP changes, avoids
+duplicate configuration, installs all ten skills, validates the result, and leaves commit and
+authentication decisions with you.
 
 ## What a preview should show
 
