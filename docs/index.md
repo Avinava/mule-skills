@@ -61,13 +61,37 @@ source-grounded documentation, and a locally validated API contract.
 
 <div class="showcase-grid" markdown>
 
-![Development evidence and release-readiness verdict](assets/showcase/development.png)
+<div class="showcase-card" markdown>
 
-![Review finding with impact and remediation](assets/showcase/review.png)
+[![Development evidence and release-readiness verdict](assets/showcase/development.png)](see-it-in-action.md#journey-1-make-a-small-mule-change-and-prove-what-is-ready)
 
-![Architecture and flow catalog derived from sample source](assets/showcase/documentation.png)
+**Change, test, and package.** A currency change, passing tests, and a lint-gated verdict.
 
-![RAML contract and local validation evidence](assets/showcase/api-design.png)
+</div>
+
+<div class="showcase-card" markdown>
+
+[![Review finding with impact and remediation](assets/showcase/review.png)](see-it-in-action.md#journey-2-review-a-deliberately-flawed-mule-project-without-changing-it)
+
+**Find release risks.** A missing error handler becomes a prioritized finding.
+
+</div>
+
+<div class="showcase-card" markdown>
+
+[![Architecture and flow catalog derived from sample source](assets/showcase/documentation.png)](see-it-in-action.md#journey-3-document-the-sample-project)
+
+**Document a project.** What each flow does, and what the source does not establish.
+
+</div>
+
+<div class="showcase-card" markdown>
+
+[![RAML contract and local validation evidence](assets/showcase/api-design.png)](see-it-in-action.md#journey-4-design-an-orders-api)
+
+**Design an API.** A consumer requirement becomes a validated RAML contract.
+
+</div>
 
 </div>
 
