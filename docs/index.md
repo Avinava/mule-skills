@@ -121,34 +121,6 @@ flowchart LR
 preparation. `anypoint-connect`, used through operational workflows, owns explicitly approved
 Exchange publishing and Anypoint runtime changes. [See the complete ownership map](ecosystem.md).
 
-## Paste one instruction
-
-Open your Mule repository in the agent and paste:
-
-```text
-Fetch and follow https://raw.githubusercontent.com/Avinava/mule-skills/main/docs/agent-install.md
-to install or update Mule Skills in this Mule repository. Detect the agent host and existing
-configuration, preview the changes, preserve customized files, run the validation, and do not
-commit or authenticate to Anypoint unless I approve it.
-```
-
-The agent inspects first, detects an existing install, previews file and MCP changes, avoids
-duplicate configuration, installs all ten skills, validates the result, and leaves commit and
-authentication decisions with you. [Walk through the result](getting-started.md).
-
-## What gets installed
-
-| Layer | Purpose | Credentials |
-| --- | --- | --- |
-| Ten `mule-*` skills | Decide how to design, implement, test, document, build, review, release, operate, diagnose, answer connector questions, and keep dependencies current | None |
-| `mule-lint@2.3.0` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
-| `mule-build@3.2.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
-| `anypoint-connect@0.17.0` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
-
-Use Node.js `>=22.0.0` for the MCP servers; Node.js 24 LTS is recommended. The skills
-themselves are instructions and remain useful when an MCP server is unavailable; the missing tool
-becomes a visible validation gap.
-
 ## Safety you can predict
 
 | Request | Default behavior |

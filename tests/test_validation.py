@@ -392,7 +392,7 @@ class PluginManifestTests(unittest.TestCase):
             root = self.copy_repository(temporary)
             package = self.ecosystem_package(root, "mule-lint")
             self.edit(
-                root / "docs/index.md",
+                root / "docs/mcp-servers.md",
                 f'mule-lint@{package["version"]}',
                 "mule-lint@9.9.9",
             )
@@ -503,7 +503,7 @@ class PluginManifestTests(unittest.TestCase):
             )
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertEqual([], validator.validate_repository(root))
-            index = (root / "docs/index.md").read_text(encoding="utf-8")
+            index = (root / "docs/mcp-servers.md").read_text(encoding="utf-8")
             self.assertIn(f"anypoint-connect@{next_version}", index)
             self.assertNotIn(f"anypoint-connect@{package['version']}", index)
             agent_install = (root / "docs/agent-install.md").read_text(encoding="utf-8")

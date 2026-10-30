@@ -97,10 +97,6 @@ def main() -> int:
                 f"Use Node.js `{old_shared_node}` to satisfy all three",
                 f"Use Node.js `{new_shared_node}` to satisfy all three",
             ),
-            (
-                f"Node.js `{old_shared_node}` for the MCP servers",
-                f"Node.js `{new_shared_node}` for the MCP servers",
-            ),
         )
         for old_claim, new_claim in shared_claims:
             updated = updated.replace(old_claim, new_claim)

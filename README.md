@@ -88,36 +88,20 @@ explicit responses and local validation. Do not publish.
 These captures show rendered sample artifacts. The [walkthrough](docs/see-it-in-action.md) distinguishes
 recorded tool evidence, representative handoffs, and fresh examples.
 
-## How the skills fit together
-
-```mermaid
-flowchart LR
-    Design[Design] --> Develop[Develop] --> Test[Test]
-    Test --> Build[Check and package] --> Review[Review]
-    Review --> Ops[Release and operate]
-    Ops --> Diagnose[Troubleshoot]
-    Docs[Document] -.-> Develop
-    Connectors[Connector facts] -.-> Develop
-    Dependencies[Dependency versions] -.-> Build
-```
-
-Skills guide the work; MCP tools supply local checks or authorized platform evidence.
-Release and runtime changes require explicit authorization.
-
 ## Skills
 
-| Skill | Use it for | What you receive |
-| --- | --- | --- |
-| [`mule-api-design`](skills/mule-api-design/) | HTTP API workshops, URI/method/data/error design, RAML/OAS authoring, contract assessment, and safe Design Center workflows | Consumer-centered contract, decision ledger, and validation evidence |
-| [`mule-docs`](skills/mule-docs/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes | Evidence-backed Markdown and Mermaid, plus clearly labeled gaps |
-| [`mule-development`](skills/mule-development/) | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch, and configuration | Implemented source change with proportionate validation |
-| [`mule-testing`](skills/mule-testing/) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration | Faithful tests with focused and full validation evidence |
-| [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures | Root-cause assessment or ranked hypotheses, confidence, evidence gaps, and fix plan |
-| [`mule-ops`](skills/mule-ops/) | Runtime health, releases and hotfixes, deployments, logs, metrics, recurring checks, and multi-application correlation | Health assessment, evidence coverage, release record and rollback plan, risks, and recommended actions |
-| [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness | Prioritized findings, fix options, coverage limits, and readiness verdict when applicable |
-| [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags | Exact checks, test totals, artifact or failure evidence, and release actions performed |
-| [`mule-dependencies`](skills/mule-dependencies/) | Latest and compatible connector, plugin, and runtime versions, release-note feature lookups, and pom upgrade checks | Newest and newest compatible release per dependency, with source and fetch time |
-| [`mule-connectors`](skills/mule-connectors/) | Connector authentication by version, token rules, run-as identity, subscription sources and replay, benign signatures, and sensitive loggers | Version-scoped claims with documented or observed evidence, re-verified live |
+| Skill | Use it for |
+| --- | --- |
+| [`mule-api-design`](skills/mule-api-design/) | HTTP API workshops, URI/method/data/error design, RAML/OAS authoring, contract assessment, and safe Design Center workflows |
+| [`mule-docs`](skills/mule-docs/) | Project documentation, architecture, APIs, flows, onboarding, operations, and targeted refreshes |
+| [`mule-development`](skills/mule-development/) | Mule production XML, DataWeave, APIKit implementation, connectors, error handling, queues, batch, and configuration |
+| [`mule-testing`](skills/mule-testing/) | Behavior-focused MUnit authoring, repair, fixtures, mocks, assertions, and test-only configuration |
+| [`mule-troubleshooting`](skills/mule-troubleshooting/) | Incidents, timeouts, connection failures, rate limits, concurrency, memory, and cross-application failures |
+| [`mule-ops`](skills/mule-ops/) | Runtime health, releases and hotfixes, deployments, logs, metrics, recurring checks, and multi-application correlation |
+| [`mule-review`](skills/mule-review/) | Working changes, commits, branches, PRs, whole projects, and release readiness |
+| [`mule-build`](skills/mule-build/) | Local validation, tests, packaging, runtime work, versioning, and tags |
+| [`mule-dependencies`](skills/mule-dependencies/) | Latest and compatible connector, plugin, and runtime versions, release-note feature lookups, and pom upgrade checks |
+| [`mule-connectors`](skills/mule-connectors/) | Connector authentication by version, token rules, run-as identity, subscription sources and replay, benign signatures, and sensitive loggers |
 
 See the [skill catalog](docs/skills.md) for routing and expected handoffs, or
 [workflow examples](docs/workflows.md) for more copyable prompts.
@@ -129,8 +113,8 @@ Credential-free launch configuration for three pinned MCP servers:
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.17.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.17.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
-| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.2.0) | Mule validation, testing, packaging, local runtime, versioning, tagging, and secure-reference preconditions |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.3.0) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
+| [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.2.0) |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.3.0) |
 
 Source links come from each published package's repository metadata. Package links resolve to the
 exact registry version used by the checked-in configuration rather than an unpinned latest release.
