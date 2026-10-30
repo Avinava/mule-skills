@@ -1,0 +1,62 @@
+#%RAML 1.0
+title: Sample Orders API
+version: v1
+baseUri: https://api.example.com/{version}
+protocols: [ HTTPS ]
+mediaType: application/json
+description: A synthetic contract-only example for retrieving an order.
+securitySchemes:
+  bearer:
+    type: Pass Through
+    describedBy:
+      headers:
+        Authorization:
+          type: string
+          description: Bearer access token validated by the implementation.
+      responses:
+        401:
+          description: Missing or invalid access token.
+securedBy: [ bearer ]
+types:
+  Order:
+    type: object
+    properties:
+      id: string
+      status:
+        enum: [ READY, SHIPPED ]
+      total:
+        type: number
+        minimum: 0
+      currency:
+        type: string
+        pattern: '^[A-Z]{3}$'
+  Error:
+    type: object
+    properties:
+      code: string
+      message: string
+/orders/{orderId}:
+  uriParameters:
+    orderId:
+      type: string
+      minLength: 1
+  get:
+    displayName: Get order
+    description: Retrieve one order by its stable identifier.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Order
+            example:
+              id: ORD-1001
+              status: READY
+              total: 42.50
+              currency: USD
+      404:
+        body:
+          application/json:
+            type: Error
+            example:
+              code: ORDER_NOT_FOUND
+              message: The requested order does not exist.

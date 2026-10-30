@@ -30,7 +30,7 @@ A first install should describe, in plain language:
 
 ```text
 Install mode: new installation
-Skills: 8 to add under .agents/skills
+Skills: 10 to add under .agents/skills
 Hosts: detected from existing repository configuration
 MCP: add missing mule-build, mule-lint, and anypoint-connect entries
 Preserved: existing AGENTS.md and customized host configuration

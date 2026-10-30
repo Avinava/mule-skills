@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mule Skills output examples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --slate-950: #0b1220;
+    --slate-800: #1e293b;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-200: #e2e8f0;
+    --slate-50: #f8fafc;
+    --cyan: #22d3ee;
+    --ink: #0f172a;
+    --warn-bg: #fff7e6;
+    --warn-bar: #f59e0b;
+    --ok: #15803d;
+    --ok-bg: #dcfce7;
+    --idle: #475569;
+    --idle-bg: #e2e8f0;
+    --stage-a: var(--cyan);
+    --stage-b: #38bdf8;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #cbd5e1; font: 18px/1.5 var(--sans); color: var(--ink); }
+
+  /* Fixed frame: every capture has identical dimensions. */
+  .frame {
+    width: 1200px;
+    height: 900px;
+    padding: 36px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, var(--slate-950), var(--slate-800));
+    border-radius: 24px;
+    display: flex;
+  }
+
+  article {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.35);
+    overflow: hidden;
+  }
+  article::before {
+    content: "";
+    height: 8px;
+    flex: none;
+    background: linear-gradient(90deg, var(--stage-a), var(--stage-b));
+  }
+  .body { flex: 1; display: flex; flex-direction: column; padding: 32px 44px 0; min-height: 0; }
+
+  #development { --stage-a: #fbbf24; --stage-b: #f97316; }
+  #review { --stage-a: #c084fc; --stage-b: #ec4899; }
+  #documentation { --stage-a: #22d3ee; --stage-b: #38bdf8; }
+  #api-design { --stage-a: #7dd3fc; --stage-b: #8b5cf6; }
+
+  .eyebrow { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; letter-spacing: 0.14em; color: var(--slate-600); }
+  .eyebrow .num { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: #fff; letter-spacing: 0; background: linear-gradient(135deg, var(--stage-a), var(--stage-b)); text-shadow: 0 1px 1px rgb(0 0 0 / 0.25); }
+  h1 { font-size: 38px; line-height: 1.15; letter-spacing: -0.02em; margin: 12px 0 14px; }
+  h2 { font-size: 20px; margin: 22px 0 8px; }
+  p { margin: 0 0 10px; }
+
+  .project { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+  .chip { font: 600 14px/1 var(--mono); padding: 7px 10px; border-radius: 999px; background: var(--slate-50); border: 1px solid var(--slate-200); color: var(--slate-600); }
+
+  pre { font: 400 16px/1.5 var(--mono); background: var(--slate-950); color: #e2f3f7; padding: 16px 22px; border-radius: 10px; margin: 0 0 14px; white-space: pre-wrap; }
+  code { font: 400 0.9em var(--mono); }
+  .tag { color: #b91c1c; font-weight: 700; margin-bottom: 12px; }
+
+  table { border-collapse: collapse; width: 100%; margin: 0 0 14px; }
+  td, th { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--slate-200); vertical-align: top; }
+  th { font-size: 13px; letter-spacing: 0.08em; color: var(--slate-500); }
+  td.mono { font: 400 15px/1.5 var(--mono); white-space: nowrap; }
+  td.name code { font-size: 0.8em; }
+  footer span:last-child { white-space: nowrap; }
+
+  .status { display: inline-block; font-size: 15px; font-weight: 600; padding: 3px 12px; border-radius: 999px; }
+  .status.ok { color: var(--ok); background: var(--ok-bg); }
+  .status.idle { color: var(--idle); background: var(--idle-bg); }
+
+  .note { border-left: 4px solid var(--warn-bar); background: var(--warn-bg); padding: 12px 18px; border-radius: 0 8px 8px 0; margin: 4px 0 0; font-size: 17px; }
+
+  .flow { display: flex; align-items: center; gap: 12px; margin: 6px 0 4px; }
+  .box { flex: 1; text-align: center; padding: 14px; border: 1px solid #7dd3fc; border-radius: 10px; background: #ecfeff; line-height: 1.45; }
+  .arrow { color: #0891b2; font-weight: 700; }
+
+  /* One footer pattern: evidence type · date · tool versions. */
+  footer { margin-top: auto; padding: 14px 44px; background: var(--slate-50); border-top: 1px solid var(--slate-200); font-size: 14px; color: var(--slate-500); display: flex; justify-content: space-between; gap: 16px; flex: none; }
+  footer b { color: var(--slate-600); }
+</style>
+</head>
+<body>
+
+<section class="frame"><article id="development">
+  <div class="body">
+    <div class="eyebrow"><span class="num">1</span>DEVELOPMENT + TESTING + BUILD + REVIEW</div>
+    <h1>A small change. A clear readiness verdict.</h1>
+    <div class="project"><span class="chip">sample-orders-system-api</span><span class="chip">mule-build sample @ 5b252ed</span></div>
+    <pre>output application/json
+---
+[{ id: "ORD-1001", status: "READY",
+   total: 42.50, currency: "USD" }]
+
+Assert: payload[0].currency == "USD"</pre>
+    <table>
+      <tr><th>CHECK</th><th>OBSERVED RESULT</th></tr>
+      <tr><td>Full MUnit run</td><td>1 passed · 0 failed · 0 skipped</td></tr>
+      <tr><td>Normal package</td><td>JAR produced, tests enabled</td></tr>
+      <tr><td>Static lint</td><td>1 error · 6 warnings · 5 information findings</td></tr>
+      <tr><td>Focused selector</td><td>No matching suite; full run executed the test</td></tr>
+    </table>
+    <p class="note"><b>Not ready to release.</b> Clear or disposition lint findings. No commit, tag, publish, or deployment performed.</p>
+  </div>
+  <footer><span><b>Recorded tool evidence</b> · 2026-10-27 · lint re-run 2026-10-30</span><span>mule-build 3.2.0 · mule-lint 2.3.0</span></footer>
+</article></section>
+
+<section class="frame"><article id="review">
+  <div class="body">
+    <div class="eyebrow"><span class="num">2</span>READ-ONLY REVIEW</div>
+    <h1>From a lint finding to a fix direction.</h1>
+    <div class="project"><span class="chip">sample-orders-system-api</span><span class="chip">mule-lint sample @ b828113</span><span class="chip">1 error · 10 warnings · 9 info</span></div>
+    <p class="tag">HIGH · Missing error-handling contract</p>
+    <pre>src/main/mule/orders-api.xml:31
+get-order-by-id-flow
+
+MULE-003: flow has no error handler</pre>
+    <h2>Why it matters</h2>
+    <p>Connector, transformation, or lookup failures can escape without the API's intended status, payload, logging, and correlation behavior.</p>
+    <h2>What to do next</h2>
+    <p>Define or reference the approved error handler. Add MUnit coverage for the expected error event, then rerun lint and tests.</p>
+    <p class="note"><b>Coverage:</b> repository XML and static rules. Runtime logs, metrics, deployment state, and API contract behavior were not available.</p>
+  </div>
+  <footer><span><b>Representative handoff</b> from recorded evidence · 2026-10-27 · lint re-run 2026-10-30 · no source changed</span><span>mule-lint 2.3.0</span></footer>
+</article></section>
+
+<section class="frame"><article id="documentation">
+  <div class="body">
+    <div class="eyebrow"><span class="num">3</span>SOURCE-GROUNDED DOCUMENTATION</div>
+    <h1>Explain the flow the repository actually has.</h1>
+    <div class="project"><span class="chip">sample-orders-system-api</span><span class="chip">mule-build sample @ 5b252ed</span></div>
+    <div class="flow">
+      <div class="box">MUnit test<br><code>flow-ref</code></div><span class="arrow">&rarr;</span>
+      <div class="box"><code>list-orders-flow</code><br>set-payload</div><span class="arrow">&rarr;</span>
+      <div class="box">JSON array<br>one sample order</div>
+    </div>
+    <h2>Flow and test catalog</h2>
+    <table>
+      <tr><th>NAME</th><th>BEHAVIOR</th><th>EVIDENCE</th></tr>
+      <tr><td class="name"><code>list-orders-flow</code></td><td>Returns a static order array</td><td class="mono">orders.xml:6–11</td></tr>
+      <tr><td class="name"><code>list-orders-flow-returns-an-order</code></td><td>MUnit test: calls the flow and asserts one order</td><td class="mono">orders-test-suite.xml:13–27</td></tr>
+    </table>
+    <h2>What is not established</h2>
+    <p>No HTTP listener, API contract, backend request, or explicit error handler is defined in this flow. A connector dependency alone does not establish an integration.</p>
+    <p class="note"><b>Documentation scope:</b> static source inventory and inspection. No deployed runtime behavior is claimed.</p>
+  </div>
+  <footer><span><b>Fresh inspection</b> · 2026-10-30 · inventory and source read</span><span>mule-docs inventory script</span></footer>
+</article></section>
+
+<section class="frame"><article id="api-design">
+  <div class="body">
+    <div class="eyebrow"><span class="num">4</span>API CONTRACT DESIGN</div>
+    <h1>From consumer requirement to validated RAML.</h1>
+    <div class="project"><span class="chip">orders.raml</span><span class="chip">synthetic contract</span></div>
+    <p>Retrieve an order by ID. Return a typed order or a defined not-found error. Require a bearer token.</p>
+    <pre>#%RAML 1.0
+title: Sample Orders API
+securedBy: [ bearer ]
+/orders/{orderId}:
+  get:
+    responses:
+      200: # Order: id, status, total, currency
+      401: # Unauthorized
+      404: # Error: code, message</pre>
+    <table>
+      <tr><th>LOCAL VALIDATION</th><th>OBSERVED RESULT</th></tr>
+      <tr><td>Functional conformance</td><td><span class="status ok">Conforms</span></td></tr>
+      <tr><td>Findings</td><td><span class="status ok">0 findings</span></td></tr>
+      <tr><td>Governance conformance</td><td><span class="status idle">Not run: no profile supplied</span></td></tr>
+    </table>
+    <p class="note">Contract-only. APIKit implementation, token validation, governance, and deployment remain downstream work.</p>
+  </div>
+  <footer><span><b>Fresh local validation</b> · 2026-10-30 · abbreviated contract; full source in orders.raml</span><span>mule-lint 2.3.0</span></footer>
+</article></section>
+
+</body>
+</html>

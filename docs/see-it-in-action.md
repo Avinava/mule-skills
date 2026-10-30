@@ -1,9 +1,10 @@
 # See Mule Skills in action
 
-These two journeys show what a Mule developer actually receives. They are grounded in the sample
+These four journeys show what a Mule developer actually receives. The first two are grounded in the sample
 projects shipped by [`mule-build` at `5b252ed`](https://github.com/Avinava/mule-build/tree/5b252edd1d36b1d91d9f1f8b682fbc6038eaf0f1/examples/sample-orders-system-api)
 and [`mule-lint` at `b828113`](https://github.com/Avinava/mule-lint/tree/b8281135ced9d68846b39e19b578710b0fe8e8e0/examples/sample-orders-system-api),
-using `mule-lint@2.2.0` and `mule-build@3.2.0`, re-measured on 2026-10-27 with Maven on Java 17.
+using `mule-lint@2.3.0` and `mule-build@3.2.0`. Build and test evidence was measured on 2026-10-27 with Maven
+on Java 17; lint counts were re-run on 2026-10-30 against `mule-lint@2.3.0` and are unchanged.
 The samples remain at these exact commits; tool upgrades do not silently change the source baseline.
 
 This is not a gallery where every skill is forced to produce a file. Some skills change source or
@@ -11,6 +12,10 @@ tests; some return a decision, review, diagnosis, or operational assessment. Eac
 was observed from the tools and shows the representative handoff a developer should expect.
 
 ## Journey 1: make a small Mule change and prove what is ready
+
+![Recorded development evidence: a currency change, passing full tests and packaging, and unresolved lint findings](assets/showcase/development.png)
+
+This capture renders the recorded 2026-10-27 evidence below, not a new test run or an agent chat screenshot.
 
 **Developer request**
 
@@ -57,7 +62,7 @@ is releasable.
 | Build doctor for `test` | Passed on Java 17, with two optional toolchain notes (`MB-TC-006` plugin version, `MB-TC-004` no JDK pin) | Maven, the POM, Mule/MUnit plugins, source layout, and a compatible local runtime were detected. With Maven on an unsupported JDK the same check fails with `MB-TC-001` and `MB-TC-005` before any test runs |
 | Artifact compatibility (`compat`) | No compatibility errors; same two optional notes | Connector minimum Mule versions and Java support fit the declared target |
 | Secret enforcement | Passed; 2 files checked | No unsecured references, literal secrets or plaintext config secrets matched; this is not a complete security assessment |
-| `mule-lint@2.2.0` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
+| `mule-lint@2.3.0` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
 | Focused MUnit selector | Exit `1`: no matching suite found | The requested suite/test selector was not resolved; the full run below executed the test |
 | Full MUnit run | Passed on Java 17: 1 run, 0 failures, 0 errors, 0 skipped | The test, including the added currency assertion, executed successfully on the reported JDK |
 | Normal package | Passed with tests enabled; 1 test passed and a JAR was produced with a build-info marker (`stripped: false`, `productionDeployable: true`) | Local test and packaging evidence is available; lint findings still need review |
@@ -95,6 +100,10 @@ for a developer to know exactly what passed, what did not, and what decision rem
 
 ## Journey 2: review a deliberately flawed Mule project without changing it
 
+![Review handoff showing a missing error handler, its impact, fix direction, and evidence limits](assets/showcase/review.png)
+
+This capture renders a representative handoff from the recorded 2026-10-27 tool evidence.
+
 **Developer request**
 
 ```text
@@ -108,15 +117,16 @@ perfect result.
 
 ### Observed tool evidence
 
-`mule-lint@2.2.0` returned a complete report-v1 scan of three Mule files and exited `1` with:
+`mule-lint@2.3.0` returned a complete report-v1 scan of three Mule files and exited `1` with:
 
 ```text
 Errors: 1    Warnings: 10    Info: 9
 ```
 
 No configured quality gate was evaluated in this default scan. The non-zero exit reflects the
-error finding; execution completeness is reported separately. The rules added in 2.2.0 (`CFG-004`, `PROJ-003`, `ERR-005`, `TEST-002`, `LOG-007`) were enabled and reported
-nothing for this sample, so the counts match the previous release.
+error finding; execution completeness is reported separately. Release 2.3.0 only redesigns the offline
+HTML report, and the rules added in 2.2.0 (`CFG-004`, `PROJ-003`, `ERR-005`, `TEST-002`, `LOG-007`)
+reported nothing for this sample, so the counts match both previous releases.
 
 The release-blocking error is at `src/main/mule/orders-api.xml:31`: flow
 `get-order-by-id-flow` has no error handler (`MULE-003`). Warnings also cover correlation
@@ -146,10 +156,92 @@ demonstrated runtime defects, and state its coverage: repository XML and static 
 runtime logs, metrics, deployment state, and API contract behavior were not available. No source,
 comment, commit, PR, or runtime state is changed by the review.
 
+## Journey 3: document the sample project
+
+```text
+Use mule-docs to document this sample's architecture and flow catalog.
+Distinguish source evidence from assumptions and show any missing API or runtime evidence.
+```
+
+![Source-grounded documentation showing the MUnit invocation, list-orders flow, static JSON result, and evidence gaps](assets/showcase/documentation.png)
+
+On 2026-10-30, the bundled `inventory_mule_project.py` was run against the public
+`mule-build` sample at revision `01169916ec50e64e31ed15afa64f709b1c2c8c9a`.
+Source inspection confirmed one flow and one MUnit test. The architecture is:
+
+```mermaid
+flowchart LR
+    Test[MUnit test] -->|flow-ref| Flow[list-orders-flow]
+    Flow --> Payload[set-payload: static order array]
+```
+
+| Item | Verified behavior | Source |
+| --- | --- | --- |
+| `list-orders-flow` | Returns one static order with id, status, and total | `src/main/mule/orders.xml:6-11` |
+| MUnit test `list-orders-flow-returns-an-order` | Calls the flow and asserts one order | `src/test/munit/orders-test-suite.xml:13-27` |
+| Boundaries | No listener, external request, explicit error handler, or API specification | Source inspection and inventory |
+
+The HTTP connector dependency does not establish an actual backend call. Business ownership,
+deployment topology, and runtime health remain unknown. This is a fresh documentation artifact
+created from static evidence, not a runtime execution report.
+
+Reproduce from a checkout of this repository and the public sample:
+
+```bash
+python3 skills/mule-docs/scripts/inventory_mule_project.py /path/to/mule-build/examples/sample-orders-system-api --pretty
+```
+
+## Journey 4: design an orders API
+
+```text
+Use mule-api-design to author a RAML 1.0 contract for retrieving an order by ID.
+Return id, status, total, and currency; define a not-found response and require a bearer token.
+Keep this contract-only and validate locally. Do not publish or deploy.
+```
+
+![RAML contract excerpt with successful functional validation, zero findings, and governance explicitly not run](assets/showcase/api-design.png)
+
+The complete [orders.raml](assets/showcase/orders.raml) is a new synthetic contract, separate from
+the implementation sample. Decisions: `GET /orders/{orderId}`, JSON responses, HTTPS, an explicit
+bearer header, typed order fields, and a typed `404` error. The `401` response documents missing or
+invalid credentials. This example's bearer scheme describes the header contract; token verification
+must be implemented and reviewed downstream.
+
+| Operation | Successful response | Error response |
+| --- | --- | --- |
+| `GET /orders/{orderId}` | `200`, Order | `404`, Error; `401`, unauthorized |
+
+Local validation on 2026-10-30 used the bundled `mule-lint@2.3.0` pin:
+
+```bash
+npx -y @sfdxy/mule-lint@2.3.0 api validate docs/assets/showcase --main orders.raml --format json
+```
+
+Observed result, omitting the machine-local absolute path and duration:
+
+```json
+{"mainFile":"orders.raml","format":"raml-1.0","functionalConforms":true,"governanceConforms":"not-run","findings":[]}
+```
+
+No governance profile was supplied. Functional conformance is not proof of implementation,
+authorization enforcement, governance approval, or deployment.
+
+### Reproducing the captures
+
+The four PNGs are 2x browser captures of [showcase.html](assets/showcase/showcase.html), a compact
+rendered presentation of these artifacts and evidence. They are not screenshots of a particular
+agent product. Regenerate them after any change to the source:
+
+```bash
+uv run --with playwright playwright install chromium
+uv run --with playwright python tools/capture_showcase.py
+```
+
+The script fails if a card overflows its fixed frame. Update the source and PNGs together.
+
 ## What these journeys do not claim
 
-- They do not demonstrate API contract design because neither selected journey contains an API
-  specification that needs a product decision.
+- The contract-only design example does not add APIKit routing to the implementation sample.
 - They do not invent an operational health report or root-cause analysis without runtime evidence.
 - They do not treat a generated JAR as proof that tests passed or a deployment was authorized.
 - They do not imply that every skill creates a file. See the [skill catalog](skills.md) for each

@@ -13,13 +13,13 @@ describing the task is usually enough.
 | [`mule-troubleshooting`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-troubleshooting) | Diagnose incidents and failures | Read-only diagnosis by default | Root-cause assessment or ranked hypotheses, confidence, evidence gaps, and fix plan |
 | [`mule-ops`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-ops) | Assess runtime health, and plan and watch authorized releases and changes | Read-only telemetry analysis by default; mutations only when authorized | Health assessment, evidence coverage, release record and rollback plan, watch checkpoints, and recommended actions |
 | [`mule-review`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-review) | Review changes, repositories, PRs, or release readiness | Read-only; no implementation, comment, or PR-state change unless requested | Prioritized findings, fix options, coverage limits, and a readiness verdict when applicable |
+| [`mule-build`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-build) | Run local readiness, security, MUnit, packaging, and release-preparation gates | Creates `target/` artifacts during packaging; source/Git changes require an explicit version or release request | Exact checks, test totals, artifact or failure evidence, and release actions performed |
 | [`mule-dependencies`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-dependencies) | Look up current connector, plugin, and runtime versions and their compatibility | Read-only lookup; no project files are changed | Newest and newest compatible release per dependency, constraints used, source, and fetch time |
 | [`mule-connectors`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-connectors) | Answer connector-specific behavior: authentication by version, token rules, run-as identity, subscription sources, benign signatures, sensitive loggers | Read-only; builds a transient profile from live sources when none is curated | Version-scoped claims with documented or observed evidence, and what was re-verified |
-| [`mule-build`](https://github.com/Avinava/mule-skills/tree/main/skills/mule-build) | Run local readiness, security, MUnit, packaging, and release-preparation gates | Creates `target/` artifacts during packaging; source/Git changes require an explicit version or release request | Exact checks, test totals, artifact or failure evidence, and release actions performed |
 
-See [Mule Skills in action](see-it-in-action.md) for an evidence-backed change journey and a
-read-only risk review. The examples deliberately show a blocked test gate rather than presenting a
-tests-skipped package as a successful release.
+See [Mule Skills in action](see-it-in-action.md) for four worked journeys: a change, a review,
+documentation, and an API design. The examples deliberately show a blocked test gate rather than
+presenting a tests-skipped package as a successful release.
 
 ## Choosing the right skill
 

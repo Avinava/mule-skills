@@ -72,7 +72,7 @@ cannot be regenerated from a template.
 | GitHub Copilot in VS Code | `.github/copilot-instructions.md`, `AGENTS.md` | `.vscode/mcp.json` | Reload VS Code, check its MCP server list |
 | GitHub Copilot CLI | `.github/copilot-instructions.md`, `AGENTS.md` | `.mcp.json` | `copilot mcp list` |
 | Gemini coding agents | `GEMINI.md`, `AGENTS.md` | `.mcp.json` where supported | The host's MCP status view |
-| Other compatible agents | `AGENTS.md` plus whatever the host supports | `.mcp.json` when the host accepts `mcpServers` | The host's documented MCP check |
+| Cursor and other compatible agents | `AGENTS.md` plus whatever the host supports | `.mcp.json` when the host accepts `mcpServers` | The host's documented MCP check |
 
 Codex discovers repository skills from `.agents/skills/` in directories between the working
 directory and the repository root — see the
