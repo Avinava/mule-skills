@@ -49,57 +49,44 @@ Then [set up your project context](docs/project-setup.md).
 
 ## See it in action
 
-### Change, test, and package
+<table>
+  <tr>
+    <td width="50%"><a href="docs/see-it-in-action.md#journey-1-make-a-small-mule-change-and-prove-what-is-ready"><img src="docs/assets/showcase/development.png" alt="DataWeave change, MUnit evidence, and release-readiness handoff"></a><br><b>Change, test, and package.</b> Full tests and packaging passed; lint findings still block release readiness.</td>
+    <td width="50%"><a href="docs/see-it-in-action.md#journey-2-review-a-deliberately-flawed-mule-project-without-changing-it"><img src="docs/assets/showcase/review.png" alt="Review finding with missing error handler, impact, and remediation"></a><br><b>Find release risks.</b> A missing error handler becomes a prioritized finding with a source location and fix direction.</td>
+  </tr>
+  <tr>
+    <td width="50%"><a href="docs/see-it-in-action.md#journey-3-document-the-sample-project"><img src="docs/assets/showcase/documentation.png" alt="Sample architecture and source-backed flow catalog"></a><br><b>Document a project.</b> Trace the request through the implementation and see what each flow does.</td>
+    <td width="50%"><a href="docs/see-it-in-action.md#journey-4-design-an-orders-api"><img src="docs/assets/showcase/api-design.png" alt="Orders API RAML excerpt and local validation evidence"></a><br><b>Design an API.</b> Turn consumer requirements into an explicit contract and inspect its validation evidence.</td>
+  </tr>
+</table>
+
+<details>
+<summary>Prompts behind these examples</summary>
 
 ```text
 Add currency: "USD" to the sample order response, extend its MUnit test,
 validate and package, then review the result. Do not commit or deploy.
 ```
 
-![DataWeave change, MUnit evidence, and release-readiness handoff](docs/assets/showcase/development.png)
-
-The recorded full test and packaging passed. Lint findings still blocked release readiness;
-the focused selector failed to find a suite.
-[Read the walkthrough](docs/see-it-in-action.md#journey-1-make-a-small-mule-change-and-prove-what-is-ready).
-
-### Find release risks
-
 ```text
 Review this Mule application for correctness and release risk.
 Report findings and fix directions without editing files.
 ```
-
-![Review finding with missing error handler, impact, and remediation](docs/assets/showcase/review.png)
-
-A missing error handler becomes a prioritized finding with a source location and fix direction.
-[Read the walkthrough](docs/see-it-in-action.md#journey-2-review-a-deliberately-flawed-mule-project-without-changing-it).
-
-### Document a project
 
 ```text
 Use mule-docs to document the sample application's architecture and flows.
 Distinguish implemented behavior from assumptions and missing evidence.
 ```
 
-![Sample architecture and source-backed flow catalog](docs/assets/showcase/documentation.png)
-
-Trace the request through the implementation and see what each flow does.
-[Read the walkthrough](docs/see-it-in-action.md#journey-3-document-the-sample-project).
-
-### Design an API
-
 ```text
 Use mule-api-design to design a RAML 1.0 order lookup API with
 explicit responses and local validation. Do not publish.
 ```
 
-![Orders API operations, RAML excerpt, and local validation evidence](docs/assets/showcase/api-design.png)
+</details>
 
-Turn consumer requirements into an explicit contract and inspect its validation evidence.
-[Read the walkthrough](docs/see-it-in-action.md#journey-4-design-an-orders-api).
-
-These captures show rendered sample artifacts. The walkthrough distinguishes recorded
-tool evidence, representative handoffs, and fresh examples.
+These captures show rendered sample artifacts. The [walkthrough](docs/see-it-in-action.md) distinguishes
+recorded tool evidence, representative handoffs, and fresh examples.
 
 ## How the skills fit together
 
@@ -143,7 +130,7 @@ Credential-free launch configuration for three pinned MCP servers:
 | --- | --- | --- |
 | [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.17.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.17.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
 | [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.2.0) | Mule validation, testing, packaging, local runtime, versioning, tagging, and secure-reference preconditions |
-| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.2.0) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
+| [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.3.0) | Canonical Mule standards, static analysis, XML formatting, and RAML/OAS contract validation |
 
 Source links come from each published package's repository metadata. Package links resolve to the
 exact registry version used by the checked-in configuration rather than an unpinned latest release.

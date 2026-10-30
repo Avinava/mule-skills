@@ -3,7 +3,8 @@
 These four journeys show what a Mule developer actually receives. The first two are grounded in the sample
 projects shipped by [`mule-build` at `5b252ed`](https://github.com/Avinava/mule-build/tree/5b252edd1d36b1d91d9f1f8b682fbc6038eaf0f1/examples/sample-orders-system-api)
 and [`mule-lint` at `b828113`](https://github.com/Avinava/mule-lint/tree/b8281135ced9d68846b39e19b578710b0fe8e8e0/examples/sample-orders-system-api),
-using `mule-lint@2.2.0` and `mule-build@3.2.0`, re-measured on 2026-10-27 with Maven on Java 17.
+using `mule-lint@2.3.0` and `mule-build@3.2.0`. Build and test evidence was measured on 2026-10-27 with Maven
+on Java 17; lint counts were re-run on 2026-10-30 against `mule-lint@2.3.0` and are unchanged.
 The samples remain at these exact commits; tool upgrades do not silently change the source baseline.
 
 This is not a gallery where every skill is forced to produce a file. Some skills change source or
@@ -61,7 +62,7 @@ is releasable.
 | Build doctor for `test` | Passed on Java 17, with two optional toolchain notes (`MB-TC-006` plugin version, `MB-TC-004` no JDK pin) | Maven, the POM, Mule/MUnit plugins, source layout, and a compatible local runtime were detected. With Maven on an unsupported JDK the same check fails with `MB-TC-001` and `MB-TC-005` before any test runs |
 | Artifact compatibility (`compat`) | No compatibility errors; same two optional notes | Connector minimum Mule versions and Java support fit the declared target |
 | Secret enforcement | Passed; 2 files checked | No unsecured references, literal secrets or plaintext config secrets matched; this is not a complete security assessment |
-| `mule-lint@2.2.0` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
+| `mule-lint@2.3.0` | Complete scan, exit `1`: 1 error, 6 warnings, 5 information findings | The sample still has review findings, including no flow error handler |
 | Focused MUnit selector | Exit `1`: no matching suite found | The requested suite/test selector was not resolved; the full run below executed the test |
 | Full MUnit run | Passed on Java 17: 1 run, 0 failures, 0 errors, 0 skipped | The test, including the added currency assertion, executed successfully on the reported JDK |
 | Normal package | Passed with tests enabled; 1 test passed and a JAR was produced with a build-info marker (`stripped: false`, `productionDeployable: true`) | Local test and packaging evidence is available; lint findings still need review |
@@ -116,15 +117,16 @@ perfect result.
 
 ### Observed tool evidence
 
-`mule-lint@2.2.0` returned a complete report-v1 scan of three Mule files and exited `1` with:
+`mule-lint@2.3.0` returned a complete report-v1 scan of three Mule files and exited `1` with:
 
 ```text
 Errors: 1    Warnings: 10    Info: 9
 ```
 
 No configured quality gate was evaluated in this default scan. The non-zero exit reflects the
-error finding; execution completeness is reported separately. The rules added in 2.2.0 (`CFG-004`, `PROJ-003`, `ERR-005`, `TEST-002`, `LOG-007`) were enabled and reported
-nothing for this sample, so the counts match the previous release.
+error finding; execution completeness is reported separately. Release 2.3.0 only redesigns the offline
+HTML report, and the rules added in 2.2.0 (`CFG-004`, `PROJ-003`, `ERR-005`, `TEST-002`, `LOG-007`)
+reported nothing for this sample, so the counts match both previous releases.
 
 The release-blocking error is at `src/main/mule/orders-api.xml:31`: flow
 `get-order-by-id-flow` has no error handler (`MULE-003`). Warnings also cover correlation
@@ -175,8 +177,8 @@ flowchart LR
 
 | Item | Verified behavior | Source |
 | --- | --- | --- |
-| `list-orders-flow` | Returns one static order with id, status, and total | `src/main/mule/orders.xml:6-10` |
-| MUnit invocation | Calls the flow and asserts its payload | `src/test/munit/orders-test-suite.xml` |
+| `list-orders-flow` | Returns one static order with id, status, and total | `src/main/mule/orders.xml:6-11` |
+| MUnit test `list-orders-flow-returns-an-order` | Calls the flow and asserts one order | `src/test/munit/orders-test-suite.xml:13-27` |
 | Boundaries | No listener, external request, explicit error handler, or API specification | Source inspection and inventory |
 
 The HTTP connector dependency does not establish an actual backend call. Business ownership,
@@ -209,11 +211,10 @@ must be implemented and reviewed downstream.
 | --- | --- | --- |
 | `GET /orders/{orderId}` | `200`, Order | `404`, Error; `401`, unauthorized |
 
-Local validation on 2026-10-30 used the built `mule-lint` 2.3.0 checkout at
-`b8b85a94d7cd43bd0257ddff43aa501265e72481` (not the bundled 2.2.0 pin):
+Local validation on 2026-10-30 used the bundled `mule-lint@2.3.0` pin:
 
 ```bash
-node /path/to/mule-lint/dist/bin/mule-lint.js api validate docs/assets/showcase --main orders.raml --format json
+npx -y @sfdxy/mule-lint@2.3.0 api validate docs/assets/showcase --main orders.raml --format json
 ```
 
 Observed result, omitting the machine-local absolute path and duration:
@@ -227,11 +228,16 @@ authorization enforcement, governance approval, or deployment.
 
 ### Reproducing the captures
 
-The four PNGs are browser captures of [showcase.html](assets/showcase/showcase.html), a compact
+The four PNGs are 2x browser captures of [showcase.html](assets/showcase/showcase.html), a compact
 rendered presentation of these artifacts and evidence. They are not screenshots of a particular
-agent product. Serve `docs/assets/showcase/` locally, open `showcase.html`, and use PinchTab's
-`screenshot --selector` with `#development`, `#review`, `#documentation`, or `#api-design`.
-Update the source and its corresponding PNG together when the evidence changes.
+agent product. Regenerate them after any change to the source:
+
+```bash
+uv run --with playwright playwright install chromium
+uv run --with playwright python tools/capture_showcase.py
+```
+
+The script fails if a card overflows its fixed frame. Update the source and PNGs together.
 
 ## What these journeys do not claim
 

@@ -59,6 +59,8 @@ turning missing telemetry into a confident conclusion.
 Four concrete examples show a change with test evidence, a prioritized review finding,
 source-grounded documentation, and a locally validated API contract.
 
+<div class="showcase-grid" markdown>
+
 ![Development evidence and release-readiness verdict](assets/showcase/development.png)
 
 ![Review finding with impact and remediation](assets/showcase/review.png)
@@ -66,6 +68,8 @@ source-grounded documentation, and a locally validated API contract.
 ![Architecture and flow catalog derived from sample source](assets/showcase/documentation.png)
 
 ![RAML contract and local validation evidence](assets/showcase/api-design.png)
+
+</div>
 
 These are rendered artifact captures. The development and review examples retain their recorded
 2026-10-27 evidence; documentation and API design were produced on 2026-10-30.
@@ -113,7 +117,7 @@ authentication decisions with you. [Walk through the result](getting-started.md)
 | Layer | Purpose | Credentials |
 | --- | --- | --- |
 | Ten `mule-*` skills | Decide how to design, implement, test, document, build, review, release, operate, diagnose, answer connector questions, and keep dependencies current | None |
-| `mule-lint@2.2.0` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
+| `mule-lint@2.3.0` | Mule standards, static analysis, XML formatting, RAML/OAS validation | None |
 | `mule-build@3.2.0` | Readiness, MUnit, package, local runtime, version and tag preparation | None |
 | `anypoint-connect@0.17.0` | Authorized Design Center, Exchange, Governance, telemetry, and lifecycle actions | Anypoint login only when needed |
 

@@ -62,7 +62,7 @@ mule-skills/
 │   ├── install.sh                  # Vendored install for non-plugin hosts
 │   ├── hosts/                      # Codex, VS Code, and generic JSON MCP configurations
 │   └── templates/                  # Project-owned AGENTS, Claude, Copilot, and Gemini guidance
-├── tools/                          # Dependency-free repository validation
+├── tools/                          # Repository validation (stdlib) and capture_showcase.py (Playwright, run with uv)
 ├── tests/                          # Validator and checker tests
 ├── docs/                           # Documentation site source, published with GitHub Pages
 ├── mkdocs.yml                      # Site configuration and navigation

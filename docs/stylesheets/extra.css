@@ -59,3 +59,26 @@
     grid-template-columns: 1fr;
   }
 }
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.showcase-grid p {
+  margin: 0;
+}
+
+.showcase-grid img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 44em) {
+  .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+}
