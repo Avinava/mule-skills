@@ -112,7 +112,7 @@ Credential-free launch configuration for three pinned MCP servers:
 
 | Server and source | Exact package pin | Role |
 | --- | --- | --- |
-| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.17.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.17.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
+| [`anypoint-connect`](https://github.com/Avinava/anypoint-connect) | [`@sfdxy/anypoint-connect@0.18.0`](https://registry.npmjs.org/@sfdxy%2Fanypoint-connect/0.18.0) | Authorized Design Center, Exchange, Governance, runtime evidence, and lifecycle operations |
 | [`mule-build`](https://github.com/Avinava/mule-build) | [`@sfdxy/mule-build@3.2.0`](https://registry.npmjs.org/@sfdxy%2Fmule-build/3.2.0) |
 | [`mule-lint`](https://github.com/Avinava/mule-lint) | [`@sfdxy/mule-lint@2.3.0`](https://registry.npmjs.org/@sfdxy%2Fmule-lint/2.3.0) |
 
